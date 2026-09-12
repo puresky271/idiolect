@@ -6,16 +6,22 @@
 
 当前状态：
   · render_supplemental_blocks 已接通 turn_logic（美妆 / 穿搭 / 社交平台 / 留学防御）；
-  · post_reply_voice_check 仍是 stub（voice_check 子系统未接线，永远 skipped）。
+  · post_reply_voice_check 已接线 voice_check 清洗链（2026-09-12 起，
+    `ANON_VOICE_CHECK_ENABLED=0` 可整体回退为透传）。
 """
 from __future__ import annotations
 
+import logging
+import os
 from typing import Any
 from datetime import datetime
 
 from .canon import get_canon_facts, get_canon_profile
 from .voice import VOICE_MANIFEST
 from ...registry import canonicalize_name
+from ...scene_engine import env_enabled
+
+_log = logging.getLogger(__name__)
 
 CHARACTER_NAME = "爱音"
 
@@ -62,7 +68,9 @@ def get_voice_manifest() -> str:
 
 
 def postprocess_reply(*, character: str, reply_text: str, history: list | None = None) -> dict[str, Any]:
-    return {"text": str(reply_text or ""), "violations": {}, "ok": True, "skipped": not is_anon(character)}
+    result = dict(post_reply_voice_check(character=character, reply_text=reply_text, history=history))
+    result.setdefault("text", str(reply_text or ""))
+    return result
 
 
 def post_reply_voice_check(
@@ -71,19 +79,34 @@ def post_reply_voice_check(
     reply_text: str,
     history: list | None = None,
 ) -> dict[str, Any]:
-    """爱音回复后的语气后处理校验。
+    """爱音回复后的语气清洗（2026-09-12 接线）。
 
-    将来检查项（拟）：
+    跑 `anon.voice_check.clean_reply`：
+      · 永远跑：句中「语气词 + 并列连词」拆段、省略号归一 `······`
+      · mood gate（缺省 voice_mood=70 / empathy=50，本仓库无 mood 基建）：
+        单 ?/! 前补 ~、句末装饰 ♪/~/——、逗号概率换 ~ / ——（装饰密度上限 2 段）
+    随机步骤按输入定种（`idiolect/_text_rng.py`），同一输入两次清洗同输出。
+
+    `ANON_VOICE_CHECK_ENABLED=0`（或 off/no/false）整体回退为透传。
+
+    将来检查项（拟，未实现）：
       - 起手式去重（ねぇ / えーー / あ、 / ちょっと / あの / 嗯！等等过频）
       - 拉长音控制（「ねぇーー」「えええ」过载）
-      - 颜文字 / 感叹号密度（避免过载假阳光）
       - 留学失败话题防御态正确触发（不直接讲深度伤痕、走转移）
       - 「灯灯」call sign 频率（canon 但不能每条都喊）
       - 「都市丽人完美姐姐」假设阳光稀释 canon → flag
-
-    当前 stub 总返 `{"violations": {}, "ok": True, "skipped": True}`。
     """
     if not is_anon(character):
         return {"violations": {}, "ok": True, "skipped": True}
-    # TODO[voice_check]: 真正的语气检查
-    return {"violations": {}, "ok": True, "skipped": True}
+    if not env_enabled(os.environ.get("ANON_VOICE_CHECK_ENABLED")):
+        return {"text": str(reply_text or ""), "violations": {}, "ok": True, "skipped": "disabled"}
+    try:
+        from .voice_check import clean_reply
+        from ..._text_rng import seeded_rng
+        text, info = clean_reply(str(reply_text or ""), rng=seeded_rng(reply_text))
+        violations = info.get("violations", {})
+        return {"text": text, "violations": violations, "changed": list(violations),
+                "ok": bool(info.get("ok", True))}
+    except Exception as _err:
+        _log.warning("[AnonVoiceCheck] error: %s", _err)
+        return {"text": str(reply_text or ""), "violations": {}, "ok": True}

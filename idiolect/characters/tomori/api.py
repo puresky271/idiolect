@@ -7,16 +7,22 @@
 当前状态：
   · render_supplemental_blocks 已接通 turn_logic（歌词 / 海洋生物 / 昆虫 / 天文 / 石头
     / 凌晨窗口，2026-05-20 起）；
-  · post_reply_voice_check 仍是 stub（voice_check 子系统未接线，永远 skipped）。
+  · post_reply_voice_check 已接线 voice_check 清洗链（2026-09-12 起，
+    `TOMORI_VOICE_CHECK_ENABLED=0` 可整体回退为透传）。
 """
 from __future__ import annotations
 
+import logging
+import os
 from typing import Any
 from datetime import datetime
 
 from .canon import get_canon_facts, get_canon_profile
 from .voice import VOICE_MANIFEST
 from ...registry import canonicalize_name
+from ...scene_engine import env_enabled
+
+_log = logging.getLogger(__name__)
 
 CHARACTER_NAME = "灯"
 
@@ -71,7 +77,7 @@ def render_supplemental_blocks(
             mode=mode,
         )
     except Exception as _err:
-        print(f"[tomori.api.render_supplemental_blocks] error: {_err}", flush=True)
+        _log.warning("[tomori.api.render_supplemental_blocks] error: %s", _err)
         return ""
 
 
@@ -83,25 +89,53 @@ def post_reply_voice_check(
     *,
     character: str,
     reply_text: str,
+    history: list | None = None,
 ) -> dict[str, Any]:
-    """灯回复后的语气后处理校验（不修改 reply、只产出诊断）。
+    """灯回复后的语气清洗 + 起手式去重（2026-09-12 接线）。
 
-    当前 stub 总返 `{"violations": {}, "ok": True}`、voice_check 子系统接线前没人会跑入分支。
+    流程：
+      1. `voice_check.throttle_opening`（仅当 history 里有 assistant 回复时）：
+         起手式跨轮去重轮换 + 连续省略号起手修复。
+      2. `voice_check.clean_reply`：呀/啊 清洗 → CJK 空格停顿补偿 → 标点软化 →
+         省略号配对 / 归一 / 配额 → 纯省略号气泡扩展。
+         随机步骤按输入定种（`idiolect/_text_rng.py`），同一输入两次清洗同输出。
 
-    将来检查项（拟）：
-      - ellipsis_overuse: 『…』数量 > 段数、或当分隔符滥用
-      - sajiao_tail: 句末出现禁词（呢/啦/哦/呀/嘛）
+    `TOMORI_VOICE_CHECK_ENABLED=0`（或 off/no/false）整体回退为透传。
+
+    将来检查项（拟，未实现）：
+      - sajiao_tail: 句末出现禁词（呢/啦/呀/嘛）
       - confident_modifier: 评价副词（挺/特别/非常/确实/明显/超）
       - high_gravity_dilution: 「一辈子」「我们的歌」「让我们一起迷失」非深度场合误用
       - knowing_summary: 「她是…的人」式人物画像归纳
     """
     if not is_tomori(character):
         return {"violations": {}, "ok": True, "skipped": True}
-    # TODO[voice_check]: 真正的语气检查
-    return {"violations": {}, "ok": True, "skipped": True}
+    if not env_enabled(os.environ.get("TOMORI_VOICE_CHECK_ENABLED")):
+        return {"text": str(reply_text or ""), "violations": {}, "ok": True, "skipped": "disabled"}
+    try:
+        from .voice_check import clean_reply, throttle_opening
+        from ..._text_rng import seeded_rng
+
+        text = str(reply_text or "")
+        changed: list[str] = []
+        prior = [str(m.get("content", "") or "") for m in (history or [])
+                 if isinstance(m, dict) and m.get("role") == "assistant"]
+        if prior:
+            text, tinfo = throttle_opening(text, prior)
+            if tinfo.get("replaced") or tinfo.get("stripped") or tinfo.get("double_ellipsis_fixed"):
+                changed.append("opening_throttle")
+
+        text, info = clean_reply(text, rng=seeded_rng(text))
+        violations = info.get("violations", {})
+        changed.extend(k for k in violations if k not in changed)
+        return {"text": text, "violations": violations, "changed": changed,
+                "ok": bool(info.get("ok", True))}
+    except Exception as _err:
+        _log.warning("[TomoriVoiceCheck] error: %s", _err)
+        return {"text": str(reply_text or ""), "violations": {}, "ok": True}
 
 
 def postprocess_reply(*, character: str, reply_text: str, history: list | None = None) -> dict[str, Any]:
-    result = dict(post_reply_voice_check(character=character, reply_text=reply_text))
+    result = dict(post_reply_voice_check(character=character, reply_text=reply_text, history=history))
     result.setdefault("text", str(reply_text or ""))
     return result

@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 from typing import Any
 
 from .canon import CHARACTER_NAME, get_canon_facts, get_canon_profile
 from .voice import get_voice_manifest
 from ...registry import canonicalize_name
+
+_log = logging.getLogger(__name__)
 
 
 def is_rana(character: str) -> bool:
@@ -62,7 +65,7 @@ def post_reply_voice_check(*, character: str, reply_text: str) -> dict[str, Any]
         return {"text": text, "violations": info.get("violations", {}),
                 "changed": changed, "ok": bool(info.get("ok", True))}
     except Exception as _err:  # noqa: BLE001
-        print(f"[RanaVoiceCheck] error: {_err}", flush=True)
+        _log.warning("[RanaVoiceCheck] error: %s", _err)
         return {"text": str(reply_text or ""), "violations": {}, "ok": True}
 
 

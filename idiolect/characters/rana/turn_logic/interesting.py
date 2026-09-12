@@ -62,7 +62,7 @@ from __future__ import annotations
 
 import os
 import re
-import threading
+from idiolect.scene_engine import SessionStore
 from typing import Callable, Optional
 
 
@@ -90,8 +90,9 @@ _RANA_INTERESTING_RE = re.compile(r"有趣|好玩|有意思")
 # ═══════════════════════════════════════════════════════════════════════
 # per-session 去重
 # ═══════════════════════════════════════════════════════════════════════
-_LOCK = threading.Lock()
-_SESSION_FIRED: dict[str, set[str]] = {}
+# 有上限的 per-session 去重表（共享脚手架）：裸 dict 只增不减，
+# 常驻进程里 session 不淘汰就是缓慢漏内存（2026-09-12 评审抓到）。
+_SESSION_FIRED = SessionStore()
 
 
 def _normalize_session(session_id: Optional[str]) -> str:
@@ -100,21 +101,12 @@ def _normalize_session(session_id: Optional[str]) -> str:
 
 def _mark_fired(session_id: Optional[str], key: str) -> bool:
     sid = _normalize_session(session_id)
-    with _LOCK:
-        bucket = _SESSION_FIRED.setdefault(sid, set())
-        if key in bucket:
-            return True
-        bucket.add(key)
-        return False
+    return _SESSION_FIRED.mark(sid, key)
 
 
 def reset_session_fired(session_id: Optional[str] = None) -> None:
     """清空去重状态（测试与诊断用）。"""
-    with _LOCK:
-        if session_id is None:
-            _SESSION_FIRED.clear()
-        else:
-            _SESSION_FIRED.pop(_normalize_session(session_id), None)
+    _SESSION_FIRED.reset(None if session_id is None else _normalize_session(session_id))
 
 
 def _enabled() -> bool:

@@ -1,0 +1,1220 @@
+{
+  "MARINE_TAXONOMY": {
+    "企鹅": {
+      "ja": "ペンギン",
+      "category_sci": "Sphenisciformes（目）",
+      "blurb": "群居海鸟、不会飞但精于游泳、雏鸟由父母轮流保温；日本水族馆 must-see",
+      "tomori_canon": "灯 底色 **喜欢企鹅**、动物图案创可贴有企鹅款、有水族馆年票、楼顶天空企鹅常客",
+      "venue": [
+        "池袋サンシャイン水族館（楼顶 天空のペンギン）",
+        "墨田水族館"
+      ],
+      "subspecies": {
+        "洪堡企鹅": {
+          "sci": "Spheniscus humboldti",
+          "ja": "フンボルトペンギン",
+          "size": "65-70cm / 4-5kg",
+          "habits": "群居、一夫一妻、水中 30 km/h、面颊粉红裸皮散热",
+          "note": "池袋サンシャイン楼顶「天空のペンギン」主力物种、灯最常看的"
+        },
+        "帝企鹅": {
+          "sci": "Aptenodytes forsteri",
+          "ja": "コウテイペンギン",
+          "size": "100-130cm / 22-45kg",
+          "habits": "南极极地、雄性脚上单足孵蛋约 65 天禁食 4 个月",
+          "note": "日本水族馆罕见、电影《皇帝企鹅日记》"
+        },
+        "国王企鹅": {
+          "sci": "Aptenodytes patagonicus",
+          "ja": "オウサマペンギン",
+          "size": "85-95cm / 11-16kg",
+          "habits": "亚南极岛屿群居、孵化期 14-16 个月（最长）、雏鸟全身棕色绒毛",
+          "note": "名古屋港水族馆、葛西临海有展示"
+        },
+        "阿德利企鹅": {
+          "sci": "Pygoscelis adeliae",
+          "ja": "アデリーペンギン",
+          "size": "70-75cm / 4-6kg",
+          "habits": "南极沿海、用石头筑巢（会偷邻居石头）、最典型的「企鹅形」",
+          "note": "日本水族馆少、长崎ペンギン水族館有"
+        },
+        "巴布亚企鹅": {
+          "sci": "Pygoscelis papua",
+          "ja": "ジェンツーペンギン",
+          "size": "75-90cm / 4.5-8.5kg",
+          "habits": "亚南极、游速最快可达 36 km/h、橙色喙白色头斑",
+          "note": "墨田水族館「ペンギンカフェ」展示"
+        },
+        "小蓝企鹅": {
+          "sci": "Eudyptula minor",
+          "ja": "コガタペンギン",
+          "size": "33cm / 1kg（最小）",
+          "habits": "澳洲南部 / 新西兰、夜行性、白天躲洞穴",
+          "note": "日本水族馆罕见"
+        }
+      }
+    },
+    "水母": {
+      "ja": "クラゲ",
+      "category_sci": "Medusozoa（亚门）",
+      "blurb": "约 95% 由水构成、没有心脏 / 大脑 / 骨骼；伞缘触手有刺胞、毒性因种而异",
+      "tomori_canon": "灯 底色 **喜欢水母**、和企鹅并列水族馆 must-see；底色 里灯对「滑溜溜的东西」感兴趣",
+      "venue": [
+        "墨田水族館（クラゲ展示「ビッグシャーレ」最大圆形展示缸）",
+        "池袋サンシャイン水族館",
+        "鶴岡市立加茂水族館（クラゲ世界第一）"
+      ],
+      "subspecies": {
+        "海月水母": {
+          "sci": "Aurelia aurita",
+          "ja": "ミズクラゲ",
+          "size": "伞径 25-40cm",
+          "habits": "日本最常见、浅蓝半透明、4 片 U 形生殖腺标志性",
+          "note": "墨田水族館「ビッグシャーレ」主展示；「海月」是诗意写法、灯写词偏好"
+        },
+        "越前水母": {
+          "sci": "Nemopilema nomurai",
+          "ja": "エチゼンクラゲ",
+          "size": "伞径 1-2m / 200kg（巨型）",
+          "habits": "日本海大量繁殖年份会成灾、损害渔业、刺胞强毒",
+          "note": "野生不在水族馆、新闻常提"
+        },
+        "灯塔水母": {
+          "sci": "Turritopsis dohrnii",
+          "ja": "ベニクラゲ",
+          "size": "4-5mm（极小）",
+          "habits": "**生物学上不死**——成体可逆向发育回水螅状态、理论上无限循环",
+          "note": "新江ノ島水族館、加茂水族館有研究展示；这条灯会停下来发呆"
+        },
+        "桃花水母": {
+          "sci": "Craspedacusta sowerbii",
+          "ja": "マミズクラゲ",
+          "size": "伞径 1-2cm",
+          "habits": "**淡水水母**罕见、湖泊池塘偶发成群、伞缘 4 片粉红生殖腺如桃花",
+          "note": "野生罕见、上野不忍池历史曾有记录"
+        },
+        "箱水母": {
+          "sci": "Chironex fleckeri",
+          "ja": "オーストラリアウンバチクラゲ",
+          "size": "伞径 30cm / 触手 3m",
+          "habits": "澳洲海域剧毒、刺胞含心脏毒素、可致命",
+          "note": "日本不产、文献中提及；灯会用「致命的透明」这种意象"
+        },
+        "倒立水母": {
+          "sci": "Cassiopea andromeda",
+          "ja": "サカサクラゲ",
+          "size": "伞径 30cm",
+          "habits": "**伞向下口向上**栖息于浅海泥沙、共生藻光合供能",
+          "note": "墨田水族館有展示、姿态独特"
+        }
+      }
+    },
+    "海豚": {
+      "ja": "イルカ",
+      "category_sci": "Delphinidae（科）",
+      "blurb": "高度社会性、回声定位、每只有专属「signature whistle」识别身份；通过镜像测试",
+      "tomori_canon": "灯 底色 没明确连接、但「能在镜中认出自己」这种自我意识题灯会有兴趣",
+      "venue": [
+        "品川アクアパーク（海豚秀）",
+        "横滨八景岛シーパラダイス",
+        "鴨川シーワールド（虎鲸）"
+      ],
+      "subspecies": {
+        "宽吻海豚": {
+          "sci": "Tursiops truncatus",
+          "ja": "バンドウイルカ",
+          "size": "2-4m / 150-650kg",
+          "habits": "海豚秀主力、最常被研究、寿命 40-60 年、可学习手势指令",
+          "note": "品川アクアパーク主展示种"
+        },
+        "真海豚": {
+          "sci": "Delphinus delphis",
+          "ja": "マイルカ",
+          "size": "1.5-2.5m / 100-200kg",
+          "habits": "外洋性大群、体侧黄褐色沙漏纹、群体可达千头",
+          "note": "野生洄游、水族馆较少"
+        },
+        "虎鲸": {
+          "sci": "Orcinus orca",
+          "ja": "シャチ",
+          "size": "6-9m / 3-6t（海豚科最大）",
+          "habits": "顶级掠食者、家族群「pod」固定成员、有方言",
+          "note": "鴨川シーワールド、名古屋港水族館展示"
+        },
+        "白鲸": {
+          "sci": "Delphinapterus leucas",
+          "ja": "シロイルカ",
+          "size": "3.5-5.5m / 700-1600kg",
+          "habits": "北极亚北极、可前后弯曲颈椎（多数鲸不能）、声音多变「海里的金丝雀」",
+          "note": "横滨八景岛、名古屋港水族館；属一角鲸科严格不算 Delphinidae"
+        },
+        "伪虎鲸": {
+          "sci": "Pseudorca crassidens",
+          "ja": "オキゴンドウ",
+          "size": "4-6m / 1-2t",
+          "habits": "全黑、群居、分享猎物、虎鲸近亲但温和",
+          "note": "鴨川シーワールド有过展示"
+        }
+      }
+    },
+    "章鱼": {
+      "ja": "タコ",
+      "category_sci": "Octopoda（目）",
+      "blurb": "9 个「大脑」（中央 + 8 腕各神经节）；变色 / 改变皮肤纹理；逃脱能力极强；寿命 1-2 年",
+      "tomori_canon": "灯 底色 没明确连接、但 9 个大脑 / 改变形状 这种特性灯会觉得有趣",
+      "venue": [
+        "池袋サンシャイン水族館",
+        "葛西临海水族園",
+        "鳥羽水族館"
+      ],
+      "subspecies": {
+        "真蛸": {
+          "sci": "Octopus vulgaris",
+          "ja": "マダコ",
+          "size": "腕展 1m / 3kg",
+          "habits": "日本料理常见种、岩礁洞穴栖、智力测试主角（拧瓶盖、走迷宫）",
+          "note": "葛西临海触摸池"
+        },
+        "北太平洋巨型章鱼": {
+          "sci": "Enteroctopus dofleini",
+          "ja": "ミズダコ",
+          "size": "腕展 4-9m / 50kg+（最大）",
+          "habits": "北海道近海、深海性、寿命 3-5 年、雌性产卵后绝食守护至死",
+          "note": "鳥羽水族館、新潟水族館展示"
+        },
+        "蓝环章鱼": {
+          "sci": "Hapalochlaena lunulata",
+          "ja": "ヒョウモンダコ",
+          "size": "腕展 10-20cm",
+          "habits": "**剧毒**、唾液含河豚毒素、被激怒时蓝环闪烁警告",
+          "note": "日本南部温暖海域有目击、水族馆罕见"
+        },
+        "拟态章鱼": {
+          "sci": "Thaumoctopus mimicus",
+          "ja": "ミミックオクトパス",
+          "size": "腕展 60cm",
+          "habits": "印尼海域、可模仿至少 15 种海洋动物（比目鱼 / 海蛇 / 狮子鱼）",
+          "note": "野生只目击难展示"
+        },
+        "深海小飞象": {
+          "sci": "Grimpoteuthis spp.",
+          "ja": "メンダコ類",
+          "size": "20-30cm",
+          "habits": "深海 1000-7000m、伞状鳍如「小飞象」耳、半透明",
+          "note": "深海特展时偶有标本"
+        }
+      }
+    },
+    "鲨鱼": {
+      "ja": "サメ",
+      "category_sci": "Selachimorpha（亚纲）",
+      "blurb": "软骨鱼、嗅觉极敏锐（百万分之一血腥）；多数终生游泳「专性洄游」、停下缺氧死亡",
+      "tomori_canon": "灯 底色 没明确连接、neutral",
+      "venue": [
+        "池袋サンシャイン水族館（黑鳍礁鲨）",
+        "葛西临海水族園",
+        "鴨川シーワールド"
+      ],
+      "subspecies": {
+        "大白鲨": {
+          "sci": "Carcharodon carcharias",
+          "ja": "ホホジロザメ",
+          "size": "4-6m / 700-2000kg",
+          "habits": "顶级掠食者、可用「跃出水面」捕食海豹、嗅觉感知 5 km 外血腥",
+          "note": "**捕获后无法在水族馆长期饲养**、冲绳近海野生有目击"
+        },
+        "鲸鲨": {
+          "sci": "Rhincodon typus",
+          "ja": "ジンベエザメ",
+          "size": "10-12m / 20t（现存最大鱼）",
+          "habits": "滤食性、口腔 1.5m 张开吸入磷虾、性情温顺",
+          "note": "美ら海水族館（冲绳）/ 海遊館（大阪）/ 鹿児島水族館 展示"
+        },
+        "虎鲨": {
+          "sci": "Galeocerdo cuvier",
+          "ja": "イタチザメ",
+          "size": "3-4m / 400kg",
+          "habits": "杂食「海中垃圾桶」（车牌 / 罐头都吃过）、夜行、热带亚热带",
+          "note": "南西诸岛野生、水族馆有展示"
+        },
+        "无双髻鲨": {
+          "sci": "Sphyrna mokarran",
+          "ja": "ヒラシュモクザメ",
+          "size": "4-6m",
+          "habits": "T 形头部传感面积大、可探测海底埋藏的鳐鱼电信号",
+          "note": "日本南部、葛西临海水族園"
+        },
+        "黑鳍礁鲨": {
+          "sci": "Carcharhinus melanopterus",
+          "ja": "ツマグロ",
+          "size": "1.5-2m",
+          "habits": "珊瑚礁浅海、鳍尖黑色、性情温和、人类游泳常见接触种",
+          "note": "池袋サンシャイン主展示鲨"
+        },
+        "皱鳃鲨": {
+          "sci": "Chlamydoselachus anguineus",
+          "ja": "ラブカ",
+          "size": "1.5-2m",
+          "habits": "深海 500-1500m、外形原始「活化石」、6 对鳃裂、孕期 3 年（脊椎动物最长）",
+          "note": "駿河湾偶捕获、沼津港深海水族館有标本"
+        }
+      }
+    },
+    "海星": {
+      "ja": "ヒトデ",
+      "category_sci": "Asteroidea（纲）",
+      "blurb": "棘皮动物、五辐对称；可再生失去的腕、有些可从单一腕重新长出整体；管足吸盘移动",
+      "tomori_canon": "灯 底色 没明确连接、但「能再生」+「五辐对称」是会让灯停下来看的细节",
+      "venue": [
+        "墨田水族館（触摸池）",
+        "池袋サンシャイン水族館",
+        "鳥羽水族館"
+      ],
+      "subspecies": {
+        "北太平洋海星": {
+          "sci": "Asterias amurensis",
+          "ja": "マヒトデ",
+          "size": "直径 30-50cm",
+          "habits": "5 腕、扁平、贪食贝类、北日本沿岸常见入侵种（澳洲深受其害）",
+          "note": "墨田水族館触摸池可摸"
+        },
+        "棘冠海星": {
+          "sci": "Acanthaster planci",
+          "ja": "オニヒトデ",
+          "size": "直径 30-40cm",
+          "habits": "16 腕、覆盖**毒棘**、专食珊瑚虫、爆发时摧毁珊瑚礁",
+          "note": "冲绳珊瑚礁防控对象、水族馆为科普展示"
+        },
+        "面包海星": {
+          "sci": "Culcita novaeguineae",
+          "ja": "マンジュウヒトデ",
+          "size": "直径 20-30cm",
+          "habits": "5 腕极退化呈五角面包形、热带珊瑚礁、底面满管足",
+          "note": "美ら海水族館展示"
+        },
+        "向日葵海星": {
+          "sci": "Pycnopodia helianthoides",
+          "ja": "ヒマワリヒトデ",
+          "size": "直径 60-100cm（巨型）",
+          "habits": "16-24 腕、北太平洋、移动可达 1m/min（海星里超快）、近年因海星消瘦症濒危",
+          "note": "新江ノ島水族館历史展示"
+        }
+      }
+    },
+    "河豚": {
+      "ja": "フグ",
+      "category_sci": "Tetraodontidae（科）",
+      "blurb": "受惊吸入水将身体膨胀成球；体内含河豚毒素 tetrodotoxin、人类摄入无解毒剂",
+      "tomori_canon": "灯 底色 没明确、neutral；但「致命的可爱」这种反差灯会写词",
+      "venue": [
+        "墨田水族館",
+        "葛西临海水族園",
+        "下関海響館（河豚专门）"
+      ],
+      "subspecies": {
+        "红鳍东方鲀": {
+          "sci": "Takifugu rubripes",
+          "ja": "トラフグ",
+          "size": "70cm / 5kg",
+          "habits": "高级食材主角、下关名物、料理需河豚调理免许、毒素集中肝/卵巢",
+          "note": "下関海響館、葛西临海展示"
+        },
+        "虎纹东方鲀": {
+          "sci": "Takifugu pardalis",
+          "ja": "ヒガンフグ",
+          "size": "30cm",
+          "habits": "近岸常见、皮肤虎纹、毒性比红鳍稍低",
+          "note": "葛西临海水族園"
+        },
+        "黄鳍东方鲀": {
+          "sci": "Takifugu xanthopterus",
+          "ja": "シマフグ",
+          "size": "60cm",
+          "habits": "横纹、鳍黄色、群居",
+          "note": "下関海響館"
+        },
+        "刺鲀": {
+          "sci": "Diodon holocanthus",
+          "ja": "ハリセンボン",
+          "size": "30-40cm",
+          "habits": "膨胀时全身硬棘竖起如球（其实不是 Tetraodontidae 而是 Diodontidae）、严格说不算「河豚」但常被并称",
+          "note": "墨田水族館热带区"
+        }
+      }
+    },
+    "金鱼": {
+      "ja": "金魚",
+      "category_sci": "Carassius auratus（同一物种 / 不同品种）",
+      "blurb": "鲫鱼人工选育变种、起源中国宋代；可达 41 年寿命；视觉为四色（含紫外）",
+      "tomori_canon": "灯 底色 没明确、但「夏天 / 縁日 / 红色尾巴」的季节意象灯会写进笔记本",
+      "venue": [
+        "墨田水族館（江戸金魚展）",
+        "アートアクアリウム",
+        "夏祭り 縁日「金魚すくい」"
+      ],
+      "subspecies": {
+        "和金": {
+          "sci": "Carassius auratus var. wakin",
+          "ja": "ワキン",
+          "size": "15-30cm",
+          "habits": "原始体型、最接近野生鲫鱼、缘日金鱼すくい主力",
+          "note": "夏祭最常见、灯笔记里的「红尾」"
+        },
+        "琉金": {
+          "sci": "Carassius auratus var. ryukin",
+          "ja": "リュウキン",
+          "size": "15-20cm",
+          "habits": "圆腹、长尾、体高、江戸金魚四大品种之一",
+          "note": "墨田江戸金魚展主推"
+        },
+        "出目金": {
+          "sci": "Carassius auratus var. demekin",
+          "ja": "デメキン",
+          "size": "10-15cm",
+          "habits": "眼球向外突出、视力差、不与游速快的同养",
+          "note": "アートアクアリウム"
+        },
+        "兰寿": {
+          "sci": "Carassius auratus var. ranchu",
+          "ja": "ランチュウ",
+          "size": "15-20cm",
+          "habits": "无背鳍、头部「狮子头」肉瘤、「金魚の王様」称号",
+          "note": "弥彦金魚まつり / 江戸川区金魚まつり"
+        },
+        "丹顶": {
+          "sci": "Carassius auratus var. tancho",
+          "ja": "タンチョウ",
+          "size": "15-20cm",
+          "habits": "全身白唯顶部红斑、状如丹顶鶴",
+          "note": "鉴赏价值高、专门会场展示"
+        },
+        "流金": {
+          "sci": "Carassius auratus var. ryukin (variant)",
+          "ja": "リュウキン（流れ尾）",
+          "size": "15-20cm",
+          "habits": "琉金长尾型、尾鳍极长拖曳如流水",
+          "note": "鉴赏品种、价格高"
+        }
+      }
+    },
+    "海獭": {
+      "ja": "ラッコ",
+      "category_sci": "Enhydra lutris（单物种 / 3 亚种）",
+      "blurb": "用石头敲贝壳的少数哺乳动物；睡觉时彼此勾爪防漂走；日本水族馆数量逐年减少濒危",
+      "tomori_canon": "灯 底色 没明确、但「滑溜溜的东西」+「用石头敲东西」灯会关注",
+      "venue": [
+        "鳥羽水族館（日本最多）",
+        "サンシャイン水族館（曾有展示、近年减少）",
+        "サンピアザ水族館（札幌）"
+      ],
+      "subspecies": {
+        "北方海獭": {
+          "sci": "Enhydra lutris kenyoni",
+          "ja": "アラスカラッコ",
+          "size": "1.0-1.5m / 22-45kg",
+          "habits": "阿拉斯加 / 阿留申群岛、最大亚种、毛皮密度 10 万根/cm²（哺乳动物最高）",
+          "note": "日本水族馆主要饲育亚种"
+        },
+        "加州海獭": {
+          "sci": "Enhydra lutris nereis",
+          "ja": "カリフォルニアラッコ",
+          "size": "1.0-1.4m / 18-35kg",
+          "habits": "美国加州沿岸、体型最小亚种、近危",
+          "note": "日本无展示、美国蒙特雷湾水族馆"
+        },
+        "千岛海獭": {
+          "sci": "Enhydra lutris lutris",
+          "ja": "アジアラッコ",
+          "size": "1.2-1.5m / 25-40kg",
+          "habits": "千岛群岛 / 北海道周辺、灭绝边缘、北海道近年偶有目击",
+          "note": "野生为主、水族馆罕见"
+        }
+      }
+    },
+    "海豹": {
+      "ja": "アザラシ",
+      "category_sci": "Phocidae（科）",
+      "blurb": "鳍脚类（鳍足亚目 Pinnipedia）真海豹科——无外耳廓、后鳍不能转向前、陆上靠腹部蠕动；近缘但分科：海狮 Otariidae（有外耳廓）/ 海象 Odobenidae（长牙）",
+      "tomori_canon": "灯 底色 没明确、但「圆滚滚」+「水里灵活陆上笨拙」的反差灯会停下来看",
+      "venue": [
+        "旭山動物園（アザラシ館・圆筒水柱）",
+        "おたる水族館（北海道）",
+        "鴨川シーワールド",
+        "仙台うみの杜水族館"
+      ],
+      "subspecies": {
+        "斑海豹": {
+          "sci": "Phoca largha",
+          "ja": "ゴマフアザラシ",
+          "size": "1.5-1.7m / 60-110kg",
+          "habits": "日本北方沿岸最常见、白底黑斑（胡麻斑纹）、寿命 30 年；幼体「ゴマちゃん」是日本水族馆人气吉祥物",
+          "note": "旭山動物園・おたる水族館主力展示、灯如果说 ゴマちゃん 不是矫情、是真实的 圈名"
+        },
+        "港海豹": {
+          "sci": "Phoca vitulina",
+          "ja": "ゼニガタアザラシ",
+          "size": "1.4-1.9m / 80-170kg",
+          "habits": "环状斑纹（钱形）得名、北海道襟裳岬有日本最大野生群落、单独行动多",
+          "note": "野生主、襟裳岬游轮观察"
+        },
+        "髭海豹": {
+          "sci": "Erignathus barbatus",
+          "ja": "アゴヒゲアザラシ",
+          "size": "2.1-2.7m / 250-360kg",
+          "habits": "下颚长须（味觉/触觉感受器）、北极底栖摄食、声音如鸟啼用于求偶",
+          "note": "おたる水族館过去有展示"
+        },
+        "环斑海豹": {
+          "sci": "Pusa hispida",
+          "ja": "ワモンアザラシ",
+          "size": "1.0-1.4m / 50-110kg",
+          "habits": "北极冰下 / 冰穴、Phocidae 最小种、寿命 40+ 年",
+          "note": "日本水族馆罕见、ノルウェー / カナダ系展示"
+        },
+        "北象海豹": {
+          "sci": "Mirounga angustirostris",
+          "ja": "キタゾウアザラシ",
+          "size": "雄 4-5m / 2000kg、雌 2.5m / 600kg（巨型 + 雌雄差最大）",
+          "habits": "雄性鼻部象鼻状膨胀、可潜深 1500m / 2 小时、加州海岸繁殖",
+          "note": "日本无展示、太平洋东岸野生"
+        },
+        "竖琴海豹": {
+          "sci": "Pagophilus groenlandicus",
+          "ja": "タテゴトアザラシ",
+          "size": "1.7-2.0m / 130kg",
+          "habits": "幼体「白子」纯白绒毛 2-3 周（猎杀争议焦点）、北大西洋浮冰繁殖",
+          "note": "日本水族馆罕、海外纪录片常见"
+        }
+      }
+    },
+    "海龟": {
+      "ja": "ウミガメ",
+      "category_sci": "Cheloniidae + Dermochelyidae（2 科）",
+      "blurb": "爬行纲、全球濒危、雌性回出生海滩产卵；性别由孵化温度决定（高温雌、低温雄）",
+      "tomori_canon": "灯 底色 没明确、但「回到出生地」「温度决定性别」灯会停下来想",
+      "venue": [
+        "美ら海水族館（冲绳）",
+        "葛西临海水族園",
+        "下田海中水族館"
+      ],
+      "subspecies": {
+        "赤蠵龟": {
+          "sci": "Caretta caretta",
+          "ja": "アカウミガメ",
+          "size": "甲长 80-110cm",
+          "habits": "日本主产卵种（屋久島 / 御前崎海岸）、肉食性（贝 / 螃蟹）、头大颚强",
+          "note": "屋久島产卵观察是知名生态项目"
+        },
+        "绿海龟": {
+          "sci": "Chelonia mydas",
+          "ja": "アオウミガメ",
+          "size": "甲长 80-120cm",
+          "habits": "成年植食性（海草）、热带亚热带、寿命可达 80 年",
+          "note": "美ら海水族館主展示"
+        },
+        "玳瑁": {
+          "sci": "Eretmochelys imbricata",
+          "ja": "タイマイ",
+          "size": "甲长 60-90cm",
+          "habits": "热带珊瑚礁、捕食海绵（少数能消化海绵的动物）、甲壳「鼈甲」历史工艺品",
+          "note": "现严禁鼈甲贸易、CITES 附录 I"
+        },
+        "棱皮龟": {
+          "sci": "Dermochelys coriacea",
+          "ja": "オサガメ",
+          "size": "甲长 1.5-2.5m / 700kg（最大龟）",
+          "habits": "无硬甲、革质背、可潜深 1200m、专食水母",
+          "note": "极濒危、日本沿岸偶有迷途个体"
+        }
+      }
+    },
+    "鲸": {
+      "ja": "クジラ",
+      "category_sci": "Cetacea（下目）",
+      "blurb": "海洋哺乳动物、肺呼吸；分须鲸（滤食）/ 齿鲸（捕食）；歌声可传 1000+ km",
+      "tomori_canon": "灯 底色 没明确、但「歌声传千公里」灯会停下来——这跟写词的人有共鸣",
+      "venue": [
+        "太地町立くじらの博物館",
+        "国立科学博物館（标本）",
+        "野生 watching：御蔵島 / 小笠原"
+      ],
+      "subspecies": {
+        "抹香鲸": {
+          "sci": "Physeter macrocephalus",
+          "ja": "マッコウクジラ",
+          "size": "16-20m / 35-57t",
+          "habits": "齿鲸最大、可潜深 2000m、单声波 230 dB（地球最响动物声）、捕食大王乌贼",
+          "note": "《白鲸记》原型、小笠原野生 watching"
+        },
+        "座头鲸": {
+          "sci": "Megaptera novaeangliae",
+          "ja": "ザトウクジラ",
+          "size": "12-16m / 25-30t",
+          "habits": "**会唱长 30 分歌**、雄性繁殖期歌曲在群体内传播、跃身击浪标志性",
+          "note": "冲绳座间味 / 慶良間野生 watching 旺季 1-3 月"
+        },
+        "蓝鲸": {
+          "sci": "Balaenoptera musculus",
+          "ja": "シロナガスクジラ",
+          "size": "24-30m / 100-150t（地球史上最大动物）",
+          "habits": "心脏 600kg、舌头重 4t、心跳 4-8 次/分、寿命 80-90 年",
+          "note": "野生罕见、博物馆标本"
+        },
+        "弓头鲸": {
+          "sci": "Balaena mysticetus",
+          "ja": "ホッキョククジラ",
+          "size": "14-18m / 60-100t",
+          "habits": "北极圏、用厚头骨破冰、寿命可达 200+ 年（哺乳动物最长）",
+          "note": "近年阿留申个体捕获含 19 世纪鱼叉头"
+        },
+        "小须鲸": {
+          "sci": "Balaenoptera acutorostrata",
+          "ja": "ミンククジラ",
+          "size": "8-10m / 5-10t",
+          "habits": "须鲸最小、孤独或小群、日本沿岸常见",
+          "note": "调查捕鲸主要对象、太地町博物馆"
+        }
+      }
+    },
+    "海葵": {
+      "ja": "イソギンチャク",
+      "category_sci": "Actiniaria（目）",
+      "blurb": "刺胞动物、固着或浅埋、口盘周围触手有刺胞、与小丑鱼共生最有名",
+      "tomori_canon": "灯 底色 没明确、neutral",
+      "venue": [
+        "池袋サンシャイン水族館",
+        "葛西临海水族園",
+        "美ら海水族館（共生展示）"
+      ],
+      "subspecies": {
+        "壮丽海葵": {
+          "sci": "Heteractis magnifica",
+          "ja": "センジュイソギンチャク",
+          "size": "口盘直径 50cm-1m",
+          "habits": "热带珊瑚礁、与小丑鱼（Amphiprion）共生最经典、夜间收缩白天展开",
+          "note": "美ら海水族館 / アクアパーク品川"
+        },
+        "哈氏地毯海葵": {
+          "sci": "Stichodactyla haddoni",
+          "ja": "ハタゴイソギンチャク",
+          "size": "口盘直径 50-80cm",
+          "habits": "短触手平铺如地毯、毒性较强、底层埋砂",
+          "note": "葛西临海水族園"
+        },
+        "蛇形海葵": {
+          "sci": "Anemonia viridis",
+          "ja": "スナギンチャク（近縁）",
+          "size": "口盘直径 5-10cm",
+          "habits": "地中海 / 大西洋、绿色或紫色、潮间带石下",
+          "note": "野生欧洲、日本水族馆罕"
+        }
+      }
+    },
+    "海马": {
+      "ja": "タツノオトシゴ",
+      "category_sci": "Hippocampus（属）",
+      "blurb": "**雄性育儿**——雌性产卵于雄性育儿袋、雄性怀胎 14-28 天分娩；游泳极慢、靠尾巴缠绕固着",
+      "tomori_canon": "灯 底色 没明确、但「雄性怀胎」「靠尾巴卷住才能不漂走」灯会觉得有趣",
+      "venue": [
+        "葛西临海水族園",
+        "アクアマリンふくしま",
+        "新江ノ島水族館"
+      ],
+      "subspecies": {
+        "日本海马": {
+          "sci": "Hippocampus mohnikei",
+          "ja": "サンゴタツ",
+          "size": "8-10cm",
+          "habits": "日本沿岸、海草丛、环境破坏导致野生减少",
+          "note": "葛西临海展示"
+        },
+        "巴氏豆丁海马": {
+          "sci": "Hippocampus bargibanti",
+          "ja": "ピグミーシーホース",
+          "size": "1.4-2.4cm（极小）",
+          "habits": "印太热带、与柳珊瑚（Muricella）共生拟态、皮肤瘤突如珊瑚虫",
+          "note": "潜水拍摄圣杯、水族馆展示困难"
+        },
+        "草海龙": {
+          "sci": "Phyllopteryx taeniolatus",
+          "ja": "リーフィーシードラゴン",
+          "size": "20-25cm",
+          "habits": "澳洲南部、全身叶状突起拟海藻、严格说不是海马是海龙（同科）",
+          "note": "アクアマリンふくしま、新江ノ島水族館"
+        }
+      }
+    }
+  },
+  "VENUE_KEYWORDS": {
+    "池袋サンシャイン水族館": [
+      "池袋サンシャイン",
+      "サンシャイン水族館",
+      "池袋水族馆",
+      "池袋 sunshine",
+      "sunshine水族馆",
+      "sunshine aquarium",
+      "天空企鹅",
+      "天空のペンギン"
+    ],
+    "墨田水族館": [
+      "墨田水族馆",
+      "墨田水族館",
+      "sumida aquarium",
+      "スカイツリー水族館",
+      "東京スカイツリー水族館",
+      "skytree水族馆"
+    ],
+    "上野动物园": [
+      "上野动物园",
+      "上野動物園",
+      "上野动物園",
+      "ueno zoo",
+      "上野公園",
+      "上野公园"
+    ],
+    "葛西临海水族園": [
+      "葛西临海",
+      "葛西臨海",
+      "kasai aquarium"
+    ],
+    "美ら海水族館": [
+      "美ら海",
+      "美海水族館",
+      "churaumi"
+    ],
+    "鳥羽水族館": [
+      "鳥羽水族馆",
+      "鳥羽水族館",
+      "toba aquarium"
+    ],
+    "海遊館": [
+      "海遊館",
+      "海游馆",
+      "kaiyukan",
+      "大阪海遊館"
+    ],
+    "鴨川シーワールド": [
+      "鴨川シーワールド",
+      "鴨川 sea world",
+      "kamogawa seaworld"
+    ],
+    "アートアクアリウム": [
+      "アートアクアリウム",
+      "art aquarium",
+      "金鱼艺术展"
+    ],
+    "旭山動物園": [
+      "旭山動物園",
+      "旭山动物园",
+      "asahiyama zoo",
+      "アザラシ館"
+    ],
+    "おたる水族館": [
+      "おたる水族館",
+      "小樽水族馆",
+      "otaru aquarium"
+    ]
+  },
+  "VAGUE_KEYWORDS": [
+    "海洋生物",
+    "海生动物",
+    "海底动物",
+    "海里的",
+    "海中的",
+    "水里的",
+    "水族馆",
+    "水族館",
+    "aquarium",
+    "水生生物",
+    "海洋馆"
+  ],
+  "ANON_KEYWORDS": [
+    "爱音",
+    "愛音",
+    "anon",
+    "千早爱音",
+    "千早愛音",
+    "小爱",
+    "小爱音",
+    "アノン"
+  ],
+  "CATEGORY_VARIANTS": {
+    "企鹅": [
+      "企鹅",
+      "ペンギン",
+      "penguin",
+      "Sphenisciformes"
+    ],
+    "水母": [
+      "水母",
+      "クラゲ",
+      "海月",
+      "jellyfish",
+      "Medusozoa"
+    ],
+    "海豚": [
+      "海豚",
+      "イルカ",
+      "dolphin",
+      "Delphinidae"
+    ],
+    "章鱼": [
+      "章鱼",
+      "タコ",
+      "octopus",
+      "Octopoda"
+    ],
+    "鲨鱼": [
+      "鲨鱼",
+      "鮫",
+      "サメ",
+      "shark",
+      "Selachimorpha"
+    ],
+    "海星": [
+      "海星",
+      "ヒトデ",
+      "starfish",
+      "sea star",
+      "Asteroidea"
+    ],
+    "河豚": [
+      "河豚",
+      "フグ",
+      "pufferfish",
+      "Tetraodontidae"
+    ],
+    "金鱼": [
+      "金鱼",
+      "金魚",
+      "goldfish",
+      "Carassius auratus"
+    ],
+    "海獭": [
+      "海獭",
+      "ラッコ",
+      "sea otter",
+      "Enhydra lutris",
+      "Enhydra"
+    ],
+    "海豹": [
+      "海豹",
+      "アザラシ",
+      "seal",
+      "Phocidae",
+      "Pinnipedia"
+    ],
+    "海龟": [
+      "海龟",
+      "海龜",
+      "ウミガメ",
+      "sea turtle",
+      "Cheloniidae"
+    ],
+    "鲸": [
+      "鲸鱼",
+      "鯨",
+      "クジラ",
+      "whale",
+      "Cetacea"
+    ],
+    "海葵": [
+      "海葵",
+      "イソギンチャク",
+      "sea anemone",
+      "Actiniaria"
+    ],
+    "海马": [
+      "海马",
+      "タツノオトシゴ",
+      "seahorse",
+      "Hippocampus"
+    ]
+  },
+  "SUBSPECIES_VARIANTS": {
+    "洪堡企鹅": [
+      "洪堡",
+      "humboldt",
+      "Spheniscus humboldti",
+      "フンボルト"
+    ],
+    "帝企鹅": [
+      "帝企鹅",
+      "皇帝企鹅",
+      "コウテイ",
+      "Aptenodytes forsteri",
+      "emperor penguin"
+    ],
+    "国王企鹅": [
+      "国王企鹅",
+      "オウサマ",
+      "Aptenodytes patagonicus",
+      "king penguin"
+    ],
+    "阿德利企鹅": [
+      "阿德利",
+      "アデリー",
+      "Pygoscelis adeliae",
+      "adelie"
+    ],
+    "巴布亚企鹅": [
+      "巴布亚",
+      "ジェンツー",
+      "Pygoscelis papua",
+      "gentoo"
+    ],
+    "小蓝企鹅": [
+      "小蓝企鹅",
+      "コガタペンギン",
+      "Eudyptula minor",
+      "little blue penguin",
+      "fairy penguin"
+    ],
+    "海月水母": [
+      "海月水母",
+      "ミズクラゲ",
+      "Aurelia aurita",
+      "moon jelly"
+    ],
+    "越前水母": [
+      "越前水母",
+      "エチゼンクラゲ",
+      "Nemopilema",
+      "nomura"
+    ],
+    "灯塔水母": [
+      "灯塔水母",
+      "ベニクラゲ",
+      "Turritopsis",
+      "immortal jelly"
+    ],
+    "桃花水母": [
+      "桃花水母",
+      "マミズクラゲ",
+      "Craspedacusta"
+    ],
+    "箱水母": [
+      "箱水母",
+      "オーストラリアウンバチ",
+      "Chironex",
+      "box jellyfish"
+    ],
+    "倒立水母": [
+      "倒立水母",
+      "サカサクラゲ",
+      "Cassiopea"
+    ],
+    "宽吻海豚": [
+      "宽吻",
+      "瓶鼻",
+      "バンドウイルカ",
+      "Tursiops",
+      "bottlenose"
+    ],
+    "真海豚": [
+      "真海豚",
+      "マイルカ",
+      "Delphinus delphis",
+      "common dolphin"
+    ],
+    "虎鲸": [
+      "虎鲸",
+      "シャチ",
+      "Orcinus orca",
+      "killer whale",
+      "orca"
+    ],
+    "白鲸": [
+      "白鲸",
+      "シロイルカ",
+      "Delphinapterus",
+      "beluga"
+    ],
+    "伪虎鲸": [
+      "伪虎鲸",
+      "オキゴンドウ",
+      "Pseudorca",
+      "false killer whale"
+    ],
+    "真蛸": [
+      "真蛸",
+      "マダコ",
+      "Octopus vulgaris",
+      "common octopus"
+    ],
+    "北太平洋巨型章鱼": [
+      "北太平洋巨型",
+      "ミズダコ",
+      "Enteroctopus",
+      "giant pacific octopus"
+    ],
+    "蓝环章鱼": [
+      "蓝环章鱼",
+      "蓝环",
+      "ヒョウモンダコ",
+      "Hapalochlaena",
+      "blue ring"
+    ],
+    "拟态章鱼": [
+      "拟态章鱼",
+      "模仿章鱼",
+      "ミミックオクトパス",
+      "Thaumoctopus",
+      "mimic octopus"
+    ],
+    "深海小飞象": [
+      "小飞象",
+      "メンダコ",
+      "Grimpoteuthis",
+      "dumbo octopus"
+    ],
+    "大白鲨": [
+      "大白鲨",
+      "ホホジロザメ",
+      "Carcharodon",
+      "great white"
+    ],
+    "鲸鲨": [
+      "鲸鲨",
+      "ジンベエザメ",
+      "Rhincodon",
+      "whale shark"
+    ],
+    "虎鲨": [
+      "虎鲨",
+      "イタチザメ",
+      "Galeocerdo",
+      "tiger shark"
+    ],
+    "无双髻鲨": [
+      "双髻鲨",
+      "锤头鲨",
+      "ヒラシュモク",
+      "Sphyrna",
+      "hammerhead"
+    ],
+    "黑鳍礁鲨": [
+      "黑鳍礁鲨",
+      "ツマグロ",
+      "melanopterus",
+      "blacktip reef"
+    ],
+    "皱鳃鲨": [
+      "皱鳃鲨",
+      "ラブカ",
+      "Chlamydoselachus",
+      "frilled shark"
+    ],
+    "北太平洋海星": [
+      "北太平洋海星",
+      "マヒトデ",
+      "Asterias amurensis"
+    ],
+    "棘冠海星": [
+      "棘冠海星",
+      "オニヒトデ",
+      "Acanthaster",
+      "crown-of-thorns"
+    ],
+    "面包海星": [
+      "面包海星",
+      "マンジュウヒトデ",
+      "Culcita"
+    ],
+    "向日葵海星": [
+      "向日葵海星",
+      "ヒマワリヒトデ",
+      "Pycnopodia"
+    ],
+    "红鳍东方鲀": [
+      "红鳍东方鲀",
+      "红鳍东方鲀",
+      "トラフグ",
+      "Takifugu rubripes"
+    ],
+    "虎纹东方鲀": [
+      "虎纹东方鲀",
+      "ヒガンフグ",
+      "Takifugu pardalis"
+    ],
+    "黄鳍东方鲀": [
+      "黄鳍东方鲀",
+      "シマフグ",
+      "Takifugu xanthopterus"
+    ],
+    "刺鲀": [
+      "刺鲀",
+      "ハリセンボン",
+      "Diodon",
+      "porcupinefish"
+    ],
+    "和金": [
+      "和金",
+      "ワキン",
+      "wakin"
+    ],
+    "琉金": [
+      "琉金",
+      "リュウキン",
+      "ryukin"
+    ],
+    "出目金": [
+      "出目金",
+      "デメキン",
+      "demekin",
+      "telescope eye"
+    ],
+    "兰寿": [
+      "兰寿",
+      "蘭寿",
+      "ランチュウ",
+      "ranchu"
+    ],
+    "丹顶": [
+      "丹顶金鱼",
+      "タンチョウ"
+    ],
+    "流金": [
+      "流金"
+    ],
+    "北方海獭": [
+      "北方海獭",
+      "アラスカラッコ",
+      "Enhydra lutris kenyoni"
+    ],
+    "加州海獭": [
+      "加州海獭",
+      "カリフォルニアラッコ",
+      "nereis"
+    ],
+    "千岛海獭": [
+      "千岛海獭",
+      "アジアラッコ",
+      "lutris lutris"
+    ],
+    "斑海豹": [
+      "斑海豹",
+      "ゴマフアザラシ",
+      "ゴマちゃん",
+      "Phoca largha",
+      "spotted seal"
+    ],
+    "港海豹": [
+      "港海豹",
+      "钱形海豹",
+      "ゼニガタアザラシ",
+      "Phoca vitulina",
+      "harbor seal"
+    ],
+    "髭海豹": [
+      "髭海豹",
+      "胡子海豹",
+      "アゴヒゲアザラシ",
+      "Erignathus",
+      "bearded seal"
+    ],
+    "环斑海豹": [
+      "环斑海豹",
+      "ワモンアザラシ",
+      "Pusa hispida",
+      "ringed seal"
+    ],
+    "北象海豹": [
+      "北象海豹",
+      "キタゾウアザラシ",
+      "Mirounga",
+      "elephant seal"
+    ],
+    "竖琴海豹": [
+      "竖琴海豹",
+      "タテゴトアザラシ",
+      "Pagophilus",
+      "harp seal"
+    ],
+    "赤蠵龟": [
+      "赤蠵龟",
+      "红海龟",
+      "アカウミガメ",
+      "Caretta",
+      "loggerhead"
+    ],
+    "绿海龟": [
+      "绿海龟",
+      "アオウミガメ",
+      "Chelonia mydas",
+      "green turtle"
+    ],
+    "玳瑁": [
+      "玳瑁",
+      "タイマイ",
+      "Eretmochelys",
+      "hawksbill"
+    ],
+    "棱皮龟": [
+      "棱皮龟",
+      "オサガメ",
+      "Dermochelys",
+      "leatherback"
+    ],
+    "抹香鲸": [
+      "抹香鲸",
+      "マッコウクジラ",
+      "Physeter",
+      "sperm whale"
+    ],
+    "座头鲸": [
+      "座头鲸",
+      "ザトウクジラ",
+      "Megaptera",
+      "humpback"
+    ],
+    "蓝鲸": [
+      "蓝鲸",
+      "シロナガスクジラ",
+      "Balaenoptera musculus",
+      "blue whale"
+    ],
+    "弓头鲸": [
+      "弓头鲸",
+      "ホッキョククジラ",
+      "Balaena mysticetus",
+      "bowhead"
+    ],
+    "小须鲸": [
+      "小须鲸",
+      "ミンククジラ",
+      "acutorostrata",
+      "minke"
+    ],
+    "壮丽海葵": [
+      "壮丽海葵",
+      "センジュイソギンチャク",
+      "Heteractis magnifica"
+    ],
+    "哈氏地毯海葵": [
+      "哈氏地毯海葵",
+      "ハタゴイソギンチャク",
+      "Stichodactyla haddoni"
+    ],
+    "蛇形海葵": [
+      "蛇形海葵",
+      "Anemonia viridis"
+    ],
+    "日本海马": [
+      "日本海马",
+      "サンゴタツ",
+      "Hippocampus mohnikei"
+    ],
+    "巴氏豆丁海马": [
+      "豆丁海马",
+      "ピグミーシーホース",
+      "bargibanti"
+    ],
+    "草海龙": [
+      "草海龙",
+      "リーフィーシードラゴン",
+      "Phyllopteryx",
+      "leafy seadragon"
+    ]
+  }
+}

@@ -99,7 +99,7 @@ def _replace_first_sentence_period(text: str) -> tuple[str, bool]:
     return new_text, True
 
 
-def random_replace_one_punct(text: str) -> tuple[str, int]:
+def random_replace_one_punct(text: str, rng=None) -> tuple[str, int]:
     """Randomly replace N of ，/。 in text with `······`、N grows with punct count
     but is reduced by existing ellipsis groups in the text.
 
@@ -109,6 +109,9 @@ def random_replace_one_punct(text: str) -> tuple[str, int]:
 
     2026-05-19 v6: 在 base 曲线之前先做"首句末尾「。」→ ······"强制替换、
                    独立于 base/existing 计数。这条计入 replaced_count。
+
+    rng：可选随机源（默认全局 random）。接线后由调用方按输入定种注入，
+    保证同一输入两次清洗同输出（见 `idiolect/_text_rng.py`）。
 
     Returns:
         (new_text, replaced_count)
@@ -128,7 +131,7 @@ def random_replace_one_punct(text: str) -> tuple[str, int]:
         return text, extra
 
     # 随机挑 k 个位置、倒序替换（避免 index shift）
-    chosen = sorted(random.sample(positions, k), reverse=True)
+    chosen = sorted((rng or random).sample(positions, k), reverse=True)
     new_text = text
     for pos in chosen:
         new_text = new_text[:pos] + "······" + new_text[pos + 1:]

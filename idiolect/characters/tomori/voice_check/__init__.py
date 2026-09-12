@@ -80,8 +80,14 @@ __all__ = (
 )
 
 
-def clean_reply(text: str) -> tuple[str, dict]:
+def clean_reply(text: str, *, rng=None) -> tuple[str, dict]:
     """灯回复后处理总入口。
+
+    Args:
+        text: LLM 产出的回复
+        rng:  可选随机源（标点软化 / 啊后插分隔用）。接线后由调用方按输入
+              定种注入（`idiolect/_text_rng.py`），保证同输入同输出；
+              缺省退回全局 random（self-test 用）。
 
     Returns:
         (cleaned_text, info_dict)
@@ -128,7 +134,7 @@ def clean_reply(text: str) -> tuple[str, dict]:
         info["ok"] = False
 
     # Stage 1: punctuation 随机替换
-    text, punct_count = random_replace_one_punct(text)
+    text, punct_count = random_replace_one_punct(text, rng=rng)
     if punct_count > 0:
         info["violations"]["punctuation"] = punct_count
         info["ok"] = False
@@ -140,7 +146,7 @@ def clean_reply(text: str) -> tuple[str, dict]:
         info["ok"] = False
 
     # Stage 2b: 啊 + 中文 → 插 ······ (70%) 或 ， (30%) — 2026-05-12 新加
-    text, insert_count = insert_separator_after_ah(text)
+    text, insert_count = insert_separator_after_ah(text, rng=rng)
     if insert_count > 0:
         info["violations"]["insert_separator_after_ah"] = insert_count
         info["ok"] = False

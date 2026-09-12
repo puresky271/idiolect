@@ -1,0 +1,804 @@
+{
+  "SOCIAL_TAXONOMY": {
+    "Instagram": {
+      "ja": "Instagram / インスタ / IG",
+      "blurb": "**爱音 大概 主力 SNS**——女高中生 OOTD / 美妆 / 朋友合照都在这里",
+      "anon_canon": "爱音本能 SNS 自拍频率高、IG stories 是日常、reels 二创偶尔做、close friends 列表 大概 有几个真的好友",
+      "subspecies": {
+        "IG Stories": {
+          "feature": "Instagram Stories",
+          "ja": "ストーリーズ",
+          "metric": "24h 自动消失、stickers / poll / question / link sticker",
+          "vibe": "**爱音日常 SNS 主力**、店里 / 路上 / 演出后台都发 stories",
+          "note": "highlight 留下来、ootd / live preview / 朋友合照 must"
+        },
+        "IG Reels": {
+          "feature": "Instagram Reels",
+          "ja": "リール",
+          "metric": "短视频 15-90s、算法推送、和 TikTok 互推",
+          "vibe": "演出花絮 / 美妆 try / 朋友互动 大概 形式",
+          "note": "remix 二创 / 配 BGM 是流量入口"
+        },
+        "IG Posts": {
+          "feature": "Instagram Posts（feed）",
+          "ja": "フィード投稿",
+          "metric": "九宫格 / 拼图 / 长图、最久存在的内容形式",
+          "vibe": "OOTD / 演出照 / 高质量摄影、不像 stories 那样随手",
+          "note": "爱音 大概 一周 1-2 张精修"
+        },
+        "Close Friends": {
+          "feature": "Close Friends list",
+          "ja": "親しい友達",
+          "metric": "**绿色圆圈**专属、stories 限定可见、最多 1000 人",
+          "vibe": "**真好友 + MyGO 内部 大概 在这里**、半私密发布",
+          "note": "和素世 / 灯 / 立希 / 乐奈 大概 都在这个 list"
+        },
+        "IG Live": {
+          "feature": "Instagram Live",
+          "ja": "インスタライブ",
+          "metric": "直播、可与好友双人 / 多人 live",
+          "vibe": "演出后即兴 live、粉丝实时聊天",
+          "note": "MyGO 官方账号 大概 有用过这个"
+        }
+      }
+    },
+    "X": {
+      "ja": "X / Twitter / ツイッター",
+      "blurb": "MyGO 官方账号 大概 主战场——文字 + 图、最快到达粉丝",
+      "anon_canon": "爱音本能 **MyGO SNS 担当**、X 是 MyGO 官方账号 大概 主平台；sumimi 粉丝 follow + 让初华关注 MyGO 账号 底色",
+      "subspecies": {
+        "X timeline": {
+          "feature": "X (Twitter) timeline / RT / quote",
+          "ja": "タイムライン",
+          "metric": "280 字限制、RT / 引用 / reply、follower 数 = 影响力",
+          "vibe": "**MyGO 官方账号 大概 主推平台**、演出预告 / setlist / 感想 大概 在这里发",
+          "note": "爱音运营的官方 大概 是这个；CRYCHIC 弃置账号上 素世 配文「再见了」也是这家"
+        },
+        "X Spaces": {
+          "feature": "X Spaces",
+          "ja": "スペース",
+          "metric": "语音直播、邀请讲者上麦、回放 30 天",
+          "vibe": "乐队 / 粉丝问答 大概 偶尔开、和 IG Live / Discord Stage 类似",
+          "note": "未必 底色、但作为 SNS 担当 爱音 大概 知道"
+        },
+        "X Premium": {
+          "feature": "X Premium / blue check",
+          "ja": "X Premium / ブルーバッジ",
+          "metric": "蓝标 / 长文 / RT priority、月费 ¥980 程度（日本）",
+          "vibe": "**verified 标记** = 防冒充、官方账号 must、爱音作为运营 大概 关心",
+          "note": "MyGO 官方账号是否蓝标 = SNS 担当议题"
+        },
+        "X List": {
+          "feature": "X List（リスト）",
+          "ja": "リスト",
+          "metric": "私有 / 公开 list、不 follow 也能看 timeline",
+          "vibe": "私人监控其他乐队 / 同行 大概 用法、爱音 SNS 担当 大概 用这个",
+          "note": "和 IG close friends 某种意义上对应"
+        },
+        "MyGO 官方账号": {
+          "feature": "MyGO!!!!! 公式 X 账号",
+          "ja": "MyGO!!!!! 公式アカウント",
+          "metric": "**爱音运营担当**（原作设定 底色 L57）",
+          "vibe": "**底色 hint**：sumimi 粉丝爱音让初华 follow 这个账号（L888）、CRYCHIC 弃置账号上 素世 配文「再见了」（L1110）",
+          "note": "运营节奏 / 文案 / 图片 都是爱音；和素世曾经在 CRYCHIC 做的事对应"
+        }
+      }
+    },
+    "TikTok": {
+      "ja": "TikTok / ティックトック",
+      "blurb": "短视频算法平台、女高中生 must、FYP 算法推送是流量魔术",
+      "anon_canon": "爱音本能 「赶时髦的潮物」大概 刷 TikTok 跟趋势、自己发 大概 偶尔",
+      "subspecies": {
+        "FYP（For You Page）": {
+          "feature": "For You Page",
+          "ja": "おすすめ",
+          "metric": "算法推送主页、watch time 决定推流",
+          "vibe": "**爱音刷 SNS 主时段 大概 在这里**、广告 / 美妆 / 趋势舞蹈混着推",
+          "note": "「For You」是 TikTok 标志、和 IG reels 算法相似"
+        },
+        "Duet / Stitch": {
+          "feature": "Duet / Stitch（合拍 / 拼接）",
+          "ja": "デュエット / スティッチ",
+          "metric": "二创、和原视频并排 / 接龙",
+          "vibe": "演出花絮 / 美妆 try-on / 趋势挑战 二创工具",
+          "note": "MyGO 演出片段 大概 被粉丝 duet"
+        },
+        "TikTok Sound": {
+          "feature": "TikTok Sound",
+          "ja": "サウンド",
+          "metric": "原声 / 二创音频、爆火 sound 推爆视频流量",
+          "vibe": "**MyGO 曲被用作 sound 是流量 hint**、爱音作为 SNS 担当 大概 关注哪首被截取",
+          "note": "Music Discovery 入口"
+        },
+        "TikTok Live": {
+          "feature": "TikTok Live",
+          "ja": "ライブ",
+          "metric": "直播、礼物 = 收益、需要 1000+ followers",
+          "vibe": "演出后开 live 答粉丝、爱音作为 SNS 担当 大概 知道门槛",
+          "note": "和 IG Live / YT Live 三足"
+        },
+        "TikTok Shop": {
+          "feature": "TikTok Shop（小黄车）",
+          "ja": "TikTok Shop",
+          "metric": "直播带货、佣金分成",
+          "vibe": "美妆 / 时尚 KOL 主流、爱音 大概 作为消费者刷过",
+          "note": "Nyamuchi（喵梦）大概 用过"
+        }
+      }
+    },
+    "YouTube": {
+      "ja": "YouTube / ユーチューブ",
+      "blurb": "长视频 / vlog / live 主战场、Nyamuchi Channel 在这里",
+      "anon_canon": "爱音本能 **关注 Nyamuchi Channel（喵梦）**、刷美妆视频 / 合作广告（原作设定 L4819-4821）",
+      "subspecies": {
+        "YouTube Channel": {
+          "feature": "YouTube Channel（订阅）",
+          "ja": "チャンネル登録",
+          "metric": "订阅 / 通知 / 会员、subscriber 数 = 影响力",
+          "vibe": "**Nyamuchi Channel（喵梦）大概 在这里 + 爱音订阅**、SSS 机制粉丝认知度",
+          "note": "MyGO 官方 YT 也 大概 有"
+        },
+        "YouTube Shorts": {
+          "feature": "YouTube Shorts",
+          "ja": "ショート",
+          "metric": "60s 短视频、和 TikTok / IG Reels 三足",
+          "vibe": "MV teaser / behind-the-scenes 适合的形式",
+          "note": "2021 上线对抗 TikTok"
+        },
+        "YouTube Music": {
+          "feature": "YouTube Music",
+          "ja": "ユーチューブ ミュージック",
+          "metric": "Premium ¥1,180 程度 / 月、含 YT 全无广告 + 后台",
+          "vibe": "MyGO 音乐 official upload 大概 在这里",
+          "note": "和 Spotify / Apple Music 三足"
+        },
+        "YouTube Live": {
+          "feature": "YouTube Live",
+          "ja": "ライブ",
+          "metric": "直播、Super Chat 红色高亮投币",
+          "vibe": "live 直播 / 演出彩排 偶尔形式、Vtuber 主战场",
+          "note": "Hololive / Nijisanji 主用这个"
+        },
+        "YouTube Premium": {
+          "feature": "YouTube Premium",
+          "ja": "プレミアム",
+          "metric": "¥1,180 程度 / 月、无广告 + 后台播放 + 离线",
+          "vibe": "爱音 大概 订阅、刷喵梦视频不被广告打断",
+          "note": "学生折扣 ¥780 程度"
+        }
+      }
+    },
+    "LINE": {
+      "ja": "LINE / ライン",
+      "blurb": "**日本即时通讯 must**、MyGO 内部聊天 大概 在这里",
+      "anon_canon": "爱音本能 用 LINE 和 MyGO 4 人聊天（推断）、LINE Stamp 收集 大概 多",
+      "subspecies": {
+        "LINE Chat": {
+          "feature": "LINE 1-on-1 / Group Chat",
+          "ja": "トーク / グループ",
+          "metric": "免费 / 加密、可发 photo / video / sticker / voice",
+          "vibe": "**MyGO 5 人内部 大概 一个群聊**、爱音的日常 ping rikki / soyorin / 灯灯 / 小乐奈 大概 在这里",
+          "note": "日本 LINE 渗透率 90%+"
+        },
+        "LINE Stamp": {
+          "feature": "LINE Stamp（スタンプ）",
+          "ja": "スタンプ",
+          "metric": "贴图、官方 / 创作者上架、每套 ¥120-240",
+          "vibe": "**爱音 大概 多套**、用 stamp 代替文字是日本社交 本能",
+          "note": "Nyamuchi / sumimi / Bandori 联名 stamp 大概 都买过"
+        },
+        "LINE Open Chat": {
+          "feature": "LINE Open Chat（オープンチャット）",
+          "ja": "オープンチャット",
+          "metric": "公开匿名群、最大 5000 人、粉丝群 must",
+          "vibe": "MyGO 粉丝群 / Bandori 粉丝群 大概 存在、爱音 SNS 担当 大概 监控",
+          "note": "和 Discord 服务器某种意义类似"
+        },
+        "LINE VOOM": {
+          "feature": "LINE VOOM（旧 Timeline）",
+          "ja": "ボム",
+          "metric": "朋友圈类、日本年轻人用率下降中",
+          "vibe": "曾经是爱音 大概 发动态的地方、近年向 IG 迁移",
+          "note": "LINE 内嵌 timeline、IG / X 替代后用率下降"
+        },
+        "LINE Music": {
+          "feature": "LINE Music",
+          "ja": "ライン ミュージック",
+          "metric": "¥980 程度 / 月、可设 LINE 资料背景音乐",
+          "vibe": "「BGM 设置」是日本 LINE 用户特色、爱音 大概 设个 MyGO 自家曲 hint",
+          "note": "和 Spotify 在日本市场竞争"
+        }
+      }
+    },
+    "Niconico": {
+      "ja": "ニコニコ / niconico",
+      "blurb": "**日本本土弹幕视频**、同人创作 / vocaloid / MAD 的圣地",
+      "anon_canon": "爱音作为 SNS 担当 大概 知道、MyGO 同人 MAD 大概 监控、自己用率 unlikely 高",
+      "subspecies": {
+        "niconico 動画": {
+          "feature": "ニコニコ動画",
+          "ja": "ニコニコ動画",
+          "metric": "弹幕视频、日本 OG（2006-）、コメント弾幕文化発祥地",
+          "vibe": "MyGO 同人 MAD / 演出剪辑 大概 在这里、爱音作为 SNS 担当 大概 监控",
+          "note": "和 YouTube 共存、日本同人圈仍然首选"
+        },
+        "niconico 生放送": {
+          "feature": "ニコニコ生放送",
+          "ja": "ニコニコ生放送",
+          "metric": "直播、付费会员可看时移、premium ¥550 程度 / 月",
+          "vibe": "同人活动 / Vtuber 二线 大概 在这里",
+          "note": "和 YouTube Live 二选一"
+        },
+        "vocaloid 投稿": {
+          "feature": "ボカロ投稿（vocaloid）",
+          "ja": "ボカロ",
+          "metric": "miku / ZUNDAMON 同人音乐圈、niconico OG",
+          "vibe": "MyGO 二创 vocaloid 翻唱 / cover 大概 在这里、爱音作为 SNS 担当 大概 听过",
+          "note": "「ボカロP」是日本独立音乐圈大师代名词"
+        },
+        "niconico 静画": {
+          "feature": "ニコニコ静画",
+          "ja": "ニコニコ静画",
+          "metric": "图片同人 / 漫画 / illustration",
+          "vibe": "MyGO 同人 illustration 大概 在这里、爱音作为 SNS 担当 大概 监控",
+          "note": "和 pixiv 共存"
+        }
+      }
+    },
+    "Discord": {
+      "ja": "Discord / ディスコード",
+      "blurb": "**乐队私群 / 粉丝群 / Vtuber 圈** must、voice channel 是 zoom 替代",
+      "anon_canon": "爱音本能 推断：MyGO 内部 大概 有 Discord 服务器（除了 LINE 群）、粉丝向公开 server 大概 也开了 / 监控",
+      "subspecies": {
+        "Discord 服务器": {
+          "feature": "Discord Server / Guild",
+          "ja": "サーバー",
+          "metric": "免费、可加最多 100 server、role / channel 自定义",
+          "vibe": "**MyGO 内部 大概 一个私服 + 粉丝向公开服务器**、爱音作为 SNS 担当 大概 管粉丝服",
+          "note": "和 LINE Open Chat 不同：Discord 强组织 / 弱实时"
+        },
+        "Discord Voice": {
+          "feature": "Discord Voice Channel",
+          "ja": "ボイスチャンネル",
+          "metric": "免费语音房、screen share、最多 99 人",
+          "vibe": "**乐队远程练歌词 / 排练讨论 大概 用这个**、灯写词时 大概 这里读",
+          "note": "比 LINE 通话稳、比 Zoom 自由"
+        },
+        "Discord Stage": {
+          "feature": "Discord Stage Channel",
+          "ja": "ステージ",
+          "metric": "类似 X Spaces、speakers vs audience 分层",
+          "vibe": "粉丝问答 / fan event 大概 形式",
+          "note": "未必 底色、SNS 担当 知道"
+        },
+        "Discord Bot": {
+          "feature": "Discord Bot（MEE6 / Carl-bot 等）",
+          "ja": "ボット",
+          "metric": "auto role / welcome / poll / music 等",
+          "vibe": "粉丝服务器 大概 配置 verify role + welcome bot、爱音作为 SNS 担当 大概 配置过",
+          "note": "技术活、不是所有 SNS 担当都会"
+        },
+        "Discord Nitro": {
+          "feature": "Discord Nitro（会员）",
+          "ja": "Nitro",
+          "metric": "¥1,250 程度 / 月、跨服务器 emoji / 高清流 / boost",
+          "vibe": "重度用户标志、MyGO 服务器 大概 被粉丝 boost 升级",
+          "note": "Boost = 粉丝表达爱"
+        }
+      }
+    },
+    "音乐流媒体": {
+      "ja": "音楽ストリーミング",
+      "blurb": "Spotify / Apple Music / YouTube Music 三足、Bandcamp 是 indie 直销",
+      "anon_canon": "爱音本能 **MyGO 音乐分发 大概 由 SNS 担当协调**、Spotify for Artists / Bandcamp 后台 大概 经手",
+      "subspecies": {
+        "Spotify": {
+          "feature": "Spotify",
+          "ja": "Spotify",
+          "metric": "全球流媒体顶级、¥980 程度 / 月、Discover Weekly 算法",
+          "vibe": "**MyGO 自家曲 大概 在这里**、爱音 大概 主力听歌平台、Spotify Wrapped 年终回顾每年发 SNS",
+          "note": "Spotify for Artists 后台 = 数据看板"
+        },
+        "Apple Music": {
+          "feature": "Apple Music",
+          "ja": "アップル ミュージック",
+          "metric": "¥1,080 程度 / 月、iPhone 默认、空间音频独占",
+          "vibe": "iOS 用户主力、爱音 iPhone 大概 默认装、和 Spotify 双开 大概",
+          "note": "歌词同步比 Spotify 强"
+        },
+        "YouTube Music": {
+          "feature": "YouTube Music",
+          "ja": "ユーチューブ ミュージック",
+          "metric": "¥1,180 程度 / 月、含 YT Premium、家庭计划划算",
+          "vibe": "MV 顺道听音乐 hybrid、年轻人 大概 入门",
+          "note": "和 Spotify / Apple Music 三足"
+        },
+        "LINE Music": {
+          "feature": "LINE Music",
+          "ja": "ライン ミュージック",
+          "metric": "¥980 程度 / 月、LINE BGM 设置独占",
+          "vibe": "日本 LINE 用户专属、爱音 大概 设个 MyGO 自家曲 BGM",
+          "note": "和 Spotify 日本市场竞争"
+        },
+        "Bandcamp": {
+          "feature": "Bandcamp",
+          "ja": "バンドキャンプ",
+          "metric": "Indie 直销平台、艺人收益高（85% to artist）",
+          "vibe": "**MyGO 作为 indie 乐队 大概 在 Bandcamp 卖数字 / 实体**、爱音 SNS 担当 大概 经手",
+          "note": "Bandcamp Friday = 平台让出抽成、艺人 100%"
+        }
+      }
+    },
+    "拍照修图App": {
+      "ja": "カメラ / 写真加工 アプリ",
+      "blurb": "VSCO 滤镜复古 / Lightroom 专业 / SNOW 美颜 / Lemon8 字节 = 4 大流派",
+      "anon_canon": "爱音本能 **SNS 自拍频率高**、修图 App 抽屉 大概 4-5 个、LR mobile 调色 + VSCO 出 IG 顶配",
+      "subspecies": {
+        "VSCO": {
+          "feature": "VSCO",
+          "ja": "VSCO",
+          "metric": "滤镜 App 老牌、A6 / C1 / M5 是经典款、年费 ¥3,200 程度",
+          "vibe": "**复古胶片感**、IG 系 OOTD / 食物 / 街拍 must、爱音 大概 主力",
+          "note": "「VSCO 女孩」是 2019 trend、现在仍然 mass"
+        },
+        "Lightroom Mobile": {
+          "feature": "Lightroom Mobile",
+          "ja": "Lightroom Mobile",
+          "metric": "Adobe 专业、preset 同步桌面、单 app ¥1,180 程度 / 月",
+          "vibe": "**精修必备**、爱音演出照 / OOTD 大图 大概 这家调",
+          "note": "和 VSCO 互补：VSCO 一键、LR 精调"
+        },
+        "SNOW": {
+          "feature": "SNOW",
+          "ja": "スノー",
+          "metric": "韩系美颜自拍、AR 滤镜超多、free",
+          "vibe": "和 B612 / Snapchat 同档、爱音玩 reels 二创 大概 用过",
+          "note": "韩国 NAVER 出品、亚洲市场顶级"
+        },
+        "B612": {
+          "feature": "B612",
+          "ja": "B612",
+          "metric": "和 SNOW 同公司、美颜 / AR / 滤镜、free",
+          "vibe": "「轻量自拍 must」、女高中生第一个修图 App 大概 这个",
+          "note": "名字来自《小王子》B612 星球"
+        },
+        "Foodie": {
+          "feature": "Foodie",
+          "ja": "Foodie",
+          "metric": "食物专用滤镜 LINE 出品、free",
+          "vibe": "下午茶 / 拉面 / 甜品店 拍美食 must、爱音和素世逛街 大概 用",
+          "note": "「美食 IG 必修课」"
+        },
+        "Lemon8": {
+          "feature": "Lemon8（字节系）",
+          "ja": "Lemon8",
+          "metric": "ByteDance 出品、日本主推 IG 替代、2023 上线、图文笔记 + 算法推送",
+          "vibe": "美妆 / 时尚 / 食物笔记内容主力、女高中生圈逐渐渗透",
+          "note": "TikTok 同公司、日本 SNS 担当 大概 在意"
+        }
+      }
+    }
+  },
+  "CATEGORY_VARIANTS": {
+    "Instagram": [
+      "instagram",
+      "ig",
+      "insta",
+      "インスタ",
+      "インスタグラム",
+      "ins",
+      "アイジー"
+    ],
+    "X": [
+      "twitter",
+      "x.com",
+      "ツイッター",
+      " x ",
+      "tweet",
+      "ツイート",
+      "推特"
+    ],
+    "TikTok": [
+      "tiktok",
+      "tik tok",
+      "ティックトック",
+      "tt"
+    ],
+    "YouTube": [
+      "youtube",
+      "yt",
+      "ユーチューブ",
+      "youtube channel"
+    ],
+    "LINE": [
+      "line",
+      "ライン",
+      "line app"
+    ],
+    "Niconico": [
+      "niconico",
+      "nico nico",
+      "ニコニコ",
+      "弹幕视频",
+      "ニコ動",
+      "ニコ生"
+    ],
+    "Discord": [
+      "discord",
+      "ディスコード",
+      "ディスコ"
+    ],
+    "音乐流媒体": [
+      "音乐流媒体",
+      "ストリーミング",
+      "spotify",
+      "スポティファイ",
+      "apple music",
+      "アップル ミュージック",
+      "youtube music",
+      "line music",
+      "bandcamp",
+      "バンドキャンプ",
+      "音乐订阅",
+      "music streaming"
+    ],
+    "拍照修图App": [
+      "修图",
+      "滤镜",
+      "vsco",
+      "lightroom",
+      "snow",
+      "b612",
+      "foodie",
+      "lemon8",
+      "美颜app",
+      "拍照app",
+      "カメラアプリ",
+      "写真加工"
+    ]
+  },
+  "SUBSPECIES_VARIANTS": {
+    "IG Stories": [
+      "ig stories",
+      "ig story",
+      "instagram stories",
+      "インスタ ストーリー",
+      "ストーリーズ",
+      "stories",
+      "ストーリー"
+    ],
+    "IG Reels": [
+      "ig reels",
+      "instagram reels",
+      "リール",
+      "reels"
+    ],
+    "IG Posts": [
+      "ig posts",
+      "ig feed",
+      "feed 投稿",
+      "九宫格",
+      "フィード"
+    ],
+    "Close Friends": [
+      "close friends",
+      "親しい友達",
+      "親友 list",
+      "绿色圆圈",
+      "亲密好友"
+    ],
+    "IG Live": [
+      "ig live",
+      "instagram live",
+      "インスタライブ",
+      "ig 直播"
+    ],
+    "X timeline": [
+      "timeline",
+      "タイムライン",
+      "tl",
+      "推文",
+      "ツイート rt"
+    ],
+    "X Spaces": [
+      "x spaces",
+      "twitter spaces",
+      "スペース",
+      "spaces"
+    ],
+    "X Premium": [
+      "x premium",
+      "twitter blue",
+      "ブルーバッジ",
+      "蓝标",
+      "blue check",
+      "verified"
+    ],
+    "X List": [
+      "x list",
+      "twitter list",
+      "リスト"
+    ],
+    "MyGO 官方账号": [
+      "mygo 官方账号",
+      "mygo account",
+      "mygo アカウント",
+      "mygo 公式",
+      "mygo 官账",
+      "你管 mygo"
+    ],
+    "FYP（For You Page）": [
+      "fyp",
+      "for you page",
+      "for you",
+      "おすすめ",
+      "tiktok 主页"
+    ],
+    "Duet / Stitch": [
+      "duet",
+      "stitch",
+      "デュエット",
+      "スティッチ",
+      "合拍",
+      "拼接"
+    ],
+    "TikTok Sound": [
+      "tiktok sound",
+      "tiktok bgm",
+      "tt sound",
+      "サウンド",
+      "tiktok 音乐"
+    ],
+    "TikTok Live": [
+      "tiktok live",
+      "tt live",
+      "ティックトック ライブ"
+    ],
+    "TikTok Shop": [
+      "tiktok shop",
+      "tt shop",
+      "小黄车"
+    ],
+    "YouTube Channel": [
+      "youtube channel",
+      "yt channel",
+      "チャンネル登録",
+      "订阅频道"
+    ],
+    "YouTube Shorts": [
+      "youtube shorts",
+      "yt shorts",
+      "ショート",
+      "yt 短视频"
+    ],
+    "YouTube Music": [
+      "youtube music",
+      "yt music",
+      "ユーチューブ ミュージック"
+    ],
+    "YouTube Live": [
+      "youtube live",
+      "yt live",
+      "ユーチューブ ライブ",
+      "super chat",
+      "スパチャ"
+    ],
+    "YouTube Premium": [
+      "youtube premium",
+      "yt premium",
+      "プレミアム"
+    ],
+    "LINE Chat": [
+      "line chat",
+      "line トーク",
+      "line 群",
+      "line グループ",
+      "ライン トーク"
+    ],
+    "LINE Stamp": [
+      "line stamp",
+      "line スタンプ",
+      "ライン スタンプ"
+    ],
+    "LINE Open Chat": [
+      "line open chat",
+      "line オープンチャット",
+      "openchat"
+    ],
+    "LINE VOOM": [
+      "line voom",
+      "ボム",
+      "ライン voom"
+    ],
+    "LINE Music": [
+      "line music",
+      "ライン ミュージック"
+    ],
+    "niconico 動画": [
+      "niconico douga",
+      "ニコニコ動画",
+      "nico 动画",
+      "弹幕视频"
+    ],
+    "niconico 生放送": [
+      "niconico namahousou",
+      "ニコニコ生放送",
+      "ニコ生",
+      "nico 生"
+    ],
+    "vocaloid 投稿": [
+      "vocaloid",
+      "ボカロ",
+      "ボカロp",
+      "ボカロ 投稿",
+      "ボーカロイド",
+      "miku 同人"
+    ],
+    "niconico 静画": [
+      "niconico seiga",
+      "ニコニコ静画",
+      "nico 静画"
+    ],
+    "Discord 服务器": [
+      "discord server",
+      "discord ギルド",
+      "サーバー",
+      "ディスコ サーバー"
+    ],
+    "Discord Voice": [
+      "discord voice",
+      "voice channel",
+      "ボイスチャンネル",
+      "ボイチャ"
+    ],
+    "Discord Stage": [
+      "discord stage",
+      "stage channel",
+      "ステージ チャンネル"
+    ],
+    "Discord Bot": [
+      "discord bot",
+      "ディスコ bot",
+      "mee6",
+      "carl-bot",
+      "carl bot"
+    ],
+    "Discord Nitro": [
+      "discord nitro",
+      "nitro",
+      "ニトロ",
+      "ディスコ nitro"
+    ],
+    "Spotify": [
+      "spotify",
+      "スポティファイ",
+      "spotify wrapped",
+      "spotify for artists"
+    ],
+    "Apple Music": [
+      "apple music",
+      "アップル ミュージック",
+      "アップルミュージック"
+    ],
+    "Bandcamp": [
+      "bandcamp",
+      "バンドキャンプ",
+      "bandcamp friday"
+    ],
+    "VSCO": [
+      "vsco",
+      "vsco a6",
+      "vsco c1",
+      "vsco m5",
+      "vsco 滤镜"
+    ],
+    "Lightroom Mobile": [
+      "lightroom",
+      "lightroom mobile",
+      "lr mobile",
+      "lr モバイル",
+      "ライトルーム"
+    ],
+    "SNOW": [
+      "snow",
+      "snow app",
+      "スノー アプリ"
+    ],
+    "B612": [
+      "b612",
+      "b612 app"
+    ],
+    "Foodie": [
+      "foodie",
+      "foodie app",
+      "フーディー"
+    ],
+    "Lemon8": [
+      "lemon8",
+      "lemon 8",
+      "レモンエイト"
+    ]
+  },
+  "VAGUE_KEYWORDS": [
+    "sns",
+    "SNS",
+    "社交媒体",
+    "社交平台",
+    "社交网络",
+    "社媒",
+    "网络平台",
+    "刷视频",
+    "刷帖子",
+    "刷 sns",
+    "刷 ig",
+    "刷动态",
+    "网红",
+    "kol",
+    "influencer",
+    "インフルエンサー",
+    "follower",
+    "粉丝",
+    "fans",
+    "フォロワー",
+    "关注者",
+    "评论区",
+    "コメント欄",
+    "comment",
+    "弹幕",
+    "コメント",
+    "发动态",
+    "发帖",
+    "投稿",
+    "post",
+    "ツイート",
+    "网络媒体",
+    "self media",
+    "media",
+    "frontend feed",
+    "feed 流",
+    "推流",
+    "算法推送",
+    "趋势",
+    "trend",
+    "トレンド",
+    "话题"
+  ],
+  "MYGO_NAME_KEYWORDS": [
+    "MyGO",
+    "mygo",
+    "MYGO",
+    "マイゴ",
+    "我们 mygo",
+    "我们的乐队",
+    "我们的官方",
+    "我们的 sns",
+    "我们的账号",
+    "我们 ig",
+    "我们 twitter",
+    "我们 x"
+  ],
+  "MYGO_SNS_VOCAB_KEYWORDS": [
+    "账号",
+    "アカウント",
+    "运营",
+    "管理",
+    "运营 sns",
+    "运营账号",
+    "更新账号",
+    "sns 担当",
+    "sns 运营",
+    "管 sns",
+    "你管",
+    "管理 sns",
+    "公式アカウント",
+    "公式 sns",
+    "官方账号",
+    "官 sns",
+    "官 ig",
+    "官 twitter",
+    "follower 数",
+    "粉丝数",
+    "互动数",
+    "数据看板"
+  ]
+}

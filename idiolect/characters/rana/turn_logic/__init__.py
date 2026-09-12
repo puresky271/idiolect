@@ -1,4 +1,4 @@
-"""乐奈本轮特殊逻辑入口（仿 tomori / taki / anon turn_logic）。
+"""乐奈本轮特殊逻辑入口。
 
 设计意图（与既有角色区分开）：
   · tomori 的 turn_logic 是**知识扩展**（昆虫 / 天文 / 海洋生物）
@@ -22,6 +22,9 @@
 深模块排在场景层前面；`cat_talk` 命中时压制场景层的 `rana_cat`（同一话题不写两块）。
 没有深模块命中时，本函数的输出与只有场景层时**逐字节相同**。
 
+装配样板（深模块执行 / 重叠压制 / 通用场景层 / fence 包装 / env 开关语义）
+统一下沉在 `idiolect.scene_engine`，本文件只声明数据与顺序。
+
 注：本模块产物供 `rana.api.render_supplemental_blocks` 调用、最终注入 system prompt。
 """
 from __future__ import annotations
@@ -30,7 +33,15 @@ import os
 from typing import Callable
 
 from idiolect.registry import canonicalize_name
-from idiolect.scene_engine import NO_LITERAL_COPY, SceneModule, build_scene_blocks
+from idiolect.scene_engine import (
+    SceneModule,
+    append_general_scene_blocks,
+    build_scene_blocks,
+    env_enabled,
+    run_modules,
+    uncovered_scenes,
+    wrap_blocks,
+)
 
 from .cat_talk import build_cat_talk_special_block
 from .interesting import build_interesting_special_block
@@ -56,50 +67,7 @@ _DEEP_SCENE_OVERLAP: dict[str, tuple[str, ...]] = {
 
 
 def _enabled() -> bool:
-    raw = os.environ.get("RANA_TURN_LOGIC_ENABLED")
-    if raw is None:
-        return True
-    return str(raw).strip() not in ("0", "false", "False", "off", "no", "")
-
-
-def _build_deep_blocks(
-    user_text: str, *, session_id: str | None, is_developer: bool
-) -> tuple[list[str], list[str]]:
-    """深模块层。返回 (blocks, 命中的模块 key)；单个模块异常不影响其它层。"""
-    out: list[str] = []
-    fired: list[str] = []
-    for key, builder in _DEEP_MODULES:
-        if len(out) >= _DEEP_MAX_BLOCKS:
-            break
-        try:
-            blk = builder(user_text, session_id=session_id, is_developer=is_developer)
-        except Exception as _err:  # pragma: no cover - 防御性
-            print(f"[RanaTurnLogic/{key}] error: {_err}", flush=True)
-            continue
-        if blk:
-            # 统一追加反照抄脚注：深模块的正例是语义锚、不是台词库。
-            # 依据见 `idiolect.scene_engine.NO_LITERAL_COPY` 的注释（真实探针证据）。
-            out.append(f"{blk.rstrip()}\n{NO_LITERAL_COPY}")
-            fired.append(key)
-    return out, fired
-
-
-def _scenes_for(fired: list[str]) -> list[SceneModule]:
-    covered = {s for k in fired for s in _DEEP_SCENE_OVERLAP.get(k, ())}
-    if not covered:
-        return RANA_SCENES
-    return [m for m in RANA_SCENES if m.key not in covered]
-
-
-_BLOCK_BORDER = "═" * 72
-
-
-def _wrap_blocks(blocks: list[str]) -> str:
-    """与 taki 一致的双线包装：让 LLM 把每个 block 当独立 fence。"""
-    if not blocks:
-        return ""
-    wrapped = [f"{_BLOCK_BORDER}\n{b.rstrip()}\n{_BLOCK_BORDER}" for b in blocks if b]
-    return "\n\n".join(wrapped)
+    return env_enabled(os.environ.get("RANA_TURN_LOGIC_ENABLED"))
 
 
 def build_rana_special_block(
@@ -114,7 +82,7 @@ def build_rana_special_block(
 
     Args:
         user_text:    当前 turn 的 user message
-        character:    角色名（兼容多种写法）
+        character:    角色名（经 registry 归一化的任意别名）
         session_id:   ws session id；用作 per-session 去重 key
         is_developer: True = 本轮对象是开发者（smoke / debug），不触发场景/深模块
         **kwargs:     兼容 caller 传入的 now_jst / ledger / mode / scene_context（本模块不用）
@@ -131,21 +99,22 @@ def build_rana_special_block(
     # 主动开口（auto_greet / idle）：user_text 为空，没有可匹配的场景
     if not user_text:
         return ""
-    deep_blocks, fired = _build_deep_blocks(
-        user_text, session_id=session_id, is_developer=is_developer)
+    deep_blocks, fired = run_modules(
+        _DEEP_MODULES, user_text,
+        label="RanaTurnLogic",
+        shared_kwargs={"session_id": session_id, "is_developer": is_developer},
+        max_blocks=_DEEP_MAX_BLOCKS,
+        literal_copy_note=True)
     blocks = list(deep_blocks)
     blocks.extend(build_scene_blocks(
-        user_text, _scenes_for(fired), session_id=session_id, max_blocks=1))
+        user_text, uncovered_scenes(RANA_SCENES, fired, _DEEP_SCENE_OVERLAP),
+        session_id=session_id, max_blocks=1))
     # 通用场景层（13 个五角色共有的场景）：2026-09-12 新增 `affection`——
     # 被示好不会改变她的说话方式（8 字上下、不给情感回应）。
-    try:
-        from idiolect.general_scenes import build_general_scene_blocks
-        blocks.extend(build_general_scene_blocks(
-            "乐奈", user_text, session_id=session_id, max_blocks=1,
-            is_developer=is_developer))
-    except Exception as _err:
-        print(f"[RanaTurnLogic/general_scenes] error: {_err}", flush=True)
-    return _wrap_blocks(blocks)
+    append_general_scene_blocks(
+        blocks, "乐奈", user_text, label="RanaTurnLogic",
+        session_id=session_id, is_developer=is_developer, max_blocks=1)
+    return wrap_blocks(blocks)
 
 
 build_turn_special_block = build_rana_special_block

@@ -32,6 +32,7 @@ from __future__ import annotations
 import os
 import re
 import threading
+from idiolect.scene_engine import SessionStore
 from typing import Optional
 
 
@@ -62,8 +63,9 @@ _PANDA_TEASE_RE = re.compile(
 # ═══════════════════════════════════════════════════════════════════════
 # session 级去重（main block 一次性）+ 1 轮情绪余波
 # ═══════════════════════════════════════════════════════════════════════
-_DEDUP_LOCK = threading.Lock()
-_SESSION_FIRED: dict[str, set[str]] = {}
+# 有上限的 per-session 去重表（共享脚手架）：裸 dict 只增不减，
+# 常驻进程里 session 不淘汰就是缓慢漏内存（2026-09-12 评审抓到）。
+_SESSION_FIRED = SessionStore()
 _RESIDUE_LOCK = threading.Lock()
 _RESIDUE_STATE: dict[str, dict] = {}
 
@@ -74,18 +76,12 @@ def _normalize_session(session_id: Optional[str]) -> str:
 
 def _mark_fired(session_id: Optional[str], key: str) -> bool:
     sid = _normalize_session(session_id)
-    with _DEDUP_LOCK:
-        bucket = _SESSION_FIRED.setdefault(sid, set())
-        if key in bucket:
-            return True
-        bucket.add(key)
-        return False
+    return _SESSION_FIRED.mark(sid, key)
 
 
 def _reset_session_fired(session_id: Optional[str]) -> None:
     sid = _normalize_session(session_id)
-    with _DEDUP_LOCK:
-        _SESSION_FIRED.pop(sid, None)
+    _SESSION_FIRED.reset(sid)
     with _RESIDUE_LOCK:
         _RESIDUE_STATE.pop(sid, None)
 

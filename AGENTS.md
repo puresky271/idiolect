@@ -28,7 +28,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 
 ## 技术栈与运行环境
 
-- 纯 Python 3.11+，有 `pyproject.toml`（`pip install .` 可装，`idiolect` 运行时零第三方依赖；CLI 入口 `python -m idiolect`），无 CI 配置。测试通过 `conftest.py` 把仓库根挂上 `sys.path`（直接 `import idiolect.*`）。
+- 纯 Python 3.11+，有 `pyproject.toml`（`pip install .` 可装，`idiolect` 运行时零第三方依赖；CLI 入口 `python -m idiolect`）。CI 是 GitHub Actions（`.github/workflows/ci.yml`：离线 smoke 矩阵 + wheel 包数据校验）。测试通过 `conftest.py` 把仓库根挂上 `sys.path`（直接 `import idiolect.*`）。
 - 依赖见 `requirements.txt`：`openai`、`numpy`、`jieba`、`requests`、`pytest`。重算语料派生统计才需要 `requirements-corpus.txt`（`sentence-transformers`、`scikit-learn`，模型权重首次运行时下载）。
 - **Windows 上统一用 `py -X utf8`** 跑脚本；裸 `python` 可能解析到没装依赖的解释器。所有命令在仓库根目录执行。
 
@@ -38,13 +38,14 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 idiolect/            # 运行时包：把特征写成 prompt 约束
   assemble.py        #   四层装配器（核心入口，build_messages / build_system_prompt）
   registry.py        #   角色名 → 角色包的唯一分发点（含别名归一化）
-  scene_classifier.py / scene_engine.py / general_scenes.py   # 场景分类与动态注入
+  scene_classifier.py / scene_engine.py / general_scenes.py   # 场景分类与动态注入；scene_engine 另托管 turn_logic 共享脚手架（SessionStore 去重表 / env 假值表 / 深模块执行器）
   style_target.py / scene_length_targets.py                   # 长度/句数目标块
   workspace.py       #   上下文工作区（12 层装配 + 事实选择器），四层之外的骨架
-  facts.py / tone.py
+  facts.py / tone.py / _text_rng.py   # 事实选择器 / 语气分类 / 文本定种 RNG（后处理随机步骤的确定性）
   characters/<key>/  #   五个角色包（anon/tomori/taki/soyo/rana）：
                      #     api.py（对外窄入口）、canon.py、voice.py、
-                     #     turn_logic/（场景模块）、voice_check/（出站清洗）
+                     #     turn_logic/（场景模块；其中的纯数据目录已迁 data/*.json，
+                     #       经 importlib.resources 读取）、voice_check/（出站清洗）
 tools/               # 工具链，按职责分子目录
   _paths.py          #   路径与环境变量的唯一实现，脚本不许自己拼路径
   offline_smoke.py   #   一条命令健康检查（不调 LLM，可进 CI）
@@ -62,6 +63,7 @@ report/              # 所有工具产物的默认输出目录
 tests/               # pytest 单测
 bootstrap.py         # 一条命令装成可跑状态（建 .venv → 装依赖 → 自检 → 打印一份 prompt）
 .claude/skills/      # 给 agent 的流水线 skill（见下）
+.github/workflows/   # CI（离线 smoke 矩阵 + wheel 包数据校验）
 ```
 
 **访问角色包只走 `idiolect/registry.py`**（`get_canon_profile` / `get_voice_manifest` / `render_turn_special_block`），不要按角色名堆 if/elif，也不要直接 `import idiolect.characters.<key>.*`。名字表（含日文写法、简繁差异、常见误写）也只有 `registry._ALIASES` 一份，角色包里的 `is_<char>()` 问它，别自带名单。
@@ -125,10 +127,13 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
 
 ## 测试策略
 
-- `tests/` 下是 pytest（`unittest` 风格类），分三类契约测试，每条断言对应真实踩过的坑：
+- `tests/` 下是 pytest（`unittest` 风格类），分六类契约测试，每条断言对应真实踩过的坑：
   - `test_tooling_contracts.py`：mock 时钟、装配完整性、`--assemble` 不被覆盖、元叙述门禁覆盖面；
   - `test_scene_turn_logic.py` / `test_soyo_rana_deep_turn_logic.py`：触发器命中正确且不过宽、per-session 去重、角色隔离与 env 回退开关、触发词有语料实证；
-  - `test_workspace.py`：上下文层序固定、pinned 层不被预算裁掉、执行包贴最后一条 user、事实选择器的阈值与双预算。
+  - `test_workspace.py`：上下文层序固定、pinned 层不被预算裁掉、执行包贴最后一条 user、事实选择器的阈值与双预算；
+  - `test_scene_engine_scaffold.py`：turn_logic 共享脚手架（SessionStore 的 mark/has/reset 与 LRU 淘汰、env 假值表、深模块执行器）；
+  - `test_voice_check_wiring.py`：tomori/taki/anon 后处理真的接线（不再是 stub）、清洗确定性（按输入定种）、`<CHAR>_VOICE_CHECK_ENABLED` 总开关与非本角色透传；
+  - `test_score_golden.py`：评分链 golden 文件（scene_distill / _pool_arms 全量输出、probe_report 编排契约；golden 由测试内的合成输入离线复现，失配先确认是预期改动再重新生成，不要手改）。
 - 新增约束时**先写契约测试再改实现**；触发词必须能拿出语料实证（`tools/distill/verify_triggers.py`）。
 - `tools/offline_smoke.py` 是总闸，会跑门禁与单测，适合当作提交前检查。
 

@@ -1,0 +1,1055 @@
+{
+  "FASHION_TAXONOMY": {
+    "连衣裙": {
+      "ja": "ワンピース / one-piece",
+      "blurb": "**爱音常服 底色 = 灰格纹连衣裙 + 白衬衫 + 心形项链**——所以这一类是她的主场",
+      "anon_canon": "爱音本能 常服 = 灰格纹连衣裙；SLY / LOWRYS FARM / WEGO 是日常主力",
+      "subspecies": {
+        "SLY 修身": {
+          "brand": "SLY（スライ）",
+          "code": "modal jersey 系列、A 字 / 直筒裁剪",
+          "ja": "スライ",
+          "price": "¥10,000-18,000",
+          "vibe": "日系修身、显腰线、爱音校外常服 大概 主力",
+          "note": "原宿 / 渋谷 109 旗舰店都有；和素世逛街路线 must"
+        },
+        "LOWRYS FARM 长版": {
+          "brand": "LOWRYS FARM（ロウリーズファーム）",
+          "code": "long one-piece / cami one-piece",
+          "ja": "ロウリーズファーム",
+          "price": "¥6,990-13,990",
+          "vibe": "校园系日常、宽松不挑身材、价格友好、女高中生回购王",
+          "note": "ルミネ / マルイ 标配"
+        },
+        "chuu 韩系娃娃": {
+          "brand": "chuu（チュー）韩系",
+          "code": "smock dress / 蕾丝领 cami",
+          "ja": "チュー",
+          "price": "¥5,000-9,000",
+          "vibe": "韩系娃娃裙、Y2K 复古感、SNS 拍照神器",
+          "note": "原宿 / 表参道 popup 限定 SNS 推爆"
+        },
+        "WEGO 印花": {
+          "brand": "WEGO（ウィゴー）",
+          "code": "Y2K print one-piece / vintage tee dress",
+          "ja": "ウィゴー",
+          "price": "¥3,990-7,990",
+          "vibe": "原宿系、印花复古、女高中生 entry-level",
+          "note": "原宿竹下通 / 渋谷店；爱音入门款 大概 这家"
+        },
+        "灰格纹连衣裙": {
+          "brand": "（爱音本能 常服 / 品牌 unspecified）",
+          "code": "灰色 gingham check / windowpane 格纹、A 字 / cinched waist",
+          "ja": "グレー チェック ワンピース",
+          "price": "¥8,000-15,000 范围",
+          "vibe": "**原作设定 底色 常服**——配白衬衫 + 心形项链",
+          "note": "可能是 ANON TOKYO 自家、也可能是 BEAMS / SLY；底色 没指明品牌、保留爱音定制感"
+        }
+      }
+    },
+    "上衣": {
+      "ja": "トップス / シャツ / Tシャツ",
+      "blurb": "白衬衫是真实的 必备——爱音灰格纹连衣裙下面就是这件",
+      "anon_canon": "爱音本能 常服内搭白衬衫；UNIQLO 主力 / X-girl Tee / Champion 卫衣是 streetwear 选项",
+      "subspecies": {
+        "UNIQLO U 白衬衫": {
+          "brand": "UNIQLO U（ユニクロ ユー）",
+          "code": "Cotton Open Collar Shirt / Premium Linen Shirt",
+          "ja": "ユニクロ ユー オープンカラーシャツ",
+          "price": "¥2,990-3,990",
+          "vibe": "**爱音本能 白衬衫底子 大概 这家**、Christophe Lemaire 设计、性价比顶配",
+          "note": "GU / UNIQLO 银座 must；爱音常服内搭 大概 这件"
+        },
+        "BEAMS BOY 男友风": {
+          "brand": "BEAMS BOY（ビームス ボーイ）",
+          "code": "Oxford BD Shirt / Western Shirt",
+          "ja": "ビームス ボーイ",
+          "price": "¥9,900-15,400",
+          "vibe": "BEAMS 女装支线、男友风 oversized 衬衫、原宿系经典",
+          "note": "原宿 / 表参道 BEAMS BOY 旗舰店"
+        },
+        "X-girl logo Tee": {
+          "brand": "X-girl（エックスガール）",
+          "code": "OG Logo Tee / Mills Logo Tee",
+          "ja": "エックスガール",
+          "price": "¥6,600-9,900",
+          "vibe": "原宿系 streetwear 必备、女高中生潮流 OG、camo / pink 印花经典",
+          "note": "原宿 LaForet / 渋谷; 爱音 SNS 拍照 must"
+        },
+        "Champion 卫衣": {
+          "brand": "Champion（チャンピオン）",
+          "code": "Reverse Weave Hoodie / Crewneck",
+          "ja": "チャンピオン",
+          "price": "¥7,700-12,100",
+          "vibe": "美式厚款卫衣、复古袖标、和 SLY / X-girl 都搭",
+          "note": "BEAMS / 古着店常驻"
+        },
+        "John Smedley 针织": {
+          "brand": "John Smedley（ジョン スメドレー）",
+          "code": "30 Gauge Sea Island Cotton / Merino Polo",
+          "ja": "ジョン スメドレー",
+          "price": "¥30,000-50,000",
+          "vibe": "英国 200 年针织老牌、Sea Island 棉细针、向往级",
+          "note": "妈妈台 / 演出后正装场合 大概 这级"
+        }
+      }
+    },
+    "外套": {
+      "ja": "アウター / ジャケット / コート",
+      "blurb": "牛仔外套 / 风衣 / G-jan 是日常、设计师风衣是向往",
+      "anon_canon": "爱音本能 常去原宿、外套以日系 streetwear 为主、Mackintosh 风衣是妈妈台",
+      "subspecies": {
+        "BEAMS 牛仔": {
+          "brand": "BEAMS（ビームス）",
+          "code": "G-jan / Type II 牛仔外套",
+          "ja": "ビームス",
+          "price": "¥17,600-29,700",
+          "vibe": "原宿 / 表参道 BEAMS 旗舰、日系 streetwear 入门级 outer",
+          "note": "BEAMS 是日系 select shop 顶级、爱音 大概 多次"
+        },
+        "Lululemon Scuba": {
+          "brand": "Lululemon（ルルレモン）",
+          "code": "Scuba Half-Zip / Full-Zip Hoodie",
+          "ja": "ルルレモン スキューバ",
+          "price": "¥18,700-22,000",
+          "vibe": "运动 / 街头都搭、Scuba 系列女高中生 SNS 爆款",
+          "note": "渋谷 / 原宿 / 銀座 旗舰店"
+        },
+        "Dickies / Carhartt": {
+          "brand": "Dickies / Carhartt（ディッキーズ / カーハート）",
+          "code": "Eisenhower Jacket / Detroit Jacket",
+          "ja": "ディッキーズ アイゼンハワー / カーハート デトロイト",
+          "price": "¥11,000-22,000",
+          "vibe": "工装系 outer、original heritage、和 X-girl / Stussy 同 vibe",
+          "note": "BEAMS PLUS / 古着店混搭"
+        },
+        "Mackintosh 风衣": {
+          "brand": "Mackintosh（マッキントッシュ）",
+          "code": "Dunoon / Dunkeld bonded cotton coat",
+          "ja": "マッキントッシュ",
+          "price": "¥125,000-180,000",
+          "vibe": "苏格兰雨衣老牌、橡胶贴合工艺、向往 / 妈妈台",
+          "note": "演出后正装 / 大学姐姐圈 大概 这级"
+        },
+        "THE NORTH FACE PURPLE": {
+          "brand": "THE NORTH FACE PURPLE LABEL（ザ ノース フェイス パープル レーベル）",
+          "code": "Mountain Wind Parka / 65/35 Field Jacket",
+          "ja": "ザ ノース フェイス パープル レーベル",
+          "price": "¥35,200-66,000",
+          "vibe": "nanamica 联名日本限定线、户外功能 + 都市剪裁",
+          "note": "原宿 nanamica / 渋谷 PARCO；爱音 streetwear 顶配"
+        }
+      }
+    },
+    "裤装": {
+      "ja": "パンツ / デニム",
+      "blurb": "牛仔是基本盘、A.P.C. petit standard 是日系女高中生标杆",
+      "anon_canon": "爱音本能 偶尔出现牛仔短裤 + Tee 简单 SNS 拍、不主打裤装",
+      "subspecies": {
+        "Levi's 501": {
+          "brand": "Levi's（リーバイス）",
+          "code": "501 Original Fit / 311 Shaping Skinny",
+          "ja": "リーバイス 501",
+          "price": "¥14,300-19,800",
+          "vibe": "牛仔顶级 OG、501 直筒不挑人、311 修身",
+          "note": "BEAMS / 古着店 / Levi's 旗舰；爱音 大概 备一条"
+        },
+        "A.P.C. petit standard": {
+          "brand": "A.P.C.（アー ペー セー）",
+          "code": "Petit Standard / Petit New Standard",
+          "ja": "アー ペー セー プチ スタンダード",
+          "price": "¥27,500-33,000",
+          "vibe": "法系日杂、爆款生牛仔、自养色变是 collector 点",
+          "note": "表参道 A.P.C. 旗舰；女高中生 大概 一条 + 偶尔晒色变"
+        },
+        "GU baggy": {
+          "brand": "GU（ジーユー）",
+          "code": "Baggy Jeans / Cargo Wide Pants",
+          "ja": "ジーユー バギー",
+          "price": "¥2,990-3,990",
+          "vibe": "UNIQLO 副线、Y2K baggy 复刻、女高中生平价入门",
+          "note": "GU 渋谷 / 原宿；爱音预算友好 must"
+        },
+        "Acne Studios": {
+          "brand": "Acne Studios（アクネ ストゥディオズ）",
+          "code": "1991 Toj / 2003 Loose Fit",
+          "ja": "アクネ ストゥディオズ",
+          "price": "¥38,500-55,000",
+          "vibe": "瑞典设计师、北欧极简 + streetwear 牛仔顶级、向往级",
+          "note": "南青山 Acne Studios；妈妈台 / 大学生姐姐"
+        },
+        "WC（Wonder Cargo）": {
+          "brand": "WC（ウェアクロゼット）",
+          "code": "Cargo Pants / Tactical Pants",
+          "ja": "ウェアクロゼット カーゴ",
+          "price": "¥6,990-9,990",
+          "vibe": "原宿系 cargo / 工装裤、SLY / SNIDEL 系联名、Y2K 街头",
+          "note": "ルミネエスト 新宿 / 渋谷 109"
+        }
+      }
+    },
+    "裙装": {
+      "ja": "スカート",
+      "blurb": "百褶裙 / 牛仔短裙是日常、伞裙 / 长裙是约会场合",
+      "anon_canon": "爱音本能 常服走连衣裙路线、单独裙装 大概 是和素世逛街时素世挑的",
+      "subspecies": {
+        "Levi's denim mini": {
+          "brand": "Levi's（リーバイス）",
+          "code": "Mini Skirt / Side Trim Mini",
+          "ja": "リーバイス ミニ スカート",
+          "price": "¥8,250-13,200",
+          "vibe": "Y2K 牛仔短裙复刻、配 X-girl Tee 经典 set",
+          "note": "Levi's 旗舰 / BEAMS"
+        },
+        "SLY 百褶": {
+          "brand": "SLY（スライ）",
+          "code": "Pleat Mini Skirt / Side Slit Pleated",
+          "ja": "スライ プリーツ",
+          "price": "¥9,000-14,000",
+          "vibe": "日系修身百褶、配 modal jersey top 整套",
+          "note": "渋谷 109 SLY 楼层"
+        },
+        "Stussy x SLY": {
+          "brand": "Stussy（ステューシー）/ collab capsule",
+          "code": "Stussy logo skirt / co-branded denim",
+          "ja": "ステューシー",
+          "price": "¥13,200-22,000",
+          "vibe": "美式 streetwear OG、限定联名爱音 SNS 必抢",
+          "note": "Stussy 原宿 / Dover Street Market 限定"
+        },
+        "Wonder Closet 伞裙": {
+          "brand": "Wonder Closet / WC（ウェアクロゼット）",
+          "code": "Volume Tiered Skirt / Mermaid Maxi",
+          "ja": "ウェアクロゼット スカート",
+          "price": "¥7,990-11,990",
+          "vibe": "蓬蓬伞裙、女高中生约会 / 拍照神器",
+          "note": "ルミネエスト / マルイ"
+        },
+        "原宿古着 vintage": {
+          "brand": "原宿古着 vintage（ハラジュク 古着）",
+          "code": "古着 denim mini / leather mini / vintage tartan",
+          "ja": "ハラジュク ヴィンテージ",
+          "price": "¥3,000-12,000 范围",
+          "vibe": "原宿 Flamingo / KINJI / Big Time 古着店淘货、独一无二",
+          "note": "和素世逛街 大概 战绩"
+        }
+      }
+    },
+    "鞋": {
+      "ja": "シューズ / スニーカー",
+      "blurb": "球鞋是日常、Dr. Martens 是真实的 街头风、乐福鞋是羽丘制服",
+      "anon_canon": "爱音本能 羽丘制服 = 棕色乐福鞋；课外球鞋以 New Balance / Nike Dunk / Adidas Samba 为主",
+      "subspecies": {
+        "New Balance 9060": {
+          "brand": "New Balance（ニューバランス）",
+          "code": "9060 Sea Salt / 990v6 Grey",
+          "ja": "ニューバランス 9060",
+          "price": "¥27,500-39,600",
+          "vibe": "**当下女高中生 SNS 爆款**、复古 chunky、9060 配 wide-leg 整套",
+          "note": "原宿 ABC-MART / atmos / NB 旗舰；爱音 大概 主力"
+        },
+        "Nike Dunk Low": {
+          "brand": "Nike（ナイキ）",
+          "code": "Dunk Low Panda / Dunk Low Free.99",
+          "ja": "ナイキ ダンク ロー",
+          "price": "¥13,200-15,400",
+          "vibe": "Panda（黑白）爆款、女高中生 SNS 一双、撞鞋率最高",
+          "note": "Nike 原宿 / atmos 限定"
+        },
+        "Adidas Samba": {
+          "brand": "Adidas（アディダス）",
+          "code": "Samba OG / Samba Vegan",
+          "ja": "アディダス サンバ",
+          "price": "¥14,300-16,500",
+          "vibe": "**最近最火 retro low-top**、Bella Hadid 带火、配长裙短裙都好看",
+          "note": "Adidas 原宿 / atmos pink"
+        },
+        "Dr. Martens 1461": {
+          "brand": "Dr. Martens（ドクターマーチン）",
+          "code": "1461 3-Eye Smooth / 1460 8-Eye Pascal",
+          "ja": "ドクターマーチン",
+          "price": "¥23,100-27,500",
+          "vibe": "英国朋克 OG、配格纹裙 / 长袜 = 原宿 grunge 经典",
+          "note": "原宿 LaForet / 表参道 Dr. Martens 旗舰"
+        },
+        "棕色乐福鞋": {
+          "brand": "（爱音本能 羽丘制服 / 品牌 unspecified）",
+          "code": "brown penny loafer / school loafer",
+          "ja": "ローファー",
+          "price": "¥6,000-12,000",
+          "vibe": "**原作设定 底色 羽丘制服必备**、Hush Puppies / HARUTA / G.H.BASS 系",
+          "note": "校用、原宿 ABC-MART school 楼层"
+        }
+      }
+    },
+    "包": {
+      "ja": "バッグ",
+      "blurb": "BAOBAO 是日系 must、COACH Tabby 是 SNS 当红、托特是日常",
+      "anon_canon": "爱音本能 SNS 拍照频率高、包 大概 是 SNS 主角",
+      "subspecies": {
+        "COACH Tabby": {
+          "brand": "COACH（コーチ）",
+          "code": "Tabby Shoulder Bag 26 / Pillow Tabby 18",
+          "ja": "コーチ タビー",
+          "price": "¥55,000-95,000",
+          "vibe": "**当下女高中生 SNS 一姐**、Tabby 经典 logo + 复古 Y2K 感",
+          "note": "GINZA SIX / 表参道 COACH；爱音 SNS 拍照 大概 主力"
+        },
+        "BAOBAO ISSEY MIYAKE": {
+          "brand": "BAOBAO ISSEY MIYAKE（バオバオ イッセイ ミヤケ）",
+          "code": "Lucent / Prism mesh 几何包",
+          "ja": "バオバオ",
+          "price": "¥38,500-66,000",
+          "vibe": "三宅一生设计、几何变形、日系 design icon、向往 / 礼物级",
+          "note": "GINZA SIX / 銀座 ISSEY MIYAKE 本店"
+        },
+        "L.L.Bean Tote": {
+          "brand": "L.L.Bean（エルエルビーン）",
+          "code": "Boat and Tote Bag （定番帆布托特）",
+          "ja": "エルエルビーン ボート アンド トート",
+          "price": "¥6,930-9,790",
+          "vibe": "美式帆布托特 OG、个性化刺绣、女高中生平价托特 must",
+          "note": "L.L.Bean 渋谷 / 表参道；爱音 大概 一只 + 刺绣自己名字"
+        },
+        "Marc Jacobs Tote": {
+          "brand": "Marc Jacobs（マーク ジェイコブス）",
+          "code": "The Tote Bag Mini / Medium / Large",
+          "ja": "マーク ジェイコブス トート",
+          "price": "¥30,000-49,500",
+          "vibe": "logo print 大托特、女高中生爱情 SNS 神器、price 友好",
+          "note": "GINZA SIX / 渋谷 PARCO"
+        },
+        "GUCCI / Fendi Y2K": {
+          "brand": "GUCCI / Fendi（グッチ / フェンディ）",
+          "code": "Jackie 1961 / Fendi Baguette",
+          "ja": "グッチ ジャッキー / フェンディ バゲット",
+          "price": "¥250,000-400,000",
+          "vibe": "Y2K vintage revive、奢侈品入门级、妈妈台 / 高中毕业礼",
+          "note": "銀座 / 表参道；爱音家境富裕、生日 大概 妈妈送"
+        }
+      }
+    },
+    "配饰": {
+      "ja": "アクセサリー",
+      "blurb": "**心形项链是真实的 常服必备**——爱音灰格纹连衣裙 + 白衬衫 + 心形项链",
+      "anon_canon": "爱音本能 常服心形项链是 signature；Vivienne Westwood 土星 大概 演出后造型",
+      "subspecies": {
+        "心形项链": {
+          "brand": "（爱音本能 常服 / 品牌 unspecified）",
+          "code": "heart pendant necklace、银 / 玫瑰金",
+          "ja": "ハートペンダント ネックレス",
+          "price": "¥5,000-30,000 范围",
+          "vibe": "**原作设定 底色 常服必备**——配灰格纹连衣裙 + 白衬衫",
+          "note": "可能是 ANON TOKYO 自家、也可能是 Tiffany Heart Tag / Vivienne Westwood Saturn Heart；底色 没指明品牌"
+        },
+        "Vivienne Westwood 土星": {
+          "brand": "Vivienne Westwood（ヴィヴィアン ウエストウッド）",
+          "code": "Saturn Necklace / Bas Relief",
+          "ja": "ヴィヴィアン ウエストウッド サターン",
+          "price": "¥27,500-49,500",
+          "vibe": "**女高中生 SNS 当红 #1 配饰**、土星 logo + 朋克 + Y2K 复古",
+          "note": "原宿 / 渋谷 PARCO Vivienne Westwood 旗舰；爱音 SNS 自拍 大概 戴"
+        },
+        "Tiffany & Co. T 系列": {
+          "brand": "Tiffany & Co.（ティファニー）",
+          "code": "T Smile Pendant / T Wire / Heart Tag",
+          "ja": "ティファニー",
+          "price": "¥35,000-198,000",
+          "vibe": "美系珠宝顶级、银 / 玫瑰金、Heart Tag 是真实的 心形项链 candidate",
+          "note": "GINZA SIX / 銀座本店；妈妈台 / 生日礼"
+        },
+        "Chrome Hearts 银饰": {
+          "brand": "Chrome Hearts（クロムハーツ）",
+          "code": "Cross Pendant / Dagger Ring",
+          "ja": "クロムハーツ",
+          "price": "¥77,000-198,000",
+          "vibe": "美式哥特银饰 OG、十字架 / 匕首 / 玫瑰、向往 / 二手平台",
+          "note": "原宿表参道；妈妈台 / 大学姐姐"
+        },
+        "ISSEY MIYAKE Pleats": {
+          "brand": "ISSEY MIYAKE Pleats Please（プリーツ プリーズ）",
+          "code": "Pleated Stole / Mini Pochette",
+          "ja": "プリーツ プリーズ",
+          "price": "¥25,000-55,000",
+          "vibe": "三宅一生褶皱披肩、轻盈 / 防皱 / 旅行 must、女高中生向往",
+          "note": "銀座 ISSEY MIYAKE / GINZA SIX"
+        }
+      }
+    },
+    "帽子": {
+      "ja": "ハット / キャップ",
+      "blurb": "棒球帽 / bucket hat 是 streetwear 必备、贝雷帽是法系日杂",
+      "anon_canon": "爱音本能 出门拍照 大概 戴一顶、原宿系 streetwear 配色",
+      "subspecies": {
+        "New Era 棒球帽": {
+          "brand": "New Era（ニューエラ）",
+          "code": "59FIFTY / 9TWENTY Casual Classic",
+          "ja": "ニューエラ",
+          "price": "¥6,600-9,900",
+          "vibe": "美式棒球帽 OG、9TWENTY 软顶适合女高中生、配 streetwear 全套",
+          "note": "原宿 New Era 旗舰 / atmos"
+        },
+        "Champion bucket": {
+          "brand": "Champion（チャンピオン）",
+          "code": "Reverse Weave Bucket Hat",
+          "ja": "チャンピオン バケット",
+          "price": "¥4,400-6,600",
+          "vibe": "渔夫帽 + Champion logo、配卫衣整套美式",
+          "note": "BEAMS / Champion 旗舰"
+        },
+        "BEAMS beret": {
+          "brand": "BEAMS / Beams Boy",
+          "code": "wool beret / cotton beret",
+          "ja": "ビームス ベレー",
+          "price": "¥5,500-9,900",
+          "vibe": "贝雷帽法系日杂、配灰格纹连衣裙 = 爱音常服 +1 level",
+          "note": "BEAMS BOY 原宿"
+        },
+        "KAVU outdoor": {
+          "brand": "KAVU / patagonia",
+          "code": "Strap Bucket / Trucker Cap",
+          "ja": "カブー ストラップ バケット",
+          "price": "¥4,400-6,600",
+          "vibe": "outdoor 牌、复古配色、和 BEAMS PLUS 同档",
+          "note": "原宿 BEAMS / 古着店"
+        }
+      }
+    },
+    "袜": {
+      "ja": "ソックス / タイツ",
+      "blurb": "羽丘制服 = 黑袜；课外配 Dr. Martens 时 大概 长袜 / 渔网",
+      "anon_canon": "爱音本能 羽丘制服黑袜；原宿 streetwear 时 大概 长袜 / 渔网搭 Dr. Martens",
+      "subspecies": {
+        "TABIO 日系": {
+          "brand": "TABIO（タビオ / 靴下屋）",
+          "code": "MERINO 短袜 / レース ソックス",
+          "ja": "タビオ",
+          "price": "¥1,100-2,200",
+          "vibe": "日系袜子专门店、品质细节 OG、女高中生回购王",
+          "note": "渋谷 / 原宿 タビオ；和爱音常服 大概 match"
+        },
+        "Tutuanna": {
+          "brand": "Tutuanna（チュチュアンナ）",
+          "code": "School Socks / Tights / Lounge Wear",
+          "ja": "チュチュアンナ",
+          "price": "¥770-1,540",
+          "vibe": "校园袜 / 内衣 / loungewear、女高中生平价 must",
+          "note": "ルミネ / マルイ"
+        },
+        "ATSUGI ASTIGU": {
+          "brand": "ATSUGI ASTIGU（アツギ アスティーグ）",
+          "code": "Sheer / Gloss / Soft Tights",
+          "ja": "アツギ アスティーグ",
+          "price": "¥770-1,650",
+          "vibe": "日系 tights 老牌、12 色系列适合不同场合",
+          "note": "药妆店 / Loft 必有"
+        },
+        "渔网长袜": {
+          "brand": "（古着店 / WEGO / X-girl 系）",
+          "code": "fishnet thigh-high / over-knee socks",
+          "ja": "フィッシュネット タイツ",
+          "price": "¥1,500-3,000",
+          "vibe": "Y2K / grunge / 哥特配 Dr. Martens 经典、女高中生 cosplay 偶用",
+          "note": "原宿 LaForet / 古着店"
+        }
+      }
+    }
+  },
+  "CATEGORY_VARIANTS": {
+    "连衣裙": [
+      "连衣裙",
+      "连身裙",
+      "one-piece",
+      "onepiece",
+      "ワンピース",
+      "ワンピ",
+      "one piece",
+      "single dress",
+      "dress"
+    ],
+    "上衣": [
+      "上衣",
+      "衬衫",
+      "T恤",
+      "t恤",
+      "tee",
+      "tshirt",
+      "t-shirt",
+      "卫衣",
+      "针织",
+      "毛衣",
+      "ニット",
+      "シャツ",
+      "Tシャツ",
+      "ティーシャツ",
+      "トップス",
+      "パーカー",
+      "hoodie",
+      "knit",
+      "shirt",
+      "blouse"
+    ],
+    "外套": [
+      "外套",
+      "夹克",
+      "牛仔外套",
+      "g-jan",
+      "风衣",
+      "大衣",
+      "羽绒服",
+      "コート",
+      "ジャケット",
+      "アウター",
+      "パーカー外套",
+      "denim jacket",
+      "coat",
+      "jacket",
+      "blazer",
+      "outer"
+    ],
+    "裤装": [
+      "裤装",
+      "裤子",
+      "牛仔裤",
+      "工装裤",
+      "阔腿裤",
+      "短裤",
+      "デニム",
+      "パンツ",
+      "ジーンズ",
+      "ショートパンツ",
+      "wide pants",
+      "jeans",
+      "pants",
+      "trousers",
+      "shorts"
+    ],
+    "裙装": [
+      "裙子",
+      "百褶裙",
+      "短裙",
+      "长裙",
+      "伞裙",
+      "牛仔短裙",
+      "スカート",
+      "ミニスカート",
+      "プリーツスカート",
+      "skirt",
+      "mini skirt",
+      "pleated skirt"
+    ],
+    "鞋": [
+      "鞋",
+      "球鞋",
+      "运动鞋",
+      "乐福鞋",
+      "马丁靴",
+      "高跟鞋",
+      "凉鞋",
+      "靴子",
+      "シューズ",
+      "スニーカー",
+      "ローファー",
+      "ブーツ",
+      "サンダル",
+      "ヒール",
+      "shoes",
+      "sneakers",
+      "loafer",
+      "boots",
+      "heels",
+      "sandals"
+    ],
+    "包": [
+      "包",
+      "包包",
+      "托特包",
+      "肩包",
+      "背包",
+      "腰包",
+      "手提包",
+      "バッグ",
+      "トート",
+      "ショルダーバッグ",
+      "リュック",
+      "bag",
+      "tote",
+      "shoulder bag",
+      "backpack",
+      "handbag",
+      "クラッチ"
+    ],
+    "配饰": [
+      "配饰",
+      "饰品",
+      "项链",
+      "耳环",
+      "戒指",
+      "手链",
+      "胸针",
+      "アクセサリー",
+      "ネックレス",
+      "ピアス",
+      "イヤリング",
+      "リング",
+      "ブレスレット",
+      "necklace",
+      "earring",
+      "ring",
+      "bracelet",
+      "accessory",
+      "jewelry"
+    ],
+    "帽子": [
+      "帽子",
+      "棒球帽",
+      "渔夫帽",
+      "贝雷帽",
+      "草帽",
+      "ハット",
+      "キャップ",
+      "ベレー",
+      "バケットハット",
+      "hat",
+      "cap",
+      "beret",
+      "bucket hat"
+    ],
+    "袜": [
+      "袜子",
+      "长袜",
+      "渔网袜",
+      "短袜",
+      "丝袜",
+      "tights",
+      "ソックス",
+      "タイツ",
+      "ストッキング",
+      "socks",
+      "stockings"
+    ]
+  },
+  "SUBSPECIES_VARIANTS": {
+    "SLY 修身": [
+      "sly 连衣裙",
+      "sly one-piece",
+      "スライ ワンピース",
+      "sly modal jersey",
+      "sly 直筒",
+      "sly a 字"
+    ],
+    "LOWRYS FARM 长版": [
+      "lowrys farm 连衣裙",
+      "lowrys farm one-piece",
+      "ロウリーズファーム ワンピース",
+      "lowrys long dress"
+    ],
+    "chuu 韩系娃娃": [
+      "chuu 连衣裙",
+      "chuu dress",
+      "chuu smock",
+      "チュー ワンピース",
+      "chuu 娃娃裙"
+    ],
+    "WEGO 印花": [
+      "wego 连衣裙",
+      "wego print",
+      "ウィゴー ワンピース",
+      "wego y2k dress"
+    ],
+    "灰格纹连衣裙": [
+      "灰格纹连衣裙",
+      "灰色 gingham",
+      "windowpane 连衣裙",
+      "灰格纹 ワンピース",
+      "灰格 dress",
+      "格纹连衣裙"
+    ],
+    "UNIQLO U 白衬衫": [
+      "uniqlo u 白衬衫",
+      "uniqlo u shirt",
+      "ユニクロ ユー シャツ",
+      "uniqlo open collar",
+      "uniqlo cotton shirt"
+    ],
+    "BEAMS BOY 男友风": [
+      "beams boy",
+      "beams boy 衬衫",
+      "ビームス ボーイ",
+      "beams boy oxford"
+    ],
+    "X-girl logo Tee": [
+      "x-girl",
+      "xgirl",
+      "エックスガール",
+      "x-girl tee",
+      "x-girl logo",
+      "x girl t恤"
+    ],
+    "Champion 卫衣": [
+      "champion 卫衣",
+      "champion hoodie",
+      "champion reverse weave",
+      "チャンピオン パーカー"
+    ],
+    "John Smedley 针织": [
+      "john smedley",
+      "ジョン スメドレー",
+      "smedley merino",
+      "smedley sea island"
+    ],
+    "BEAMS 牛仔": [
+      "beams 牛仔外套",
+      "beams g-jan",
+      "ビームス Gジャン",
+      "beams 牛仔"
+    ],
+    "Lululemon Scuba": [
+      "lululemon",
+      "ルルレモン",
+      "lululemon scuba",
+      "scuba half-zip"
+    ],
+    "Dickies / Carhartt": [
+      "dickies",
+      "carhartt",
+      "ディッキーズ",
+      "カーハート",
+      "eisenhower",
+      "detroit jacket"
+    ],
+    "Mackintosh 风衣": [
+      "mackintosh",
+      "マッキントッシュ",
+      "mackintosh dunoon",
+      "mackintosh dunkeld"
+    ],
+    "THE NORTH FACE PURPLE": [
+      "north face purple",
+      "purple label",
+      "ザ ノース フェイス パープル",
+      "tnf purple"
+    ],
+    "Levi's 501": [
+      "levi's 501",
+      "levis 501",
+      "リーバイス 501",
+      "501 牛仔"
+    ],
+    "A.P.C. petit standard": [
+      "a.p.c.",
+      "apc",
+      "アー ペー セー",
+      "apc petit standard",
+      "petit standard"
+    ],
+    "GU baggy": [
+      "gu baggy",
+      "ジーユー バギー",
+      "gu cargo wide"
+    ],
+    "Acne Studios": [
+      "acne studios",
+      "acne 牛仔",
+      "アクネ ストゥディオズ",
+      "acne 1991",
+      "acne 2003"
+    ],
+    "WC（Wonder Cargo）": [
+      "wonder cargo",
+      "ウェアクロゼット カーゴ",
+      "wc cargo",
+      "wear closet cargo"
+    ],
+    "Levi's denim mini": [
+      "levi's mini",
+      "levis mini",
+      "リーバイス ミニ",
+      "levi's denim mini"
+    ],
+    "SLY 百褶": [
+      "sly 百褶",
+      "sly 裙",
+      "スライ プリーツ",
+      "sly skirt"
+    ],
+    "Stussy x SLY": [
+      "stussy",
+      "ステューシー",
+      "stussy 裙",
+      "stussy x sly"
+    ],
+    "Wonder Closet 伞裙": [
+      "wonder closet 裙",
+      "ウェアクロゼット スカート",
+      "wc 伞裙",
+      "wc skirt"
+    ],
+    "原宿古着 vintage": [
+      "原宿古着",
+      "ハラジュク 古着",
+      "flamingo 古着",
+      "kinji 古着",
+      "big time 古着",
+      "vintage 短裙"
+    ],
+    "New Balance 9060": [
+      "new balance 9060",
+      "nb 9060",
+      "ニューバランス 9060",
+      "new balance 990v6",
+      "nb 990"
+    ],
+    "Nike Dunk Low": [
+      "nike dunk",
+      "dunk low",
+      "ダンク ロー",
+      "nike panda",
+      "dunk panda"
+    ],
+    "Adidas Samba": [
+      "adidas samba",
+      "アディダス サンバ",
+      "samba og"
+    ],
+    "Dr. Martens 1461": [
+      "dr. martens",
+      "dr martens",
+      "doc martens",
+      "ドクターマーチン",
+      "1461",
+      "1460",
+      "8-eye"
+    ],
+    "棕色乐福鞋": [
+      "乐福鞋",
+      "ローファー",
+      "loafer",
+      "棕色乐福",
+      "羽丘 乐福",
+      "school loafer"
+    ],
+    "COACH Tabby": [
+      "coach tabby",
+      "coach 包",
+      "コーチ タビー",
+      "coach pillow tabby",
+      "tabby 26",
+      "tabby 18"
+    ],
+    "BAOBAO ISSEY MIYAKE": [
+      "baobao",
+      "バオバオ",
+      "baobao issey",
+      "issey miyake bag",
+      "lucent",
+      "prism"
+    ],
+    "L.L.Bean Tote": [
+      "ll bean",
+      "l.l.bean",
+      "エルエルビーン",
+      "boat and tote",
+      "ll bean 托特"
+    ],
+    "Marc Jacobs Tote": [
+      "marc jacobs",
+      "マーク ジェイコブス",
+      "the tote bag",
+      "marc jacobs tote"
+    ],
+    "GUCCI / Fendi Y2K": [
+      "gucci",
+      "グッチ",
+      "fendi",
+      "フェンディ",
+      "jackie 1961",
+      "fendi baguette",
+      "gucci jackie"
+    ],
+    "心形项链": [
+      "心形项链",
+      "ハートペンダント",
+      "heart necklace",
+      "heart pendant",
+      "心形 项链",
+      "ハート ネックレス"
+    ],
+    "Vivienne Westwood 土星": [
+      "vivienne westwood",
+      "ヴィヴィアン ウエストウッド",
+      "vivienne 土星",
+      "saturn necklace",
+      "vivienne 项链",
+      "西太后",
+      "vw saturn"
+    ],
+    "Tiffany & Co. T 系列": [
+      "tiffany",
+      "ティファニー",
+      "tiffany t",
+      "tiffany heart",
+      "heart tag",
+      "tiffany & co"
+    ],
+    "Chrome Hearts 银饰": [
+      "chrome hearts",
+      "クロムハーツ",
+      "chrome hearts 项链",
+      "chrome hearts 戒指"
+    ],
+    "ISSEY MIYAKE Pleats": [
+      "pleats please",
+      "プリーツ プリーズ",
+      "issey miyake pleats",
+      "三宅一生 披肩"
+    ],
+    "New Era 棒球帽": [
+      "new era",
+      "ニューエラ",
+      "59fifty",
+      "9twenty",
+      "new era 棒球帽"
+    ],
+    "Champion bucket": [
+      "champion bucket",
+      "チャンピオン バケット",
+      "champion 渔夫"
+    ],
+    "BEAMS beret": [
+      "beams beret",
+      "ビームス ベレー",
+      "beams 贝雷"
+    ],
+    "KAVU outdoor": [
+      "kavu",
+      "カブー",
+      "patagonia 帽子",
+      "kavu strap"
+    ],
+    "TABIO 日系": [
+      "tabio",
+      "タビオ",
+      "靴下屋",
+      "tabio 短袜"
+    ],
+    "Tutuanna": [
+      "tutuanna",
+      "チュチュアンナ",
+      "tutuanna 袜"
+    ],
+    "ATSUGI ASTIGU": [
+      "atsugi",
+      "astigu",
+      "アツギ",
+      "アスティーグ",
+      "atsugi 丝袜"
+    ],
+    "渔网长袜": [
+      "渔网袜",
+      "渔网长袜",
+      "fishnet",
+      "フィッシュネット",
+      "fishnet tights"
+    ]
+  },
+  "VAGUE_KEYWORDS": [
+    "穿搭",
+    "时尚",
+    "服装",
+    "衣服",
+    "outfit",
+    "ootd",
+    "OOTD",
+    "今天穿",
+    "穿什么",
+    "搭配",
+    "コーデ",
+    "コーディネート",
+    "ファッション",
+    "ootd",
+    "おしゃれ",
+    "ルミネ",
+    "lumine",
+    "ルミネエスト",
+    "マルイ",
+    "marui",
+    "渋谷109",
+    "shibuya 109",
+    "原宿",
+    "harajuku",
+    "竹下通",
+    "竹下通り",
+    "表参道",
+    "omotesando",
+    "select shop",
+    "セレクトショップ",
+    "古着",
+    "古着屋",
+    "vintage shop",
+    "潮流",
+    "潮物",
+    "时髦",
+    "时尚感",
+    "穿衣",
+    "搭衣服",
+    "拼搭"
+  ],
+  "ANON_TOKYO_KEYWORDS": [
+    "ANON TOKYO",
+    "anon tokyo",
+    "Anon Tokyo",
+    "アノン・トーキョー",
+    "アノン トーキョー",
+    "アノントーキョー",
+    "服装设计",
+    "服装デザイン",
+    "你的品牌",
+    "自创品牌",
+    "你设计",
+    "你做的衣服",
+    "你画的衣服",
+    "队名提案",
+    "バンド名提案",
+    "バンド名候補",
+    "UnKnown",
+    "unknown 队名",
+    "あのね",
+    "Anone",
+    "アンノウイモ",
+    "Annouimo",
+    "演出服设计",
+    "ステージ衣装デザイン",
+    "演出服 设计"
+  ],
+  "SOYO_TEASE_TRIGGER_NAMES": [
+    "素世",
+    "soyorin",
+    "Soyorin",
+    "ソヨリン",
+    "そよりん",
+    "长崎素世",
+    "そよ"
+  ],
+  "SOYO_TEASE_TRIGGER_VOCAB": [
+    "挑衣服",
+    "挑衣",
+    "挑选",
+    "选衣服",
+    "整理领口",
+    "帮我挑",
+    "帮你挑",
+    "品味",
+    "俗气",
+    "好俗",
+    "好土",
+    "ダサい",
+    "土",
+    "颜色俗",
+    "搭配奇怪",
+    "吐槽",
+    "嫌弃",
+    "嘲笑",
+    "貶した"
+  ]
+}

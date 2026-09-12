@@ -45,287 +45,92 @@ API 单入口：
 """
 from __future__ import annotations
 
+import functools
+import importlib.resources
+import json
 import os
 import re
-import threading
+from idiolect.scene_engine import SessionStore
 from typing import Optional
 
 
 # ═══════════════════════════════════════════════════════════════════════
 # 数据层：12 类别 / ~50 subspecies / 喵梦 底色 override
+#
+# 纯数据已迁出到包数据 JSON：idiolect/characters/anon/data/cosmetics.json
+# （2026-09 从本模块逐字节搬迁、键序保持原样；内容为原 COSMETICS_TAXONOMY /
+# CATEGORY_VARIANTS / SUBSPECIES_VARIANTS / VAGUE_KEYWORDS / NYAMUME_KEYWORDS
+# 五个模块级字面量）。这里只留惰性访问入口；数据名与 Compat 别名经模块
+# __getattr__ 惰性暴露、老 import 不破。
 # ═══════════════════════════════════════════════════════════════════════
 
-# ─── 12 个 category（类别 + 具体 嵌套） ───
+# ─── 12 个 category（类别 + 具体 嵌套）的 schema（JSON 内保持原键序） ───
 # 每个 category：
 #   ja: 日语
 #   blurb: 一句类别概括（类别 注入用、爱音口吻）
 #   anon_canon: 爱音和这个 category 的连接（可空）
 #   subspecies: dict[name, {brand, code, ja, price, vibe, note}]
-COSMETICS_TAXONOMY: dict[str, dict] = {
-    # ───── 1. 口红 / 唇釉 / 唇彩 ─────
-    "口红": {
-        "ja": "リップ / グロス / ティント",
-        "blurb": "色号比品牌还重要——同色系一支适合白天、一支适合演出后吃饭、还有一支万能日杂",
-        "anon_canon": "爱音本能 **会拍唇膏色卡**、SNS 对镜照偶尔露出、和素世逛街时会被吐槽「这色号太暗了」",
-        "subspecies": {
-            "YSL 圆管 421":   {"brand": "YSL（イヴ・サンローラン）", "code": "Rouge Pur Couture The Slim 421（圆管丝绒）", "ja": "イヴサンローラン ルージュピュールクチュールザスリム", "price": "¥4,400 程度", "vibe": "番茄红微哑、显白 + 不挑场合、白天演出都可以的万能色", "note": "爱音可能拥有、SNS 自拍常用色调；中文圈称 YSL 421 / 杨树林 421"},
-            "Dior 999":       {"brand": "Dior（ディオール）", "code": "Rouge Dior 999（哑光 / 缎面 / 金属三版）", "ja": "ディオール ルージュ 999", "price": "¥4,950 程度", "vibe": "经典正红、显气场、约会 / 演出 / 拍照都能压全场", "note": "颜色版本多、爱音 大概 哑光 999"},
-            "Chanel Coco 416":{"brand": "Chanel（シャネル）", "code": "Rouge Coco Bloom 416 Inspire（水润）", "ja": "シャネル ルージュ ココ ブルーム", "price": "¥5,500 程度", "vibe": "粉调玫瑰、水光感、日杂级显嫩", "note": "Coco Bloom 系列水光感、416 Inspire 是日本店人气色"},
-            "ROMAND 唇泥":    {"brand": "ROMAND（ロムアンド）韩系", "code": "Blur Fudge Tint #06 Mute Blur 等", "ja": "ロムアンド ブラーファッジティント", "price": "¥1,540 程度", "vibe": "雾面奶茶系、上嘴像滤镜、平价 sumi 系少女超买账", "note": "韩系 trending、爱音粉 sumimi 圈内 大概 接触过"},
-            "CANMAKE 唇釉":   {"brand": "CANMAKE（キャンメイク）", "code": "Stay-On Balm Rouge SE-T01 等", "ja": "キャンメイク ステイオンバームルージュ", "price": "¥770 程度", "vibe": "屈臣氏 / Loft 都买得到、女高中生入门款、润色不刻意", "note": "校园人气、低价、爱音读高一 大概 第一支自购唇膏"},
-            "OPERA 染唇液":   {"brand": "OPERA（オペラ）", "code": "Lip Tint N #05 Coral Pink 等", "ja": "オペラ リップティント", "price": "¥1,650 程度", "vibe": "Cosme 大赏常胜军、染唇 + 微光、卸妆都不掉色", "note": "日本药妆店 #05 / #07 长期断货、SNS 推爆"},
-        },
-    },
-    # ───── 2. 眼影盘 ─────
-    "眼影": {
-        "ja": "アイシャドウ / アイパレット",
-        "blurb": "颜色比技术重要——同盘里的两三个色挑对了、什么妆容都能撑起来",
-        "anon_canon": "爱音本能 **会摆色卡拍照**、SNS 用过；演出妆和日常妆同一盘混着用",
-        "subspecies": {
-            "Charlotte Tilbury Pillow Talk": {"brand": "Charlotte Tilbury", "code": "Luxury Palette Pillow Talk", "ja": "シャーロット ティルベリー", "price": "¥9,000 程度", "vibe": "玫瑰金调四色、欧美爆款、显眼神 + 减龄", "note": "网红色、爱音如果买专业品 大概 入这盘"},
-            "NARS 12 色 Climax":             {"brand": "NARS（ナーズ）", "code": "Climax Eyeshadow Palette 12 色", "ja": "ナーズ クライマックス アイシャドウパレット", "price": "¥9,350 程度", "vibe": "暖棕大地 + 一抹紫红、修容 / 眼影一盘搞定", "note": "演出妆 / 日常妆都能 cover"},
-            "Maquillage 心机眼影":           {"brand": "Maquillage（マキアージュ）资生堂", "code": "Dramatic Styling Eyes BR405 茶系等", "ja": "マキアージュ ドラマティックスタイリングアイズ", "price": "¥3,300 程度", "vibe": "日系四色、自然 + 显气质、上班 OL / 校服都不出戏", "note": "日本药妆店常驻、爱音入门级日系眼影 大概 这家"},
-            "ETUDE Play Color":              {"brand": "ETUDE HOUSE（エチュード）", "code": "Play Color Eyes #Cherry Blossom 等", "ja": "エチュード プレイカラーアイズ", "price": "¥3,300 程度", "vibe": "韩系 10 色花瓣盘、粉调嫩唇、女高中生预算友好", "note": "校园人气、SNS 滤镜配色"},
-            "CANMAKE 五色":                  {"brand": "CANMAKE（キャンメイク）", "code": "Perfect Stylist Eyes 14 等", "ja": "キャンメイク パーフェクトスタイリストアイズ", "price": "¥825 程度", "vibe": "千元日币以下、女高中生第一盘、走廊试色不肉痛", "note": "屈臣氏 / Loft 必有"},
-        },
-    },
-    # ───── 3. 腮红 ─────
-    "腮红": {
-        "ja": "チーク",
-        "blurb": "腮红比眼影更能撑起整张脸的活力感——颜色对了、整张脸都「在笑」",
-        "anon_canon": "爱音 底色「阳光元气」底色和腮红高度契合、大概 比同龄人手更稳",
-        "subspecies": {
-            "NARS Orgasm":      {"brand": "NARS（ナーズ）", "code": "Blush Orgasm（4013）", "ja": "ナーズ ブラッシュ オーガズム", "price": "¥4,510 程度", "vibe": "桃粉带金光、上脸提亮、被誉为「世界销量第一腮红」", "note": "色号名争议大但产品本身是顶流"},
-            "CANMAKE 棉花糖":   {"brand": "CANMAKE（キャンメイク）", "code": "Marshmallow Finish Powder M01 等 + Cream Cheek 系列", "ja": "キャンメイク マシュマロフィニッシュパウダー / クリームチーク", "price": "¥990 程度", "vibe": "粉饼 / 腮红 / 修容三合一、棉花糖质感、女高中生回购", "note": "Cream Cheek 比 Powder 更红血感、校园 SNS 推爆"},
-            "3CE Mood Recipe":  {"brand": "3CE（スリーシーイー）韩系", "code": "Mood Recipe Face Blush #Beach Muse 等", "ja": "スリーシーイー ムードレシピ フェイスブラッシュ", "price": "¥2,200 程度", "vibe": "韩系奶茶腮红、温柔不张扬、和 ROMAND 唇釉同色系搭", "note": "Stylenanda 旗下、SNS 滤镜系 must"},
-            "Cezanne 自然":     {"brand": "Cezanne（セザンヌ）", "code": "Natural Cheek N 11 Pink Beige 等", "ja": "セザンヌ ナチュラルチークN", "price": "¥396 程度", "vibe": "几乎是日本最便宜的开架腮红、上色温和、女高中生 must", "note": "屈臣氏入门 must"},
-        },
-    },
-    # ───── 4. 粉底 / 底妆 ─────
-    "底妆": {
-        "ja": "ファンデーション / クッション",
-        "blurb": "肤况好坏比品牌牌面更重要——好底妆是看不出来在化妆、不是把脸糊白",
-        "anon_canon": "爱音 底色「常服时尚感强」、底妆基本功 大概 不差；演出 / SNS 自拍频率高",
-        "subspecies": {
-            "Armani 大师":        {"brand": "Giorgio Armani（アルマーニ）", "code": "Luminous Silk Foundation #5 / #5.5", "ja": "アルマーニ リッチイルミネイティングシルクファンデーション", "price": "¥7,700 程度", "vibe": "「亚洲女明星红毯底妆」、自然光泽、不会像欧美底那样厚", "note": "高端入门、有「红气垫」（Power Fabric）和液版两种"},
-            "CPB 长管隔离":       {"brand": "CPB（クレ・ド・ポー ボーテ）资生堂高端线", "code": "Le Sérum 隔离 / Le Concentré Concealer", "ja": "クレ・ド・ポー ボーテ", "price": "¥10,000 程度起", "vibe": "贵 sister 标志、强光透感、30+ 妈妈级 idol 用、女高中生买就是「我妈让我用」", "note": "爱音 大概 用妈妈台、自己买 大概 YSL / Armani 这级"},
-            "YSL 黑管气垫":       {"brand": "YSL（イヴ・サンローラン）", "code": "All Hours Cushion B20 / B30", "ja": "イヴサンローラン オールアワーズクッション", "price": "¥9,350 程度", "vibe": "持妆 8 小时不掉、出门补一下不糊、演出后 KTV 不脱妆", "note": "气垫主力、和 Armani 液版互补"},
-            "Maquillage 心机":    {"brand": "Maquillage（マキアージュ）资生堂", "code": "Dramatic Powdery UV", "ja": "マキアージュ ドラマティックパウダリーUV", "price": "¥3,520 程度", "vibe": "日系药妆顶级、女高中生预算可入的「成熟感」底妆", "note": "JR 站药妆店常驻"},
-            "Suqqu 粉底液":       {"brand": "Suqqu（スック）", "code": "The Liquid Foundation 110 等", "ja": "スック ザ リクイドファンデーション", "price": "¥11,000 程度", "vibe": "日系高奢、薄如蝉翼贴肤、被誉为「肌肤本身的发光」", "note": "30+ 偏多、女高中生可能听过没用过"},
-        },
-    },
-    # ───── 5. 睫毛膏 / 眼线 ─────
-    "睫毛膏": {
-        "ja": "マスカラ / アイライナー",
-        "blurb": "演出妆主力——卸妆方便比睫毛长度更要命、哭花了影响下首歌",
-        "anon_canon": "爱音本能 演出 / 拍照频率高、大概 有「演出版」和「日常版」两支分开用",
-        "subspecies": {
-            "HEROINE MAKE 玛丽魁宁": {"brand": "HEROINE MAKE（ヒロインメイク） KISS ME", "code": "Long & Curl Mascara Advanced Film 01 漆黑", "ja": "ヒロインメイク ロング&カールマスカラ アドバンストフィルム", "price": "¥1,320 程度", "vibe": "薄膜型、流泪不晕、热水卸妆、日本「演员级」防水睫毛代名词", "note": "演出 / 婚礼 / 哭戏 must；爱音演出 大概 用这只"},
-            "OPERA 眼线液":          {"brand": "OPERA（オペラ）", "code": "Eye Color Pencil 等 / Liner / Tint", "ja": "オペラ", "price": "¥1,650 程度", "vibe": "Cosme 大赏常胜、唇眼一家通用感、平价高质", "note": "和 OPERA 唇釉同品牌"},
-            "K-Palette 眼线液":      {"brand": "K-Palette（ケーパレット）", "code": "Real Lasting Eyeliner 24h WP", "ja": "ケーパレット リアルラスティングアイライナー", "price": "¥1,650 程度", "vibe": "「24 小时不脱」slogan、内眼角细笔头、日系女高中生回购王", "note": "Cosme 大赏眼线液常驻"},
-            "DEJAVU 睫毛打底":       {"brand": "DEJAVU（デジャヴュ）", "code": "Lasting-Fine E 纤维睫毛", "ja": "デジャヴュ ラスティングファイン", "price": "¥1,650 程度", "vibe": "纤维加长底膏、上 HEROINE MAKE 之前打一层、长度暴增", "note": "演出妆 pro 操作"},
-            "CANMAKE 卷翘睫":        {"brand": "CANMAKE（キャンメイク）", "code": "Quick Lash Curler", "ja": "キャンメイク クイックラッシュカーラー", "price": "¥748 程度", "vibe": "睫毛夹 + 防水底膏一支搞定、平价校园 must", "note": "女高中生第一支底膏 大概 这个"},
-        },
-    },
-    # ───── 6. 眉妆 ─────
-    "眉妆": {
-        "ja": "アイブロウ",
-        "blurb": "眉形比颜色还重要——一对好眉能让脸长得像换了一张",
-        "anon_canon": "爱音 底色「时尚感强」、眉妆基本功 大概 在线",
-        "subspecies": {
-            "Cezanne 双头眉笔":    {"brand": "Cezanne（セザンヌ）", "code": "Auto Eyebrow Pencil EX 03 ナチュラルブラウン 等", "ja": "セザンヌ 自動エイブロウペンシル", "price": "¥715 程度", "vibe": "白菜价、芯软、笔尖 + 螺旋刷一支搞定、女高中生第一支眉笔", "note": "屈臣氏 / Loft 必有"},
-            "KATE 三色眉粉":       {"brand": "KATE（ケイト）佳丽宝", "code": "Designing Eyebrow 3D EX-5", "ja": "ケイト デザイニングアイブロウ3D", "price": "¥1,210 程度", "vibe": "三色眉粉盘、可调染发后色调、Cosme 排行常驻", "note": "和 KATE 眼影同品牌、女高中生 must"},
-            "Excel 染眉膏":        {"brand": "excel（エクセル）", "code": "Color Last Eyebrow Mascara Brown 等", "ja": "エクセル カラーラスト アイブロウマスカラ", "price": "¥1,650 程度", "vibe": "染眉膏一刷把眉色调到和发色配、棕染发必备", "note": "爱音粉色长发 大概 配浅棕染眉膏"},
-            "INTEGRATE 眉笔":      {"brand": "INTEGRATE（インテグレート）资生堂", "code": "Eyebrow Pencil N", "ja": "インテグレート アイブローペンシル", "price": "¥715 程度", "vibe": "资生堂入门线、笔芯硬度刚好、画毛流不糊", "note": "JR 站药妆店常驻"},
-        },
-    },
-    # ───── 7. 防晒 / UV ─────
-    "防晒": {
-        "ja": "UVケア / 日焼け止め",
-        "blurb": "防晒不是季节性、是 365 天硬刚——皮肤底子最大的差距来自有没有每天涂",
-        "anon_canon": "爱音本能 SNS 自拍 + 户外活动多、防晒 大概 是抽屉常驻",
-        "subspecies": {
-            "Anessa 金瓶":         {"brand": "ANESSA（アネッサ）资生堂", "code": "Perfect UV Sunscreen Skincare Milk SPF50+ PA++++", "ja": "アネッサ パーフェクトUV スキンケアミルク", "price": "¥3,300 程度", "vibe": "「金瓶」是日系防晒代名词、海边 / 演出 / 拍外景能扛、汗水油脂遇到反而强化防护膜", "note": "日本防晒销冠、爱音夏天去原宿 / 海边 大概 这只"},
-            "Bioré 蓝管":          {"brand": "Biore UV（ビオレUV）", "code": "Aqua Rich Watery Essence SPF50+ PA++++", "ja": "ビオレUV アクアリッチ ウォータリーエッセンス", "price": "¥898 程度", "vibe": "屈臣氏白菜价、水感不假白、可以打底化妆、日本年销冠级", "note": "「日系防晒入门 must」、爱音平日 大概 这只"},
-            "La Roche-Posay UVA":  {"brand": "La Roche-Posay（ラロッシュポゼ）", "code": "UV Idea XL Protection Tone-Up Rose 等", "ja": "ラロッシュポゼ UVイデア XL", "price": "¥3,740 程度", "vibe": "敏感肌 / 痘痘肌专用、Tone-Up Rose 版自带粉调修色、可当隔离", "note": "皮肤科推荐、敏感肌爱音 大概 备一支"},
-            "资生堂樱花瓶":        {"brand": "资生堂 ANESSA 系列", "code": "Whitening UV Sunscreen Gel N（樱花瓶）", "ja": "アネッサ ホワイトニング UV ジェル", "price": "¥2,640 程度", "vibe": "金瓶轻盈版、女高中生预算友好、樱花季限定包装会出粉色", "note": "和金瓶系出同源、平日校园 大概 这只"},
-        },
-    },
-    # ───── 8. 香水 ─────
-    "香水": {
-        "ja": "フレグランス",
-        "blurb": "校园里喷香水会被看见——所以爱音 大概 是出门 / 演出场合用、不上学带",
-        "anon_canon": "爱音 底色「赶时髦」大概 有 1-2 瓶、SNS 拍香水瓶 大概 做过",
-        "subspecies": {
-            "Jo Malone 英国梨":    {"brand": "Jo Malone（ジョー マローン）", "code": "English Pear & Freesia Cologne", "ja": "ジョー マローン イングリッシュ ペアー & フリージア", "price": "¥14,300 程度（30ml）", "vibe": "网红香水、女高中生听说过、入门级人气色", "note": "演出 / 出门约会 大概 这只"},
-            "Diptyque 影中之水":   {"brand": "Diptyque（ディプティック）", "code": "Eau Duelle / Tam Dao 等", "ja": "ディプティック オードトワレ", "price": "¥18,150 程度（75ml）", "vibe": "法系小众、和 Jo Malone 不同档次、爱音听过 大概 没买", "note": "Ave Mujica 圈 / Roselia 圈 / 大学生姐姐圈才用"},
-            "Chanel Chance":       {"brand": "Chanel（シャネル）", "code": "Chance Eau Tendre / Eau Vive", "ja": "シャネル チャンス", "price": "¥13,200 程度（50ml）", "vibe": "经典少女入门、Chance 系列里 Eau Tendre 最甜美粉调", "note": "妈妈级也用、爱音 大概 妈妈柜台借过"},
-            "Maison Margiela 复刻":{"brand": "Maison Margiela（メゾン マルジェラ）", "code": "Replica Beach Walk / Lazy Sunday Morning 等", "ja": "メゾン マルジェラ レプリカ", "price": "¥17,600 程度（100ml）", "vibe": "「场景化香水」概念、Beach Walk 是夏日海滩、学生圈 SNS 推爆", "note": "Z 世代认同感强、爱音 大概 听过且有兴趣"},
-        },
-    },
-    # ───── 9. 美甲 ─────
-    "美甲": {
-        "ja": "ネイル",
-        "blurb": "弹吉他不能做长甲——爱音 大概 短甲 / 透明甲油 / 偶尔做凝胶",
-        "anon_canon": "爱音本能 弹吉他、演出前 大概 修甲、长指甲弹弦不舒服",
-        "subspecies": {
-            "OPI 经典":          {"brand": "OPI", "code": "Nail Lacquer 多色", "ja": "オーピーアイ ネイルラッカー", "price": "¥1,980 程度", "vibe": "美甲沙龙顶级品牌、自家可涂、显甲色 + 持久", "note": "色号名有趣（Funny Bunny / Bubble Bath 等）、SNS 拍照 must"},
-            "uka 护甲油":        {"brand": "uka（ウカ）", "code": "Nail Oil 13:00 / 18:30 / 24:00", "ja": "ウカ ネイルオイル", "price": "¥3,300 程度", "vibe": "甲油护甲油、按时间命名（午后 / 傍晚 / 深夜）、香气分层", "note": "弹吉他必备、保护指甲不脆"},
-            "CANMAKE Colorful": {"brand": "CANMAKE（キャンメイク）", "code": "Colorful Nails N", "ja": "キャンメイク カラフルネイルズ", "price": "¥396 程度", "vibe": "百元一瓶、女高中生买 5 色拼配、平价快速换", "note": "校园 SNS 推、爱音入门款 大概 这家"},
-            "美甲沙龙凝胶":      {"brand": "ネイルサロン（gel nail）", "code": "原宿 / 表参道 / 池袋 各家沙龙", "ja": "ジェルネイル", "price": "¥6,000 程度起 / 次", "vibe": "持续 3-4 周、演出前去做、款式可选 french / 渐变 / 装饰", "note": "爱音 SNS 拍美甲特写 大概 是沙龙凝胶；自己涂 大概 OPI"},
-        },
-    },
-    # ───── 10. 美瞳 / 假睫毛 ─────
-    "美瞳": {
-        "ja": "カラコン / つけまつげ",
-        "blurb": "亚洲女高中生「变美 cheat code」——一片美瞳 + 一对假睫、整脸级别提升",
-        "anon_canon": "爱音本能 演出 / SNS 大概 戴美瞳；上学日 大概 不戴",
-        "subspecies": {
-            "Decorative Eyes":   {"brand": "Decorative Eyes（デコラティブアイ）", "code": "1 Day 多色", "ja": "デコラティブアイ", "price": "¥2,200 程度（10 片装）", "vibe": "板野友美 / 渡边直美等代言系、日抛、女高中生入门", "note": "彩瞳店 / Loft / 网店都买得到"},
-            "FAIRY 假睫毛":      {"brand": "FAIRY（フェアリー）", "code": "Original 5 套装", "ja": "フェアリー つけまつげ", "price": "¥1,650 程度（5 对装）", "vibe": "演出 / 写真 / cosplay must、长度 / 浓密度分系列", "note": "ドンキ常驻、女高中生 cosplay must"},
-            "EYELASH SALON":     {"brand": "まつげエクステ（眼睫嫁接 salon）", "code": "原宿 / 池袋 各家 salon", "ja": "まつげエクステンション", "price": "¥4,000 程度起 / 次", "vibe": "嫁接式持续 3-4 周、演出前后 大概 做、不需每天上睫毛膏", "note": "演出常驻爱音 大概 嫁接派"},
-        },
-    },
-    # ───── 11. 护肤 / 基础保养 ─────
-    "护肤": {
-        "ja": "スキンケア / 基礎化粧品",
-        "blurb": "护肤是底子、化妆是上层——再贵的口红、底子不行也镇不住脸",
-        "anon_canon": "爱音本能 演出 / 拍照频率高、护肤是抽屉常驻 大概 不只一瓶",
-        "subspecies": {
-            "SK-II 神仙水":         {"brand": "SK-II", "code": "Facial Treatment Essence 230ml", "ja": "SK-II フェイシャルトリートメントエッセンス", "price": "¥21,890 程度", "vibe": "「Pitera」专利、网红护肤水、亚洲女明星标配", "note": "爱音买 大概 妈妈台 / 自己买不起、知名度全员 must"},
-            "兰蔻小黑瓶":           {"brand": "Lancôme（ランコム）", "code": "Génifique Advanced Anti-Aging Serum", "ja": "ランコム ジェニフィック アドバンスト", "price": "¥14,520 程度（30ml）", "vibe": "「网红精华液」入门、20+ 入门级抗老", "note": "SK-II 同档 / 爱音 high 可能"},
-            "黛珂紫苏水":           {"brand": "DECORTÉ（コスメデコルテ）", "code": "AQ Meliority / モイスチュアリポソーム / 紫苏化妆水", "ja": "コスメデコルテ", "price": "¥8,800 程度", "vibe": "日系高奢、紫苏水适合敏感 / 痘肌、口碑滴一滴敏感肌救星", "note": "敏感肌爱音 大概 备一支"},
-            "Hatomugi 薏仁水":      {"brand": "Naturie（ナチュリエ） Hatomugi", "code": "Skin Conditioner 500ml", "ja": "ナチュリエ ハトムギ化粧水", "price": "¥715 程度", "vibe": "白菜价大瓶、湿敷 must、女高中生平价护肤入门", "note": "校园 SNS 推爆、爱音入门 大概 这瓶"},
-            "FANCL 卸妆油":         {"brand": "FANCL（ファンケル）", "code": "Mild Cleansing Oil 120ml", "ja": "ファンケル マイルドクレンジングオイル", "price": "¥1,870 程度", "vibe": "日系无添加卸妆顶级、不刺激不假滑、Cosme 大赏常驻", "note": "演出妆 / 防水睫毛卸 must"},
-        },
-    },
-    # ───── 12. 美容工具 ─────
-    "美容工具": {
-        "ja": "ビューティーツール / 美容家電",
-        "blurb": "工具决定上限——一支好卷发棒比再贵的眼影对脸的影响还大",
-        "anon_canon": "爱音本能 粉色长发 + 演出造型 大概 自带工具、出门前一小时弄头发",
-        "subspecies": {
-            "ReFa CARAT":         {"brand": "ReFa（リファ）", "code": "CARAT FACE / 美容ローラー", "ja": "リファ カラット", "price": "¥27,500 程度", "vibe": "网红美容仪、提拉脸部线条、女明星 / 模特标配", "note": "爱音 大概 听过、家里 大概 妈妈台借过"},
-            "Panasonic 直发器":   {"brand": "Panasonic（パナソニック）", "code": "Nano Care EH-HS9A 等", "ja": "パナソニック ナノケア", "price": "¥18,700 程度", "vibe": "纳米水离子直发器、日系顶级、护发 + 直发一体", "note": "粉色长发爱音演出造型 大概 这级"},
-            "Salonia 卷发棒":     {"brand": "SALONIA（サロニア）", "code": "32mm Curling Iron", "ja": "サロニア カーリングアイロン", "price": "¥3,278 程度", "vibe": "校园人气、平价好用、女高中生第一根卷发棒", "note": "ドンキ / Loft 必有"},
-            "Refa Beautech":      {"brand": "ReFa（リファ）", "code": "Beautech Drive 等吹风机", "ja": "リファ ビューテック ドライヤー", "price": "¥38,500 程度", "vibe": "网红吹风机、低温护发、女明星等级", "note": "爱音 大概 妈妈台、自己买 大概 Salonia"},
-        },
-    },
-}
 
 
-# ─── 类别同义词（_detect_category 用） ───
-CATEGORY_VARIANTS: dict[str, list[str]] = {
-    "口红":     ["口红", "唇膏", "唇釉", "唇彩", "唇泥", "唇蜜", "染唇液", "リップ", "グロス", "ティント", "lip", "lipstick", "lipgloss", "lip tint"],
-    "眼影":     ["眼影", "眼影盘", "アイシャドウ", "アイパレット", "眼妆", "eyeshadow", "eye palette"],
-    "腮红":     ["腮红", "胭脂", "チーク", "blush", "blusher"],
-    "底妆":     ["底妆", "粉底", "粉底液", "气垫", "粉饼", "ファンデーション", "クッション", "フェイスパウダー", "foundation", "cushion", "concealer", "遮瑕"],
-    "睫毛膏":   ["睫毛膏", "眼线", "眼线笔", "眼线液", "假睫毛底膏", "マスカラ", "アイライナー", "mascara", "eyeliner"],
-    "眉妆":     ["眉妆", "眉笔", "眉粉", "染眉膏", "眉胶", "アイブロウ", "アイブロー", "eyebrow", "brow"],
-    "防晒":     ["防晒", "防晒霜", "防晒乳", "spf", "uv", "日焼け止め", "uvケア", "サンスクリーン", "sunscreen"],
-    "香水":     ["香水", "香氛", "古龙水", "淡香", "フレグランス", "コロン", "オードトワレ", "perfume", "cologne", "fragrance"],
-    "美甲":     ["美甲", "指甲油", "甲油", "凝胶甲", "ネイル", "マニキュア", "ジェルネイル", "nail", "manicure", "gel nail"],
-    "美瞳":     ["美瞳", "彩瞳", "假睫毛", "嫁接睫毛", "カラコン", "カラーコンタクト", "つけまつげ", "まつげエクステ", "color contact", "colorcon", "false lash"],
-    "护肤":     ["护肤", "保养", "化妆水", "精华", "面膜", "卸妆", "乳液", "面霜", "スキンケア", "化粧水", "美容液", "クレンジング", "skincare", "lotion", "essence", "serum", "cleanser"],
-    "美容工具": ["美容工具", "美容仪", "卷发棒", "直发器", "吹风机", "电卷棒", "美容ローラー", "美容家電", "ヘアアイロン", "hair iron", "curling iron", "beauty device"],
-}
+@functools.lru_cache(maxsize=1)
+def _load_catalog() -> dict:
+    """惰性加载美妆目录 JSON（importlib.resources 定位、进程内只读一次）。
+
+    数据来源：idiolect/characters/anon/data/cosmetics.json —— 2026-09 从
+    本模块（cosmetics.py）迁出的纯数据字面量、内容逐字节未动。
+    文件缺失 / JSON 损坏时让异常直接抛出、不做静默降级。
+    """
+    resource = importlib.resources.files("idiolect.characters.anon.data").joinpath("cosmetics.json")
+    with resource.open("r", encoding="utf-8") as fh:
+        return json.load(fh)
 
 
-# ─── Subspecies 同义词（_detect_subspecies 用） ───
-SUBSPECIES_VARIANTS: dict[str, list[str]] = {
-    # 口红
-    "YSL 圆管 421":         ["ysl 421", "杨树林 421", "yves saint laurent 421", "ysl 圆管", "rouge pur couture 421", "ザスリム 421"],
-    "Dior 999":             ["dior 999", "迪奥 999", "rouge dior 999", "ディオール 999"],
-    "Chanel Coco 416":      ["coco bloom 416", "chanel 416", "シャネル 416", "rouge coco bloom", "ココブルーム"],
-    "ROMAND 唇泥":          ["romand", "ロムアンド", "blur fudge tint", "唇泥", "mute blur"],
-    "CANMAKE 唇釉":         ["canmake 唇", "stay-on balm rouge", "ステイオンバーム", "キャンメイク 唇"],
-    "OPERA 染唇液":         ["opera lip", "opera tint", "オペラ リップ", "オペラ 染唇", "opera 唇", "オペラ"],
-    # 眼影
-    "Charlotte Tilbury Pillow Talk": ["pillow talk", "charlotte tilbury", "シャーロット ティルベリー", "ピロートーク"],
-    "NARS 12 色 Climax":             ["nars climax", "ナーズ クライマックス", "climax palette"],
-    "Maquillage 心机眼影":           ["maquillage 眼影", "maquillage アイシャドウ", "マキアージュ アイシャドウ", "ドラマティックスタイリング"],
-    "ETUDE Play Color":              ["etude play color", "play color eyes", "プレイカラー", "エチュード 眼影"],
-    "CANMAKE 五色":                  ["canmake 五色", "perfect stylist eyes", "パーフェクトスタイリスト", "キャンメイク 眼影"],
-    # 腮红
-    "NARS Orgasm":          ["nars orgasm", "ナーズ オーガズム", "nars 腮红", "orgasm blush"],
-    "CANMAKE 棉花糖":       ["canmake 棉花糖", "marshmallow finish", "マシュマロフィニッシュ", "cream cheek", "クリームチーク"],
-    "3CE Mood Recipe":      ["3ce mood recipe", "ムードレシピ", "3ce blush", "三CE 腮红"],
-    "Cezanne 自然":         ["cezanne 腮红", "natural cheek n", "セザンヌ チーク", "ナチュラルチーク"],
-    # 底妆
-    "Armani 大师":          ["armani 大师", "armani 粉底", "luminous silk", "アルマーニ ファンデ", "armani foundation"],
-    "CPB 长管隔离":         ["cpb 隔离", "クレドポー", "cle de peau", "le serum", "le concentre"],
-    "YSL 黑管气垫":         ["ysl 气垫", "all hours cushion", "オールアワーズクッション", "ysl cushion"],
-    "Maquillage 心机":      ["maquillage 粉饼", "maquillage パウダリー", "ドラマティックパウダリー", "心机粉饼", "マキアージュ パウダリー"],
-    "Suqqu 粉底液":         ["suqqu", "スック", "the liquid foundation"],
-    # 睫毛 / 眼线
-    "HEROINE MAKE 玛丽魁宁": ["heroine make", "ヒロインメイク", "玛丽魁宁", "long curl mascara", "ロング&カール"],
-    "OPERA 眼线液":          ["opera eyeliner", "opera 眼线", "オペラ アイライナー"],
-    "K-Palette 眼线液":      ["k-palette", "ケーパレット", "real lasting eyeliner", "k palette"],
-    "DEJAVU 睫毛打底":       ["dejavu", "デジャヴュ", "lasting fine", "ラスティングファイン"],
-    "CANMAKE 卷翘睫":        ["canmake 睫毛", "quick lash curler", "クイックラッシュカーラー", "キャンメイク マスカラ"],
-    # 眉妆
-    "Cezanne 双头眉笔":     ["cezanne 眉笔", "auto eyebrow", "セザンヌ アイブロウ", "ナチュラルブラウン"],
-    "KATE 三色眉粉":        ["kate 眉粉", "designing eyebrow", "ケイト アイブロウ", "kate eyebrow"],
-    "Excel 染眉膏":         ["excel 染眉", "color last eyebrow", "エクセル アイブロウマスカラ"],
-    "INTEGRATE 眉笔":       ["integrate 眉笔", "インテグレート アイブロー"],
-    # 防晒
-    "Anessa 金瓶":          ["anessa 金瓶", "アネッサ 金", "anessa milk", "perfect uv", "金色瓶子防晒"],
-    "Bioré 蓝管":           ["biore uv", "ビオレuv", "aqua rich", "アクアリッチ", "biore 防晒"],
-    "La Roche-Posay UVA":   ["la roche-posay", "ラロッシュポゼ", "uv idea", "理肤泉 防晒"],
-    "资生堂樱花瓶":         ["樱花瓶", "anessa whitening", "アネッサ ホワイトニング", "anessa pink"],
-    # 香水
-    "Jo Malone 英国梨":     ["jo malone", "ジョー マローン", "english pear", "英国梨", "イングリッシュペアー"],
-    "Diptyque 影中之水":    ["diptyque", "ディプティック", "eau duelle", "tam dao"],
-    "Chanel Chance":        ["chance", "シャネル チャンス", "chanel chance", "eau tendre", "eau vive"],
-    "Maison Margiela 复刻": ["maison margiela", "メゾン マルジェラ", "replica", "レプリカ", "beach walk", "lazy sunday"],
-    # 美甲
-    "OPI 经典":             ["opi", "オーピーアイ", "opi nail"],
-    "uka 护甲油":           ["uka", "ウカ", "nail oil", "uka 13:00", "uka 18:30", "uka 24:00"],
-    "CANMAKE Colorful":     ["canmake nail", "canmake colorful", "キャンメイク カラフルネイルズ"],
-    "美甲沙龙凝胶":         ["美甲沙龙", "ジェルネイル", "凝胶美甲", "gel nail salon"],
-    # 美瞳
-    "Decorative Eyes":      ["decorative eyes", "デコラティブアイ", "decorative 美瞳"],
-    "FAIRY 假睫毛":         ["fairy 假睫毛", "フェアリー つけまつげ", "fairy eyelash"],
-    "EYELASH SALON":        ["睫毛嫁接", "まつげエクステ", "eyelash extension", "嫁接睫毛"],
-    # 护肤
-    "SK-II 神仙水":         ["sk-ii", "sk2", "神仙水", "facial treatment essence", "pitera", "skii"],
-    "兰蔻小黑瓶":           ["小黑瓶", "lancome 小黑瓶", "genifique", "ランコム ジェニフィック", "lancôme advanced"],
-    "黛珂紫苏水":           ["黛珂", "decorte", "コスメデコルテ", "紫苏水", "ml liposome", "リポソーム"],
-    "Hatomugi 薏仁水":      ["薏仁水", "hatomugi", "ハトムギ化粧水", "naturie", "ナチュリエ"],
-    "FANCL 卸妆油":         ["fancl", "ファンケル", "mild cleansing oil", "fancl 卸妆"],
-    # 美容工具
-    "ReFa CARAT":           ["refa carat", "リファ カラット", "refa face roller", "美容棒"],
-    "Panasonic 直发器":     ["panasonic 直发", "ナノケア 直発", "nano care", "panasonic 卷发"],
-    "Salonia 卷发棒":       ["salonia", "サロニア", "salonia 卷发"],
-    "Refa Beautech":        ["refa beautech", "リファ ビューテック", "refa 吹风"],
-}
+def _taxonomy() -> dict[str, dict]:
+    """原 COSMETICS_TAXONOMY：12 个 category（ja / blurb / anon_canon / subspecies）。"""
+    return _load_catalog()["COSMETICS_TAXONOMY"]
 
 
-# ─── 泛指 vague keywords ───
-VAGUE_KEYWORDS: list[str] = [
-    "化妆", "美妆", "化妆品", "彩妆", "コスメ", "メイク", "メイク用品",
-    "买化妆品", "买美妆", "美妆店", "コスメ店", "コスメショップ", "ドラッグストア",
-    "屈臣氏", "loft", "ロフト", "プラザ", "plaza", "ainz", "アインズ",
-    "donki", "ドンキ", "ドンキホーテ",
-    "美 ootd", "妆容", "化个妆", "化好了妆", "出门化妆", "卸妆",
-    "boots", "sephora", "セフォラ",
-]
+def _category_variants() -> dict[str, list[str]]:
+    """原 CATEGORY_VARIANTS：类别同义词（_detect_category 用）。"""
+    return _load_catalog()["CATEGORY_VARIANTS"]
 
 
-# ─── 喵梦 / 若麦 底色 override keywords ───
-NYAMUME_KEYWORDS: list[str] = [
-    "喵梦", "喵姆亲", "Nyamuchi", "nyamuchi", "Nyamu", "nyamu", "ニャムチ", "ニャム",
-    "若麦", "祐天寺若麦", "祐天寺", "Wakaba", "wakaba", "ワカバ", "若叶",
-    "Amoris", "amoris", "アモーリス",
-]
+def _subspecies_variants() -> dict[str, list[str]]:
+    """原 SUBSPECIES_VARIANTS：Subspecies 同义词（_detect_subspecies 用）。"""
+    return _load_catalog()["SUBSPECIES_VARIANTS"]
+
+
+def _vague_keywords() -> list[str]:
+    """原 VAGUE_KEYWORDS：泛指 vague keywords。"""
+    return _load_catalog()["VAGUE_KEYWORDS"]
+
+
+def _nyamume_keywords() -> list[str]:
+    """原 NYAMUME_KEYWORDS：喵梦 / 若麦 底色 override keywords。"""
+    return _load_catalog()["NYAMUME_KEYWORDS"]
+
+
+_MIGRATED_DATA_NAMES = frozenset({
+    "COSMETICS_TAXONOMY", "CATEGORY_VARIANTS", "SUBSPECIES_VARIANTS",
+    "VAGUE_KEYWORDS", "NYAMUME_KEYWORDS",
+})
+_COMPAT_ALIASES = {"COSMETICS_BRANDS": "COSMETICS_TAXONOMY"}  # 给老代码 import
+
+
+def __getattr__(name: str):
+    """模块级惰性属性：迁出的数据名与 Compat 别名首次被访问时才读 JSON。"""
+    if name in _MIGRATED_DATA_NAMES:
+        return _load_catalog()[name]
+    if name in _COMPAT_ALIASES:
+        return _load_catalog()[_COMPAT_ALIASES[name]]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 # ═══════════════════════════════════════════════════════════════════════
 # Session 去重状态（轻量、进程内、仿 marine_life）
 # ═══════════════════════════════════════════════════════════════════════
-_SEEN_LOCK = threading.Lock()
-_SEEN_SUBSPECIES: dict[str, set[str]] = {}
-_SEEN_CATEGORIES: dict[str, set[str]] = {}
+_SEEN_SUBSPECIES = SessionStore()   # 有上限的 per-session 去重表（见 scene_engine.SessionStore）
+_SEEN_CATEGORIES = SessionStore()
 
 
 def _normalize_session(session_id: Optional[str]) -> str:
@@ -335,32 +140,28 @@ def _normalize_session(session_id: Optional[str]) -> str:
 
 
 def _has_seen_subspecies(session_id: str, sub: str) -> bool:
-    with _SEEN_LOCK:
-        return sub in _SEEN_SUBSPECIES.get(session_id, set())
+    return _SEEN_SUBSPECIES.has(session_id, sub)
 
 
 def _has_seen_category(session_id: str, cat: str) -> bool:
-    with _SEEN_LOCK:
-        return cat in _SEEN_CATEGORIES.get(session_id, set())
+    return _SEEN_CATEGORIES.has(session_id, cat)
 
 
 def _mark_seen(session_id: str, *, category: Optional[str] = None, subspecies: Optional[str] = None) -> None:
-    with _SEEN_LOCK:
-        if category:
-            _SEEN_CATEGORIES.setdefault(session_id, set()).add(category)
-        if subspecies:
-            _SEEN_SUBSPECIES.setdefault(session_id, set()).add(subspecies)
+    if category:
+        _SEEN_CATEGORIES.mark(session_id, category)
+    if subspecies:
+        _SEEN_SUBSPECIES.mark(session_id, subspecies)
 
 
 def reset_session_dedup(session_id: Optional[str] = None) -> None:
     """清 session 的去重状态。session_id=None → 清全部。"""
-    with _SEEN_LOCK:
-        if session_id is None:
-            _SEEN_SUBSPECIES.clear()
-            _SEEN_CATEGORIES.clear()
-        else:
-            _SEEN_SUBSPECIES.pop(session_id, None)
-            _SEEN_CATEGORIES.pop(session_id, None)
+    if session_id is None:
+        _SEEN_SUBSPECIES.reset()
+        _SEEN_CATEGORIES.reset()
+    else:
+        _SEEN_SUBSPECIES.reset(session_id)
+        _SEEN_CATEGORIES.reset(session_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -372,9 +173,9 @@ def _enabled() -> bool:
 
 def _build_subspecies_lookup() -> list[tuple[str, str, str]]:
     out: list[tuple[str, str, str]] = []
-    for cat_name, cat_data in COSMETICS_TAXONOMY.items():
+    for cat_name, cat_data in _taxonomy().items():
         for sub_name in cat_data.get("subspecies", {}).keys():
-            for kw in SUBSPECIES_VARIANTS.get(sub_name, []):
+            for kw in _subspecies_variants().get(sub_name, []):
                 if kw:
                     out.append((kw, sub_name, cat_name))
             # 子项名本身也加进去（"YSL 圆管 421" 直接作为 keyword）
@@ -383,14 +184,17 @@ def _build_subspecies_lookup() -> list[tuple[str, str, str]]:
     return out
 
 
-_SUBSPECIES_LOOKUP = _build_subspecies_lookup()
+@functools.lru_cache(maxsize=1)
+def _subspecies_lookup() -> list[tuple[str, str, str]]:
+    """(kw, subspecies, category) 查找表：首次检测时才构建、进程内缓存。"""
+    return _build_subspecies_lookup()
 
 
 def _detect_subspecies(user_text: str) -> Optional[tuple[str, str]]:
     if not user_text:
         return None
     text_lower = user_text.lower()
-    for kw, sub, cat in _SUBSPECIES_LOOKUP:
+    for kw, sub, cat in _subspecies_lookup():
         if not kw:
             continue
         if kw in user_text or kw.lower() in text_lower:
@@ -403,7 +207,7 @@ def _detect_category(user_text: str) -> Optional[str]:
         return None
     text_lower = user_text.lower()
     flat: list[tuple[str, str]] = []
-    for cat, kws in CATEGORY_VARIANTS.items():
+    for cat, kws in _category_variants().items():
         for kw in kws:
             flat.append((kw, cat))
     flat.sort(key=lambda t: -len(t[0]))
@@ -417,7 +221,7 @@ def _detect_vague(user_text: str) -> bool:
     if not user_text:
         return False
     text_lower = user_text.lower()
-    for kw in VAGUE_KEYWORDS:
+    for kw in _vague_keywords():
         if kw in user_text or kw.lower() in text_lower:
             return True
     return False
@@ -428,7 +232,7 @@ def _detect_nyamume(user_text: str) -> bool:
     if not user_text:
         return False
     text_lower = user_text.lower()
-    for kw in NYAMUME_KEYWORDS:
+    for kw in _nyamume_keywords():
         if kw in user_text or kw.lower() in text_lower:
             # 「若叶」单字易误命中地名 / 树叶（若叶台 / 若叶区 / etc）
             # 简单规则：若叶 / 若麦 命中时要求附近 ≤15 字含其他 cosmetics / 喵 / Mujica / 鼓手 / 视频 / 频道 标识
@@ -526,7 +330,7 @@ def _render_tier0(intent: dict, is_developer: bool = False) -> str:
 
 def _render_tier1(intent: dict, is_developer: bool = False) -> str:
     cat = intent["category"]
-    cat_data = COSMETICS_TAXONOMY.get(cat, {})
+    cat_data = _taxonomy().get(cat, {})
     relation = _relation_hint(is_developer)
 
     # 品牌 / 型号清单（只列 brand + code + ja、不出 vibe / note 详情）
@@ -567,7 +371,7 @@ def _render_tier1(intent: dict, is_developer: bool = False) -> str:
 def _render_tier2(intent: dict, is_developer: bool = False) -> str:
     cat = intent["category"]
     sub = intent["subspecies"]
-    cat_data = COSMETICS_TAXONOMY.get(cat, {})
+    cat_data = _taxonomy().get(cat, {})
     sub_data = cat_data.get("subspecies", {}).get(sub, {})
     relation = _relation_hint(is_developer)
 
@@ -628,7 +432,7 @@ def _render_nyamume_canon(intent: dict, *, dedup: bool = False, is_developer: bo
 
     spec_line = ""
     if sub:
-        sub_data = COSMETICS_TAXONOMY.get(cat or "", {}).get("subspecies", {}).get(sub, {})
+        sub_data = _taxonomy().get(cat or "", {}).get("subspecies", {}).get(sub, {})
         brand = sub_data.get("brand", "")
         code = sub_data.get("code", "")
         spec_line = (
@@ -738,7 +542,7 @@ def _render_nyamume_canon(intent: dict, *, dedup: bool = False, is_developer: bo
 def _render_tier2_dedup(intent: dict, is_developer: bool = False) -> str:
     cat = intent["category"]
     sub = intent["subspecies"]
-    cat_data = COSMETICS_TAXONOMY.get(cat, {})
+    cat_data = _taxonomy().get(cat, {})
     sub_data = cat_data.get("subspecies", {}).get(sub, {})
     brand = sub_data.get("brand", "")
     code = sub_data.get("code", "")
@@ -766,7 +570,7 @@ def _render_tier2_dedup(intent: dict, is_developer: bool = False) -> str:
 
 def _render_tier1_dedup(intent: dict, is_developer: bool = False) -> str:
     cat = intent["category"]
-    cat_data = COSMETICS_TAXONOMY.get(cat, {})
+    cat_data = _taxonomy().get(cat, {})
     relation = _relation_hint(is_developer)
 
     head = f"（话题：美妆 → 类别『{cat}』·**这次聊天里已经涉猎过**）"
@@ -843,9 +647,9 @@ def build_cosmetics_special_block(
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Compat：alias 让旧 import 不破
+# Compat：alias 让旧 import 不破（数据已迁出、别名由模块 __getattr__ 惰性提供）
 # ═══════════════════════════════════════════════════════════════════════
-COSMETICS_BRANDS = COSMETICS_TAXONOMY  # 给老代码 import
+# COSMETICS_BRANDS → COSMETICS_TAXONOMY：见数据层 _COMPAT_ALIASES
 
 
 # ─── self-test ─────────────────────────────────────────────────────

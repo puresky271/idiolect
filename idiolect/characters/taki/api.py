@@ -7,16 +7,22 @@
 当前状态：
   · render_supplemental_blocks 已接通 turn_logic（作曲 / 熊猫 / 凌晨窗口 / 灯话题 /
     打工 / Afterglow）；
-  · post_reply_voice_check 仍是 stub（voice_check 子系统未接线，永远 skipped）。
+  · post_reply_voice_check 已接线 voice_check 清洗链（2026-09-12 起，
+    `TAKI_VOICE_CHECK_ENABLED=0` 可整体回退为透传）。
 """
 from __future__ import annotations
 
+import logging
+import os
 from typing import Any
 from datetime import datetime
 
 from .canon import get_canon_facts, get_canon_profile
 from .voice import VOICE_MANIFEST
 from ...registry import canonicalize_name
+from ...scene_engine import env_enabled
+
+_log = logging.getLogger(__name__)
 
 CHARACTER_NAME = "立希"
 
@@ -75,7 +81,7 @@ def render_supplemental_blocks(
             scene_context=(scene_context or None),
         )
     except Exception as _err:
-        print(f"[taki.api.render_supplemental_blocks] error: {_err}", flush=True)
+        _log.warning("[taki.api.render_supplemental_blocks] error: %s", _err)
         return ""
 
 
@@ -93,14 +99,18 @@ def post_reply_voice_check(
     character: str,
     reply_text: str,
 ) -> dict[str, Any]:
-    """立希回复后的语气后处理校验（不修改 reply、只产出诊断）。
+    """立希回复后的语气清洗（2026-09-12 接线）。
 
-    当前 stub 总返 `{"violations": {}, "ok": True}`、voice_check 子系统接线前没人会跑入分支。
+    跑 `taki.voice_check.clean_reply`——原则**只删不换**：
+      · 句首软回应起手（嗯嗯/好的呀/诶嘿/呐呐 等，先吃长 phrase）
+      · 句末撒娇词（呢/哦/啦/嘛/呀，词内合法位置有 lookbehind 保护）
+      · 装饰符号（♪~———）/ 颜文字 / 多重感叹问号减到 1
 
-    将来检查项（拟）：
+    `TAKI_VOICE_CHECK_ENABLED=0`（或 off/no/false）整体回退为透传。
+
+    将来检查项（拟，未实现）：
       - visual_claim_detect: 检测对用户的 visual claim（"你穿"/"你长得"等）
       - soft_tone_overuse: 温柔正面词跨轮统计（"好开心""真的很""特别"）
-      - sajiao_tail_residue: 句末撒娇词残留（呢/哦/啦/嘛/呀）
       - long_essay_drift: 超过 SSOT 字数上限（普通 5-18 / 技术 ≤30 / 深度 ≤50）
       - nickname_lock_break: 灯被加了任何前缀 / 后缀
       - afterglow_instrument_swap: 蘭 ↔ 巴 乐器混淆
@@ -108,8 +118,17 @@ def post_reply_voice_check(
     """
     if not is_taki(character):
         return {"violations": {}, "ok": True, "skipped": True}
-    # TODO[voice_check]: 真正的语气检查、参考 tomori/voice_check 5-stage chain
-    return {"violations": {}, "ok": True, "skipped": True}
+    if not env_enabled(os.environ.get("TAKI_VOICE_CHECK_ENABLED")):
+        return {"text": str(reply_text or ""), "violations": {}, "ok": True, "skipped": "disabled"}
+    try:
+        from .voice_check import clean_reply
+        text, info = clean_reply(str(reply_text or ""))
+        violations = info.get("violations", {})
+        return {"text": text, "violations": violations, "changed": list(violations),
+                "ok": bool(info.get("ok", True))}
+    except Exception as _err:
+        _log.warning("[TakiVoiceCheck] error: %s", _err)
+        return {"text": str(reply_text or ""), "violations": {}, "ok": True}
 
 
 def postprocess_reply(*, character: str, reply_text: str, history: list | None = None) -> dict[str, Any]:

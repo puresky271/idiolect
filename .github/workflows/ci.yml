@@ -1,0 +1,80 @@
+# CI：离线健康检查是本仓库的质量总闸（见 tools/offline_smoke.py docstring）。
+# 不调 LLM、不读语料（两者在 CI 环境天然缺席，smoke 会 SKIP 而非 FAIL），
+# mock 时钟固定，所以跑的是全确定性的那一层：装配 + 红线 + 门禁 + 单测 + 零写校验。
+#
+# 矩阵：ubuntu 全覆盖支持版本（3.11–3.13，见 pyproject classifiers）；
+# windows 只跑 3.12 —— 仓库在 Windows 上开发，留一个 Windows 探针防止平台专属回归，
+# 不为它付三倍的 runner 时间。
+#
+# wheel 单独一个 job：验证角色包 data/*.json 真的进了发行物（package-data 配置
+# 一旦漏掉，装完的包会在 importlib.resources 处大声报错——但那要等用户装完才发现，
+# 这里提前到每次 push）。
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.12", "3.13"]
+        exclude:
+          - os: windows-latest
+            python: "3.11"
+          - os: windows-latest
+            python: "3.13"
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: "1"          # 中文语料文本，全链路强制 UTF-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: 安装依赖与包本体
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install .
+      - name: 离线 smoke（装配 + 红线 + 数据 + 门禁 + 单测 + 零写校验）
+        run: python -X utf8 tools/offline_smoke.py
+
+  wheel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 构建 wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel
+      - name: 校验角色包数据进了 wheel
+        run: |
+          python - <<'EOF'
+          import glob
+          import zipfile
+
+          wheels = glob.glob("dist/*.whl")
+          assert wheels, "dist/ 下没有 wheel 产物"
+          names = zipfile.ZipFile(wheels[0]).namelist()
+          need = [
+              "characters/anon/data/cosmetics.json",
+              "characters/anon/data/fashion.json",
+              "characters/anon/data/social_media.json",
+              "characters/tomori/data/marine_life.json",
+          ]
+          missing = [n for n in need if not any(name.endswith(n) for name in names)]
+          assert not missing, f"角色包 JSON 缺席 wheel（package-data 配置漂了）：{missing}"
+          print(f"wheel 数据校验 OK：{len(names)} 个文件，4 个 JSON 全在")
+          EOF

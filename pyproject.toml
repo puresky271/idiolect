@@ -47,3 +47,9 @@ version = { attr = "idiolect.__version__" }
 [tool.setuptools.packages.find]
 include = ["idiolect*"]
 namespaces = false
+
+# turn_logic 的纯数据目录已迁到角色包 data/*.json（2026-09）——
+# 作为 package-data 进 wheel，importlib.resources 才能在读 installed 包时定位。
+[tool.setuptools.package-data]
+"idiolect.characters.anon.data" = ["*.json"]
+"idiolect.characters.tomori.data" = ["*.json"]

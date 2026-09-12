@@ -32,7 +32,7 @@ API 单入口（兼容旧）：
 from __future__ import annotations
 
 import os
-import threading
+from idiolect.scene_engine import SessionStore
 from typing import Optional
 
 
@@ -353,9 +353,8 @@ SUBSPECIES_VARIANTS: dict[str, list[str]] = {
 # ═══════════════════════════════════════════════════════════════════════
 # Session 去重状态（同 marine_life 模式、独立 bucket）
 # ═══════════════════════════════════════════════════════════════════════
-_SEEN_LOCK = threading.Lock()
-_SEEN_SUBSPECIES: dict[str, set[str]] = {}
-_SEEN_CATEGORIES: dict[str, set[str]] = {}
+_SEEN_SUBSPECIES = SessionStore()   # 有上限的 per-session 去重表（见 scene_engine.SessionStore）
+_SEEN_CATEGORIES = SessionStore()
 
 
 def _normalize_session(session_id: Optional[str]) -> str:
@@ -365,31 +364,27 @@ def _normalize_session(session_id: Optional[str]) -> str:
 
 
 def _has_seen_subspecies(session_id: str, sub: str) -> bool:
-    with _SEEN_LOCK:
-        return sub in _SEEN_SUBSPECIES.get(session_id, set())
+    return _SEEN_SUBSPECIES.has(session_id, sub)
 
 
 def _has_seen_category(session_id: str, cat: str) -> bool:
-    with _SEEN_LOCK:
-        return cat in _SEEN_CATEGORIES.get(session_id, set())
+    return _SEEN_CATEGORIES.has(session_id, cat)
 
 
 def _mark_seen(session_id: str, *, category: Optional[str] = None, subspecies: Optional[str] = None) -> None:
-    with _SEEN_LOCK:
-        if category:
-            _SEEN_CATEGORIES.setdefault(session_id, set()).add(category)
-        if subspecies:
-            _SEEN_SUBSPECIES.setdefault(session_id, set()).add(subspecies)
+    if category:
+        _SEEN_CATEGORIES.mark(session_id, category)
+    if subspecies:
+        _SEEN_SUBSPECIES.mark(session_id, subspecies)
 
 
 def reset_session_dedup(session_id: Optional[str] = None) -> None:
-    with _SEEN_LOCK:
-        if session_id is None:
-            _SEEN_SUBSPECIES.clear()
-            _SEEN_CATEGORIES.clear()
-        else:
-            _SEEN_SUBSPECIES.pop(session_id, None)
-            _SEEN_CATEGORIES.pop(session_id, None)
+    if session_id is None:
+        _SEEN_SUBSPECIES.reset()
+        _SEEN_CATEGORIES.reset()
+    else:
+        _SEEN_SUBSPECIES.reset(session_id)
+        _SEEN_CATEGORIES.reset(session_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════

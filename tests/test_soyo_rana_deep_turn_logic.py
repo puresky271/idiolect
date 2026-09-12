@@ -204,6 +204,7 @@ class DeepModuleWiringTests(unittest.TestCase):
         """一轮最多 1 个深模块块——多个话题同时命中时不许叠加。"""
         import idiolect.characters.rana.turn_logic as rtl
         import idiolect.characters.soyo.turn_logic as stl
+        from idiolect.scene_engine import run_modules
 
         for pkg, entry, char, text in (
             (rtl, build_rana_special_block, "乐奈", "我外婆家的猫好像很困，你觉得它有趣吗"),
@@ -211,30 +212,37 @@ class DeepModuleWiringTests(unittest.TestCase):
         ):
             with self.subTest(char=char):
                 _reset_all()
-                deep_blocks, fired = pkg._build_deep_blocks(
-                    text, session_id="one", is_developer=False)
+                deep_blocks, fired = run_modules(
+                    pkg._DEEP_MODULES, text, label="test",
+                    shared_kwargs={"session_id": "one", "is_developer": False},
+                    max_blocks=pkg._DEEP_MAX_BLOCKS, literal_copy_note=True)
                 self.assertLessEqual(len(deep_blocks), 1)
                 self.assertLessEqual(len(fired), 1)
 
     def test_cat_talk_suppresses_cat_scene(self):
         """cat_talk 命中时压掉 rana_cat 场景块，避免同一话题两块正文。"""
         import idiolect.characters.rana.turn_logic as rtl
+        from idiolect.scene_engine import run_modules, uncovered_scenes
 
         _reset_all()
-        deep, fired = rtl._build_deep_blocks("刚才在门口看到一只猫", session_id="x",
-                                             is_developer=False)
+        deep, fired = run_modules(
+            rtl._DEEP_MODULES, "刚才在门口看到一只猫", label="test",
+            shared_kwargs={"session_id": "x", "is_developer": False},
+            max_blocks=rtl._DEEP_MAX_BLOCKS, literal_copy_note=True)
         self.assertEqual(fired, ["cat_talk"])
-        keys = [m.key for m in rtl._scenes_for(fired)]
+        keys = [m.key for m in uncovered_scenes(RANA_SCENES, fired, rtl._DEEP_SCENE_OVERLAP)]
         self.assertNotIn("rana_cat", keys)
         # 未命中深模块时场景表原样返回（同一对象，保证零漂移）
         _reset_all()
-        self.assertIs(rtl._scenes_for([]), RANA_SCENES)
+        self.assertIs(uncovered_scenes(RANA_SCENES, [], rtl._DEEP_SCENE_OVERLAP), RANA_SCENES)
 
     def test_soyo_has_no_scene_overlap_and_keeps_table(self):
         import idiolect.characters.soyo.turn_logic as stl
+        from idiolect.scene_engine import uncovered_scenes
 
-        self.assertIs(stl._scenes_for([]), SOYO_SCENES)
-        self.assertIs(stl._scenes_for(["home", "wind_ensemble"]), SOYO_SCENES)
+        self.assertIs(uncovered_scenes(SOYO_SCENES, [], stl._DEEP_SCENE_OVERLAP), SOYO_SCENES)
+        self.assertIs(uncovered_scenes(SOYO_SCENES, ["home", "wind_ensemble"],
+                                       stl._DEEP_SCENE_OVERLAP), SOYO_SCENES)
 
     def test_deep_blocks_carry_anti_copy_footer(self):
         """真实探针发现「正例被逐字照抄」→ 深模块块必须带反照抄脚注，且只带一次。"""

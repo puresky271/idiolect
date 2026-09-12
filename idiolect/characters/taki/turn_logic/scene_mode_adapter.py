@@ -43,10 +43,14 @@ API:
 """
 from __future__ import annotations
 
+import logging
 import os
 import re
 import threading
+from idiolect.scene_engine import SessionStore
 from typing import Optional
+
+_log = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -80,8 +84,9 @@ _LOWMOOD_TAIL_RE = re.compile(r"(难过|痛苦|焦虑|害怕|孤独|累|烦|崩�
 # ═══════════════════════════════════════════════════════════════════════
 # session 级 dedup + 余波
 # ═══════════════════════════════════════════════════════════════════════
-_DEDUP_LOCK = threading.Lock()
-_SESSION_FIRED: dict[str, set[str]] = {}
+# 有上限的 per-session 去重表（共享脚手架）：裸 dict 只增不减，
+# 常驻进程里 session 不淘汰就是缓慢漏内存（2026-09-12 评审抓到）。
+_SESSION_FIRED = SessionStore()
 _RESIDUE_LOCK = threading.Lock()
 _RESIDUE_STATE: dict[str, dict] = {}
 
@@ -93,19 +98,13 @@ def _normalize_session(session_id: Optional[str]) -> str:
 def _mark_fired(session_id: Optional[str], key: str) -> bool:
     """同一 session 内某 mode 已 fire 过则返 True (skip)；否则记一笔返 False。"""
     sid = _normalize_session(session_id)
-    with _DEDUP_LOCK:
-        bucket = _SESSION_FIRED.setdefault(sid, set())
-        if key in bucket:
-            return True
-        bucket.add(key)
-        return False
+    return _SESSION_FIRED.mark(sid, key)
 
 
 def _reset_session_fired(session_id: Optional[str]) -> None:
     """test hook。"""
     sid = _normalize_session(session_id)
-    with _DEDUP_LOCK:
-        _SESSION_FIRED.pop(sid, None)
+    _SESSION_FIRED.reset(sid)
     with _RESIDUE_LOCK:
         _RESIDUE_STATE.pop(sid, None)
 
@@ -327,13 +326,10 @@ def build_scene_mode_adapter_block(
             chosen_mode = "C_residue"
             block = _build_mode_c_residue_block()
 
-    # 决策 log（便于 dump 后回看）
-    print(
-        f"[SceneModeAdapter] mode={chosen_mode} "
-        f"b_score={mode_b_score:.2f} c_score={mode_c_score:.2f} "
-        f"rel={relation_factor:.2f} "
-        f"signals={signals}",
-        flush=True,
+    # 决策 log（便于 dump 后回看；库代码不直接 print，调用方按 logging 配置启用）
+    _log.info(
+        "[SceneModeAdapter] mode=%s b_score=%.2f c_score=%.2f rel=%.2f signals=%s",
+        chosen_mode, mode_b_score, mode_c_score, relation_factor, signals,
     )
 
     return block
