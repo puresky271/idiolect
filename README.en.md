@@ -6,13 +6,17 @@
   <img src="./assets/readme/hero.png" width="100%" alt="idiolect: make an AI character speak in character, and prove it got closer. The illustration shows the five members of MyGO!!!!! — Anon, Tomori, Taki, Soyo and Rana.">
 </p>
 
+~~Rikki, why are you holding a guitar — is it because the author was too lazy to re-render the image?~~
+
 **Make an AI character speak in character, and prove it got closer — with numbers.**
 
-A general model playing a character slowly turns into the same customer-service voice every time: replies grow longer, "I completely understand how you feel" appears, and every conversation ends on a meaningful note. This repository does the opposite: it **measures how the character actually talks** in the original script — how long a line is, how many sentences, which verbal tics, what changes by scene — writes those measurements into the prompt as hard constraints, and then runs automated checks on whether the output really got closer. No fine-tuning, and no original script text in the repository, only the statistics.
+Folks, as vendors keep pushing models harder on coding and agents, AI roleplay is getting harder and harder to keep a straight face through. This repository is one author's write-up of what actually worked: **a methodology for evaluating AI character-dialogue systems, plus a field log of prompt-engineering pitfalls**, with a reusable constraint framework on top. If you are building AI characters, I hope it saves you some of the pain.
 
-The running example is the five members of **BanG Dream! It's MyGO!!!!!**: Anon, Tomori, Taki, Soyo, and Rana. The method itself is show-agnostic and transfers to any character; this repository does exactly one thing — proving a reply sounds in character — and makes it standalone and reproducible.
+If you let a general model play a character, the replies drift into one customer-service voice: they grow longer, "I completely understand how you feel" shows up, and every conversation ends on a meaningful note — and it sits there comforting you forever. This repository does the opposite: it **measures how the character actually talks** in the original script — how long a line is, how many sentences, which verbal tics, what changes by scene — writes those measurements into the prompt as hard constraints, and then runs automated checks on whether the output really got closer. No fine-tuning, and no original script text in the repository, only the statistics.
 
-> **Rights and licensing, up front.**
+The running example is the five members of **BanG Dream! It's MyGO!!!!!**. Note that **the method itself is show-agnostic** and transfers to any character; we solve exactly one thing — proving a reply sounds in character — and make it standalone and reproducible.
+
+> **Let us get rights and licensing straight first.**
 > **Code** (`idiolect/`, `tools/`, `docs/`, `tests/`) is MIT — use it freely ([`LICENSE`](LICENSE)).
 > **The characters and the work are not ours**: MyGO!!!!! characters, settings, story and music belong to **Bushiroad / Craft Egg and the relevant rights holders**. This is an **unofficial fan-made technical project**, not affiliated with, authorised by, or endorsed by them.
 > **The repository contains no original script text** (no game script, dialogue or lyrics) and no audio; `data/` holds aggregate statistics only, and the sample illustration is fan usage, not official artwork.
@@ -29,7 +33,7 @@ The running example is the five members of **BanG Dream! It's MyGO!!!!!**: Anon,
 | **Ready-made character data (aggregates only)** | 26 scenes (13 general + 13 character-specific), 130 character × scene length targets, 114 per-scene tic cells, style profiles for five characters |
 | **Ten methodology documents** | Where the corpus comes from, how each feature class is computed and landed, how to evaluate, and the pitfalls already paid for |
 
-## Up and running in three minutes
+## Quick start
 
 Python 3.11+. After cloning:
 
@@ -49,9 +53,9 @@ from idiolect.assemble import build_messages
 messages = build_messages("乐奈", "你今天又想去哪找猫")   # ready to send to the model
 ```
 
-## The example cast: how differently five people talk
+## Sample analysis of the example cast
 
-The MyGO!!!!! five were not a convenience pick — their replies to the same message diverge wildly. A method that keeps these five from blending into each other survives being moved to other characters. Measured from the original script:
+Using the MyGO!!!!! five as the example:
 
 | Character | Typical line length (median) | Sentences per turn | Signature habits |
 |---|---|---|---|
@@ -61,9 +65,9 @@ The MyGO!!!!! five were not a convenience pick — their replies to the same mes
 | Soyo | 16 chars | 1.4 | Gentle and restrained; only 6% exclamation rate |
 | Rana | 6 chars | 1.2 | Extremely short, 3% exclamation rate, topic often hijacked by cats |
 
-Every median, sentence count and punctuation share in this table can be looked up in [`data/style_profiles.json`](data/style_profiles.json); Taki's noun-opening rate comes from the corpus-level counter, and `tools/score/_noun_initial.py <run-label>` prints the original baseline alongside the arm.
+Of these, every median, sentence count and punctuation share can be looked up in [`data/style_profiles.json`](data/style_profiles.json); Taki's noun-opening rate comes from the corpus-level counter, and `tools/score/_noun_initial.py <run-label>` prints the original baseline alongside the arm.
 
-The gap widens per scene: in a confession scene Rana says 7 characters, Soyo 17. That is why the constraints have to be "this character in this situation", not one shared average.
+The gap widens per scene too: in a confession scene, for instance, Rana says 7 characters and Soyo 17. That is exactly why the constraints have to be "this character in this situation", not one shared average.
 
 ## Why it exists
 
@@ -74,7 +78,7 @@ A model playing a character makes the same four mistakes, and none of them requi
 3. **The meaningful ending**: every exchange lands a neat, positive conclusion.
 4. **Breaking cover**: the model talks about its own setup, leaking inner monologue or thinking tags.
 
-If Rana and Soyo return the same paragraph of comfort, the two characters are the same character. So the whole method is one sentence: **turn "does it sound right" into a few measurable numbers, then iterate on the numbers**. Four working rules:
+If the same paragraph of comfort comes out, the characters are the same character. So the whole method is one sentence: **turn "does it sound right" into a few measurable numbers, then iterate on the numbers**.
 
 - **Compare only against the same character in the same scene.** Not against general human speech, and not against the character's global average.
 - **Numbers raise suspects; they don't convict.** One character's output runs 5x the reference length, half of it because her ellipses count as characters — you have to read the reply to judge.
@@ -85,7 +89,7 @@ Full method: [`docs/00-methodology.md`](docs/00-methodology.md) (Chinese).
 
 ## Real output
 
-This table is one real probe run, not a design target. A probe sends each character a batch of messages and scores the replies:
+This table is one real probe run, not a design target. A probe sends each character a batch of messages; we collect the replies and score them item by item:
 
 ```bash
 py -X utf8 tools/probe/probe_runner.py --label repo_standalone \
@@ -106,16 +110,16 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 - Distinct replies within a cell: 93/105. Verbatim reuse of prompt text: 1%, and the 3 copied characters were a verbal tic, not an example sentence.
 - Leak rate covers thinking tags, inner monologue, speaker echo, and Chinese stage directions — all zero here.
 
-The same inputs with an empty system prompt instead of the four layers:
+Let us see what happens with the same inputs when the four layers are replaced by an empty system prompt:
 
 | Scene | Empty system | Four layers |
 |---|---|---|
 | Rana / comforted | "I completely understand how you feel. When pressure surges like a tide..." (380 chars) | "Mm." "Cat. Under the eaves." (median 10) |
 | Rana / low mood | "When pressure surges and even breathing feels like effort..." (718 chars) | "Mm. ... A cat over there." |
 
-This single cell is not evidence — both samples are tiny. Note that the two columns come from different places: the **four layers** column is from the `repo_standalone` batch above and can be reproduced; the **empty system** column is one manual side-run (the raw record of those two generic-assistant replies) whose probe artifacts are not shipped, so treat it as a qualitative illustration only.
+The two columns come from different places: the **four layers** column is from the `repo_standalone` batch above and can be reproduced; the **empty system** column is one manual side-run (the raw record of those two generic-assistant replies) whose probe artifacts are not shipped, so treat it as a qualitative illustration only.
 
-What it shows is that **a probe must assemble its own prompt**: the shipped fixtures have an empty system field, so without `--assemble` you are measuring a bare model with no character prompt at all.
+This cell is tiny and proves nothing on its own, but it shows one thing: **a probe must assemble its own prompt** — the shipped fixtures have an empty system field, so without `--assemble` you are measuring a bare model with no character prompt at all.
 
 ## Four layers: how the prompt is assembled
 
@@ -132,9 +136,21 @@ These four layers are this repository's complete answer to "how do measured feat
 
 `tools/gates/dump_prompt.py` prints each layer for inspection; `--phase before/after` writes a pair produced by the same script, the same input, and the same clock, so the diff is clean.
 
+**What surrounds the four layers in a real system?** In a complete chat system the model also needs to know what time it is, where the character is, what was just being discussed, what the user mentioned last week. That context is organised as a **workspace**: a dozen candidate sources are collected, scored, ranked, trimmed to a budget, then assembled in a fixed layer order — and the four layers sit in the `persona` slot. The repository distils that skeleton (`idiolect/workspace.py`, zero dependencies); see [`docs/08-context-workspace.md`](docs/08-context-workspace.md):
+
+```python
+from idiolect.workspace import build_workspace_messages
+messages = build_workspace_messages(
+    "乐奈", "你今天又想去哪找猫",
+    blocks=[("current_state", "乐奈在 RiNG 排练室，下午没课"),
+            ("fact_workspace", "用户上周提过想养猫")],
+    execution_packet="【本轮执行】回复 ≤19 字",   # appended to this turn's user message
+)
+```
+
 ## Run the tooling
 
-The three-minute section above used the installed package; the repository also ships the full toolchain (requires a clone):
+The quick-start section above used the installed package; the repository also ships the full toolchain (requires a clone):
 
 ```bash
 py -X utf8 -m pip install -r requirements.txt
@@ -182,7 +198,7 @@ py -X utf8 tools/distill/export_profiles.py --check  # verify shipped profiles a
 
 Probes also run without a corpus: the scoring profile ships with the repository (`data/style_profiles.json`), and the startup log prints which source it used.
 
-## Limits and things you should know
+## On limits and caveats
 
 **No original script text is shipped.** The repository contains aggregate numbers only: length distributions, sentence counts, punctuation rates, tic frequencies, per-scene baselines (130 character-scene cells), and scoring profiles. Example-sentence fields were stripped before publication, and both the health check and the unit tests guard that line. Character and franchise rights belong to Bushiroad, Craft Egg, and related rights holders; this project is unaffiliated. See [`NOTICE.md`](NOTICE.md).
 
@@ -241,8 +257,6 @@ The longest string in `data/` is a 56-character note field; the example-sentence
 
 `tools/corpus/` is tooling only and **ships no data**. You are responsible for checking the source site's terms of service and the law where you live. This repository does not carry a copy of the HuggingFace dataset (`KomeijiForce/BanG_Dream_Events`), only the script that normalises it.
 
-### What this project does not do
-
-No character fine-tuning. No training and no distribution of model weights derived from the work. Everything happens in prompt assembly and post-processing.
+---
 
 The complete statement is in [`NOTICE.md`](NOTICE.md).
