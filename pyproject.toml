@@ -24,6 +24,12 @@ classifiers = [
 # 探针、评分等工具链见 extras 与 requirements*.txt。
 dependencies = []
 
+# 装了包就有一个 `idiolect` 命令，等于 `python -m idiolect`。
+# 这样 `uvx --from git+https://github.com/<owner>/idiolect idiolect prompt Rana "…"`
+# 这种一行调用才成立（uv 会建一个临时环境，运行时零依赖）。
+[project.scripts]
+idiolect = "idiolect.__main__:main"
+
 [project.optional-dependencies]
 llm = ["openai>=1.40"]
 tools = [
