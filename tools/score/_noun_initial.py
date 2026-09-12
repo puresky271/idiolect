@@ -1,8 +1,10 @@
 """乐奈「名词起手率」缺口：当前生产臂 vs 原作基线（非 prompt 手段的起点）。
 
-背景（`REPORT_rana_sentence.md`）：乐奈原作起手 56% 是**名词/体言直出**（五人最高），
-主谓起手只有 11%（其余四人 30~40%）。两次 prompt 侧 A/B 都是负结论（+2.04pp，z=0.30 n.s.），
-所以这一项改用**非 prompt 手段**——但先要把缺口量准（在哪一类起手上差）。
+背景（原作基线见 `docs/03-features.md` 的句式结构一节）：乐奈原作起手 55% 是
+**名词/体言直出**（五人最高；其余四人 38~42%），而主谓起手五个人都在 10~13%——
+她不是「不说主谓句」，是**换了一种起手**。两次 prompt 侧 A/B 都是负结论
+（+2.04pp，z=0.30 n.s.），所以这一项改用**非 prompt 手段**——但先要把缺口量准
+（在哪一类起手上差）。
 
 用法：
   py -X utf8 _noun_initial.py gen_off2 gen_on9        # 通用场景臂
@@ -18,7 +20,7 @@ for _p in (_ROOT, _ROOT / "tools",
            *(_ROOT / "tools" / _d for _d in ("corpus", "distill", "probe", "score", "gates"))):
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
-from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
+from _paths import CORPUS_DIR, DATA, REPORT, ROOT, corpus_file, require_corpus  # noqa: E402,F401
 
 import argparse
 import json
@@ -40,7 +42,7 @@ PUNCT = re.compile(r"^[？?！!…·]")
 
 
 def opening_shape(t: str) -> str:
-    """与 `rana_sentence.py` 完全同口径（保证与历史结论可比）。"""
+    """与 `tools/distill/style_features.py::rana_register_score` 同口径（保证与历史结论可比）。"""
     s = t.strip()
     if not s:
         return "空"
@@ -56,8 +58,9 @@ def opening_shape(t: str) -> str:
 
 
 def corpus(char: str) -> list[str]:
+    require_corpus("cn")  # 空语料当场给出人话提示，别抛原始 traceback（见 docs/02-corpus.md）
     out = []
-    for line in (CORPUS_DIR / "cn.jsonl").read_text(encoding="utf-8").splitlines():
+    for line in corpus_file("cn").read_text(encoding="utf-8").splitlines():
         if line.strip():
             r = json.loads(line)
             if r["character"] == KEY[char] and r.get("split") == "train":

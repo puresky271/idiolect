@@ -210,7 +210,8 @@ class SoyoRanaVoiceCheckTests(unittest.TestCase):
                 self.assertEqual(fn(text), {}, f"{text!r} 被误报")
 
     def test_thresholds_match_corpus(self):
-        """阈值必须来自语料实测（改前请重跑 char_style_spec.py）。"""
+        """阈值必须来自语料实测（出处与推导见 rana/soyo 的 `voice_check/thresholds.py`；
+        改数字前重跑 `tools/distill/export_profiles.py` 对照语料）。"""
         from idiolect.characters.rana import voice_check as rv
         from idiolect.characters.soyo import voice_check as sv
 
@@ -472,7 +473,7 @@ class GeneralSceneAffectionTests(unittest.TestCase):
 class GeneralSceneBatch2Tests(unittest.TestCase):
     """通用场景第二批：crisis / comfort / low_mood / wellwish。
 
-    证据（同角色同场景原作分布，n=40）见 `character_general_scenes.py` 各段注释；
+    证据是 `data/scene_char_baseline.json` 的「角色|场景」格（每格 n=40）——开文件就能核对；
     触发词与 `scene_classifier` 同源，但注入用正则更紧（分类器偏召回、注入偏精度）。
     """
 

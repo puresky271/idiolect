@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,12 +8,12 @@ dynamic = ["version"]
 description = "把角色的说话方式蒸馏成可验证的 prompt 约束（示例角色：《BanG Dream! It's MyGO!!!!!》五人）"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE", "NOTICE.md"]
 keywords = ["prompt-engineering", "character-ai", "roleplay", "llm", "evaluation"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",

@@ -47,12 +47,18 @@ def corpus_file(lang: str = "cn") -> Path:
 def require_corpus(lang: str = "cn", *, min_lines: int = 1) -> Path:
     """读取派生统计前的强制前置检查：语料必须存在且非空。
 
-    为什么要有这一步（2026-09-13 踩过）：语料路径存在但**内容为空**时，
-    所有统计脚本都会「成功」跑完并写出空产物——`export_targets.py` 写出空的
-    `style_targets.json`、`scene_char_baseline.py` 写出 0 个 cell，退出码还是 0。
-    下游只会看到「数字全空」，很难定位原因。空语料一律当场退出（码 2）。
+    为什么要这一步（2026-09-13 踩过）：语料路径存在但**内容为空**时，所有统计脚本都会
+    「成功」跑完并写出空产物——`export_targets.py` 写出空的 `style_targets.json`、
+    `scene_char_baseline.py` 写出 0 个 cell，退出码还是 0。下游只会看到「数字全空」，
+    很难定位原因。
+
+    两种失败都走同一条路：打印一行 `[stop] …` 提示并 `SystemExit`（进程退出码 1），
+    **不抛 traceback**——语料缺失是使用者的操作问题，不是脚本缺陷。
     """
-    p = corpus_file(lang)
+    try:
+        p = corpus_file(lang)
+    except FileNotFoundError as exc:
+        raise SystemExit(f"[stop] {exc}") from None
     n = sum(1 for line in p.read_text(encoding="utf-8").splitlines() if line.strip())
     if n < min_lines:
         raise SystemExit(

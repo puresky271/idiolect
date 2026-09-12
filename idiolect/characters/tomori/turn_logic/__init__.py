@@ -44,7 +44,8 @@ def build_turn_special_block(
                       None → 子系统 fallback 单一 bucket（共享去重状态）
         is_developer: True = 触发对象是开发者
         now_jst:      当前 JST datetime（time-driven 子系统用、如 late_night_window）
-        ledger:       world_ledger.json 内容（如 late_night_window 读 night_owl_today）
+        ledger:       调用方传入的世界状态 dict，读 ledger["plans"][角色]["night_owl_today"]
+                      （本仓库不带世界模拟；缺省 None 时按 False 处理）
         mode:         "chat" = 被对方找 / "autogreet" / "idle" = 主动开口
 
     Returns:

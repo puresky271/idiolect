@@ -231,6 +231,42 @@ class CorpusGuardTests(unittest.TestCase):
             finally:
                 _paths.CORPUS_DIR = old
 
+    def test_require_corpus_rejects_missing_file_without_traceback(self):
+        """语料**不存在**时同样要给人话提示，不许抛 FileNotFoundError traceback。
+
+        两者是同一种操作失误，走到脚本层面看到的东西应该一样（一行 [stop] 提示）。
+        """
+        import sys as _s
+
+        _s.path.insert(0, str(ROOT / "tools"))
+        import tempfile
+        import _paths
+
+        with tempfile.TemporaryDirectory() as tmp:
+            old = _paths.CORPUS_DIR
+            _paths.CORPUS_DIR = Path(tmp)  # 目录存在，但里面没有 cn.jsonl
+            try:
+                with self.assertRaises(SystemExit) as ctx:
+                    _paths.require_corpus("cn")
+                msg = str(ctx.exception)
+                self.assertIn("[stop]", msg)
+                self.assertIn("IDIOLECT_CORPUS_DIR", msg)
+            finally:
+                _paths.CORPUS_DIR = old
+
+    def test_corpus_missing_end_to_end_is_one_line(self):
+        """真跑一个脚本：缺语料时 stderr 只有提示、没有 traceback。"""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            env = {**os.environ, "PYTHONIOENCODING": "utf-8", "IDIOLECT_CORPUS_DIR": tmp}
+            r = subprocess.run([sys.executable, "-X", "utf8", "tools/score/_noun_initial.py", "x"],
+                               cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", env=env)
+            self.assertNotEqual(r.returncode, 0)
+            self.assertIn("[stop]", r.stderr)
+            self.assertNotIn("Traceback", r.stderr)
+
     def test_build_gold_refuses_empty_output(self):
         """源文件缺失时 build_gold 必须拒绝写出（否则会清空目标目录）。"""
         import tempfile

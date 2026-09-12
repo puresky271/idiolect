@@ -18,11 +18,11 @@
     <text x="0" y="244" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="19" fill="#8b94a7">以《BanG Dream! It's MyGO!!!!!》五名成员为示例角色：</text>
     <text x="0" y="274" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="19" fill="#8b94a7">从原作台词蒸馏长度、句数、口癖与场景差异，落进四层 prompt。</text>
     <text x="0" y="336" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#6ea8fe">不做微调 · 不分发原作文本 · pip 安装即用</text>
-    <text x="0" y="368" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">from idiolect.assemble import build_messages</text>
+    <text x="0" y="502" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">from idiolect.assemble import build_messages</text>
   </g>
 
   <g id="dialog-proof">
-    <text x="524" y="56" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#8b94a7">同一句话 × 五个角色 · 真实探针输出</text>
+    <text x="544" y="56" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#8b94a7">同一句话 × 五个角色 · 真实探针输出</text>
 
     <rect x="820" y="72" width="292" height="42" rx="16" fill="#1f2740"/>
     <text x="966" y="99" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#cfd6e4">我今天一直在哭，快撑不住了</text>
@@ -77,6 +77,6 @@
       <text x="666" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">猫。屋檐下面。</text>
     </g>
 
-    <text x="524" y="522" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">输入与五条回复均为真实探针记录 · repo_standalone · 每角色 3 条取 1</text>
+    <text x="544" y="522" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">输入与五条回复均为真实探针记录 · repo_standalone · 每角色 3 条取 1</text>
   </g>
 </svg>

@@ -11,6 +11,10 @@
   - exclamation_softener.py:  啊/吗 + ，/。 → 啊/吗 + `······`（短感叹软化）
   - ellipsis_pair.py:         单 ？/！ → `······？` / `······！`（配对强制）
   - ellipsis.py:              所有 ellipsis 变体（`…/……/.../······{n≠6}/——`）→ `······`（兜底归一）
+  - ellipsis_quota.py:        超额裸 `······` 组降级回「，」/去掉（六点轰炸治理）
+  - bubble_expander.py:       整行只有省略号的 bubble → `············`（12 中点）
+
+不在 `clean_reply` 流程里的：opening_throttle.py（起手节流，要 history，由调用方单独调）。
 
 调用顺序考量：
   · space_pause 在 punctuation 前（补出来的 ······ 计入 v5 existing 抵消、不叠加六点）
@@ -20,7 +24,7 @@
     actually pair 检查的是 `······？` 形式、softener 产的是 `啊······` 不和 ？ 相邻、互不影响
   · ellipsis 最后（兜底所有变体、含中间步骤新产生的 `············`）
 
-后续可加：
+后续可加（**都还没实现**，本仓库不含这几个模块；列在这里是为了标出后处理的已知缺口）：
   - sajiao_tail.py:  末尾撒娇词（呢/啦/呀/嘛/哦）清洗
   - confident.py:    评价副词 / confident 定论 词清洗
   - knowing.py:      知性化归纳句式检测

@@ -9,7 +9,7 @@
 
 参照物两种，都列出（`affection` 两种口径差别很大，正好用来说明为什么）：
   · `检索` = `scene_char_baseline.json` 的原型近邻 top-40 里的前若干条
-  · `锚定` = 该场景的**反应词典子集**（`affection_reference.py`），更贴题
+  · `锚定` = 该场景的**反应词典子集**（宿主工程口径，本仓库不带那份词典），更贴题
 
 用法：
   py -X utf8 scene_feedback.py --scene affection --labels aff_before,aff_after --n 8

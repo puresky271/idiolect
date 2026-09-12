@@ -39,7 +39,7 @@ CHARS = {"tomori": "灯", "anon": "爱音", "rana": "乐奈", "soyo": "素世", 
 PUNCT = "。！？!?…·、，,～~—「」『』（）()「」 　"
 
 # 人名与译名相关字符串：n-gram 会把它们切碎（orin / Soy / Tom / 小爽世…），必须排除。
-# 这些是**称呼**而非口癖——称呼另由 nickname 机制管（见 REPORT_nickname_alignment.md）。
+# 这些是**称呼**而非口癖——称呼另属五类特征里的第五类（见 `docs/03-features.md` 的五类特征表）。
 NAME_TOKENS = [
     "tomori", "anon", "rana", "soyo", "taki", "soyorin", "rikki", "tomorin",
     "灯", "爱音", "楽奈", "乐奈", "素世", "爽世", "立希", "睦", "祥子",
