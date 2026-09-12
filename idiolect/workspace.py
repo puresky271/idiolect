@@ -5,7 +5,8 @@
 装配成 messages。本模块提供这套结构的两块通用骨架：
 
 1. **装配骨架**（`ContextWorkspace` + `assemble`）：12 层固定顺序、空块剔除、
-   整体预算尾裁、执行包追加到最后一条 user 消息末尾。
+   整体预算尾裁、执行包贴到本轮 user 消息末尾（`build_workspace_messages` 负责贴，
+   `assemble` 只贴它已经装配进来的那条 user）。
 2. **事实选择器**（`select_facts`）：候选事实 → 词汇重叠 + 新近度 + 渠道/类型
    加权 → 阈值过滤 → 近去重 → 条数与字符双预算。打分公式与权重是
    实测调校值（各常量的出处见下方注释）。
@@ -20,7 +21,8 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+import warnings
+from dataclasses import dataclass
 
 from .assemble import build_system_prompt
 
@@ -55,12 +57,27 @@ class ContextWorkspace:
     def __init__(self) -> None:
         self._blocks: dict[str, ContextBlock] = {}
 
-    def add(self, key: str, text: str, *, pinned: bool = False) -> "ContextWorkspace":
-        """挂入一个上下文块。空文本直接忽略（层不存在比空层好）。"""
+    def add(self, key: str, text: str, *, pinned: bool = False,
+            replace: bool = False) -> "ContextWorkspace":
+        """挂入一个上下文块。
+
+        - 空文本直接忽略（层不存在比空层好）。
+        - **同一个 key 加第二次默认是追加**（中间空一行），`pinned` 取两者的或。
+          十几路候选材料挂进同一层是常态（两路召回都写 `memory_recall`），
+          早先的实现在这里静默覆盖，先到的那份直接消失，而且第二次不带 `pinned`
+          时还会把 pin 一起弄丢。
+        - 想整块换掉就传 `replace=True`，此时 `pinned` 以本次传的为准。
+        """
         body = str(text or "").strip()
         if not body:
             return self
-        self._blocks[str(key)] = ContextBlock(str(key), body, pinned)
+        key = str(key)
+        old = self._blocks.get(key)
+        if old is None or replace:
+            self._blocks[key] = ContextBlock(key, body, pinned)
+        else:
+            self._blocks[key] = ContextBlock(key, f"{old.text}\n\n{body}",
+                                             old.pinned or pinned)
         return self
 
     def texts(self) -> dict[str, str]:
@@ -82,6 +99,8 @@ class ContextWorkspace:
 
         `max_chars` > 0 时做整体预算裁剪：从层序尾部开始整块摘除未 pinned 的块，
         直到 system 总量达标。不切块内文本——切半块上下文比整块缺失更难排查。
+        **pinned 层（persona 通常就在里面）不参与裁剪**：如果它们本身就超预算，
+        这里发一条 `RuntimeWarning` 而不是静默超发。
 
         注意 `execution_packet` 的作用对象：它贴的是**这里已有**的最后一条 user，
         也就是历史里的上一轮。本轮那句话还没进 messages（通常由调用方随后 append），
@@ -100,6 +119,16 @@ class ContextWorkspace:
                     break
                 if not self._blocks[key].pinned:
                     keys.remove(key)
+            else:
+                # 循环走完仍未达标：剩下的都是 pinned（persona 通常就在里面）。
+                # 不静默超预算——调用方得知道这个预算配不出来。
+                over = _total(keys) - max_chars
+                if over > 0:
+                    warnings.warn(
+                        f"system 预算 {max_chars} 字配不出来：未 pinned 的层已全部摘除，"
+                        f"剩下的 pinned 层共 {_total(keys)} 字（超 {over} 字）。"
+                        f"要么放宽 max_chars，要么别再 pin 这么多层。",
+                        RuntimeWarning, stacklevel=2)
 
         messages: list[dict] = [
             {"role": "system", "content": self._blocks[key].text} for key in keys
@@ -215,7 +244,15 @@ class FactRecord:
 
 
 def topic_tokens(value: str) -> set[str]:
-    """话题词表：英文词原样收录，CJK 串切 2/3-gram（≤4 字的整词也收）。"""
+    """话题词表：英文词原样收录，CJK 串切 2/3-gram（≤4 字的整词也收）。
+
+    ⚠️ **已知盲区：单个汉字不成词**（正则要求 ≥2 个 CJK 字符）。所以「猫」「雨」
+    「伞」这类一字话题产不出任何 token，`overlap_score` 直接返回 0，那条事实在
+    词面通道里等于不存在——对乐奈这种以「猫」为核心的语域是实打实的漏召回。
+    要覆盖这类词，得靠向量通道（本仓库未收录，见 docs/08）或在词表里补双字写法
+    （「野猫」「下雨」）。改分词口径会让下面那批实测调校值失效，所以这里只记录、
+    不擅自放宽。
+    """
     text = re.sub(r"https?://\S+", " ", str(value or "").lower())
     tokens: set[str] = set()
     for word in re.findall(r"[a-z0-9_\-]{2,}|[一-鿿]{2,}", text):

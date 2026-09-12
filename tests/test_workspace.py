@@ -2,8 +2,9 @@
 
 每条断言对应上下文工作区的真实行为或调校值，防止蒸馏过程中走样：
   · 12 层顺序与工作区装配的参数顺序一致；
-  · 执行包只贴最后一条 user（没有 user 就不贴，不另起块）；
-  · 预算裁剪整块摘除、从层序尾部开始、pinned 不动；
+  · 执行包只贴本轮那条 user（贴不到就报错，不静默丢）；
+  · 预算裁剪整块摘除、从层序尾部开始、pinned 不动，配不出来时发警告；
+  · 同一层两路材料合并（`replace=True` 才覆盖）；
   · 重叠分公式（bigram 1.65 / trigram 2.15，强弱边界 2.0）是审计调校值，不是拍脑袋。
 """
 from __future__ import annotations
@@ -51,10 +52,52 @@ class TestLayerSkeleton(unittest.TestCase):
         messages = ws.assemble(max_chars=40)
         # cognitive（尾部）先被整块摘除；current_state 达标后停止
         self.assertEqual([m["content"] for m in messages], ["人格" * 10, "状态" * 10])
-        # 预算小到连 persona 都装不下时，pinned 仍然保留
-        messages = ws.assemble(max_chars=5)
+        # 预算小到连 persona 都装不下时，pinned 仍然保留（并给出警告，见下一条用例）
+        with self.assertWarns(RuntimeWarning):
+            messages = ws.assemble(max_chars=5)
         self.assertEqual([m["content"] for m in messages], ["人格" * 10])
         self.assertEqual(total, 60)
+
+    def test_budget_warns_when_pinned_layers_exceed_it(self):
+        """pinned 层自己就超预算时不许静默超发。
+
+        2026-09-13 实测：旧实现返回 500 字、不报错也不提示，调用方只会看到
+        「预算设了没用」，查不出原因。
+        """
+        ws = ContextWorkspace()
+        ws.add("persona", "人格" * 10, pinned=True)
+        with self.assertWarns(RuntimeWarning) as ctx:
+            ws.assemble(max_chars=5)
+        self.assertIn("配不出来", str(ctx.warning))
+
+    def test_no_warning_when_budget_is_met(self):
+        import warnings as _w
+
+        ws = ContextWorkspace()
+        ws.add("persona", "人格", pinned=True)
+        ws.add("cognitive", "认知")
+        with _w.catch_warnings():
+            _w.simplefilter("error")          # 达标时连警告都不该有
+            ws.assemble(max_chars=100)
+
+    def test_same_key_merges_instead_of_overwriting(self):
+        """同一层两路材料都挂进来时要合并，不能静默丢先到的那份。
+
+        2026-09-13 实测：旧实现直接覆盖，而且第二次不带 pinned 时连 pin 一起丢。
+        """
+        ws = ContextWorkspace()
+        ws.add("memory_recall", "第一路召回", pinned=True)
+        ws.add("memory_recall", "第二路召回")
+        messages = ws.assemble()
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0]["content"], "第一路召回\n\n第二路召回")
+        self.assertTrue(ws._blocks["memory_recall"].pinned, "pin 被第二次 add 弄丢了")
+
+    def test_replace_flag_overwrites(self):
+        ws = ContextWorkspace()
+        ws.add("memory_recall", "旧")
+        ws.add("memory_recall", "新", replace=True)
+        self.assertEqual([m["content"] for m in ws.assemble()], ["新"])
 
 
 class TestExecutionPacket(unittest.TestCase):
