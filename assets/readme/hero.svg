@@ -1,55 +1,82 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="380" viewBox="0 0 1200 380" role="img" aria-labelledby="heroTitle heroDesc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="544" viewBox="0 0 1200 544" role="img" aria-labelledby="heroTitle heroDesc">
   <title id="heroTitle">idiolect：让 AI 说话像角色，并且能证明它变像了</title>
-  <desc id="heroDesc">左侧是项目名与一句话说明：从原作台词蒸馏长度、句数、口癖与场景分类，落进四层 prompt。右侧是乐奈一次真实装配的 system prompt：长档案 12223 字、语气清单 1972 字、说话尺度 551 字、本轮指引 846 字，下方是这一步真实生成的回复。</desc>
+  <desc id="heroDesc">左侧是项目名与一句话说明：以《BanG Dream! It's MyGO!!!!!》五名成员为示例角色，从原作台词蒸馏长度、句数、口癖与场景分类，落进四层 prompt。右侧是真实探针记录：同一句「我今天一直在哭，快撑不住了」，爱音、灯、立希、素世、乐奈给出五种截然不同的回复。</desc>
 
   <defs>
-    <clipPath id="bgClip"><rect width="1200" height="380" rx="26"/></clipPath>
+    <clipPath id="bgClip"><rect width="1200" height="544" rx="26"/></clipPath>
   </defs>
 
   <g clip-path="url(#bgClip)">
-    <rect width="1200" height="380" fill="#0b0e14"/>
-    <rect x="0" y="0" width="6" height="380" fill="#6ea8fe"/>
+    <rect width="1200" height="544" fill="#0b0e14"/>
+    <rect x="0" y="0" width="6" height="544" fill="#6ea8fe"/>
   </g>
 
-  <g id="title-block" transform="translate(64 62)">
-    <text x="0" y="0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" letter-spacing="2.6" fill="#8b94a7">FAN PROJECT · PROMPT ENGINEERING</text>
-    <text x="0" y="76" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="62" font-weight="700" fill="#e8ecf4">idiolect</text>
-    <text x="0" y="128" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#cfd6e4">让 AI 说话像角色，并且能证明它变像了</text>
-    <text x="0" y="176" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#8b94a7">从原作台词蒸馏长度、句数、口癖与场景分类，落进四层 prompt。</text>
-    <text x="0" y="208" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#8b94a7">配一套探针、评分与门禁，每一句话的改动都能被验证。</text>
-    <text x="0" y="262" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#6ea8fe">不做微调 · 不分发原作文本 · 130 个「角色 / 场景」基线</text>
+  <g id="title-block" transform="translate(64 0)">
+    <text x="0" y="72" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" letter-spacing="2.4" fill="#8b94a7">MYGO!!!!! FAN PROJECT · PROMPT ENGINEERING</text>
+    <text x="0" y="146" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="62" font-weight="700" fill="#e8ecf4">idiolect</text>
+    <text x="0" y="192" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#cfd6e4">让 AI 说话像角色，并且能证明它变像了</text>
+    <text x="0" y="244" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="19" fill="#8b94a7">以《BanG Dream! It's MyGO!!!!!》五名成员为示例角色：</text>
+    <text x="0" y="274" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="19" fill="#8b94a7">从原作台词蒸馏长度、句数、口癖与场景差异，落进四层 prompt。</text>
+    <text x="0" y="336" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#6ea8fe">不做微调 · 不分发原作文本 · pip 安装即用</text>
+    <text x="0" y="368" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">from idiolect.assemble import build_messages</text>
   </g>
 
-  <g id="layer-proof" transform="translate(696 48)">
-    <rect width="440" height="284" rx="18" fill="#131826" stroke="#1f2740"/>
-    <text x="24" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#8b94a7">system prompt · 乐奈 · 找猫场景</text>
+  <g id="dialog-proof">
+    <text x="524" y="56" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#8b94a7">同一句话 × 五个角色 · 真实探针输出</text>
 
-    <text x="24" y="76" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" fill="#cfd6e4">长档案</text>
-    <rect x="122" y="62" width="236" height="14" rx="7" fill="#6ea8fe"/>
-    <text x="416" y="76" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">12223</text>
+    <rect x="820" y="72" width="292" height="42" rx="16" fill="#1f2740"/>
+    <text x="966" y="99" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#cfd6e4">我今天一直在哭，快撑不住了</text>
 
-    <text x="24" y="110" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" fill="#cfd6e4">语气清单</text>
-    <rect x="122" y="96" width="42" height="14" rx="7" fill="#f0a6c0"/>
-    <text x="416" y="110" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">1972</text>
+    <!-- 爱音 -->
+    <g transform="translate(0 130)">
+      <circle cx="544" cy="29" r="7" fill="#ff8899"/>
+      <text x="560" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="700" fill="#e8ecf4">爱音</text>
+      <rect x="640" y="0" width="420" height="58" rx="14" fill="#131826" stroke="#1f2740"/>
+      <rect x="640" y="0" width="5" height="58" rx="2.5" fill="#ff8899"/>
+      <text x="666" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">……纸巾。先拿着。</text>
+      <text x="666" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">哭就哭吧，我陪着。</text>
+    </g>
 
-    <text x="24" y="144" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" fill="#cfd6e4">说话尺度</text>
-    <rect x="122" y="130" width="12" height="14" rx="6" fill="#d9b382"/>
-    <text x="416" y="144" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">551</text>
+    <!-- 灯 -->
+    <g transform="translate(0 204)">
+      <circle cx="544" cy="29" r="7" fill="#77bbdd"/>
+      <text x="560" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="700" fill="#e8ecf4">灯</text>
+      <rect x="640" y="0" width="420" height="58" rx="14" fill="#131826" stroke="#1f2740"/>
+      <rect x="640" y="0" width="5" height="58" rx="2.5" fill="#77bbdd"/>
+      <text x="666" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">············</text>
+      <text x="666" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">我······也经常哭。</text>
+    </g>
 
-    <text x="24" y="178" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" fill="#cfd6e4">本轮指引</text>
-    <rect x="122" y="164" width="18" height="14" rx="7" fill="#a78bfa"/>
-    <text x="416" y="178" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">846</text>
+    <!-- 立希 -->
+    <g transform="translate(0 278)">
+      <circle cx="544" cy="29" r="7" fill="#7777aa"/>
+      <text x="560" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="700" fill="#e8ecf4">立希</text>
+      <rect x="640" y="0" width="420" height="58" rx="14" fill="#131826" stroke="#1f2740"/>
+      <rect x="640" y="0" width="5" height="58" rx="2.5" fill="#7777aa"/>
+      <text x="666" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">好了。</text>
+      <text x="666" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">去洗把脸，然后喝点水。</text>
+    </g>
 
-    <text x="24" y="198" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#8b94a7">条形按字数线性比例 · mock 白天 · 每格 3 次</text>
+    <!-- 素世 -->
+    <g transform="translate(0 352)">
+      <circle cx="544" cy="29" r="7" fill="#ffdd88"/>
+      <text x="560" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="700" fill="#e8ecf4">素世</text>
+      <rect x="640" y="0" width="420" height="58" rx="14" fill="#131826" stroke="#1f2740"/>
+      <rect x="640" y="0" width="5" height="58" rx="2.5" fill="#ffdd88"/>
+      <text x="666" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">……先别撑着。</text>
+      <text x="666" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">来我家吧，今天妈妈不在。</text>
+    </g>
 
-    <line x1="24" y1="212" x2="416" y2="212" stroke="#1f2740"/>
+    <!-- 乐奈 -->
+    <g transform="translate(0 426)">
+      <circle cx="544" cy="29" r="7" fill="#77dd77"/>
+      <text x="560" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="700" fill="#e8ecf4">乐奈</text>
+      <rect x="640" y="0" width="420" height="58" rx="14" fill="#131826" stroke="#1f2740"/>
+      <rect x="640" y="0" width="5" height="58" rx="2.5" fill="#77dd77"/>
+      <text x="666" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">嗯。</text>
+      <text x="666" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" fill="#e8ecf4">猫。屋檐下面。</text>
+    </g>
 
-    <rect x="24" y="224" width="392" height="44" rx="14" fill="#0b0e14" stroke="#1f2740"/>
-    <path d="M46 268 L46 278 L58 268 Z" fill="#1f2740"/>
-    <text x="44" y="252" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="19" fill="#e8ecf4">「嗯。」「猫。屋檐下面。」</text>
-  </g>
-
-  <g id="footer-note" transform="translate(64 330)">
-    <text x="0" y="0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">上面这张面板就是一次真实装配的全部内容</text>
+    <text x="524" y="522" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b94a7">输入与五条回复均为真实探针记录 · repo_standalone · 每角色 3 条取 1</text>
   </g>
 </svg>

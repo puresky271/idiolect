@@ -3,36 +3,70 @@
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="idiolect: make an AI character speak in character, and prove it got closer. On the right, one real assembled four-layer prompt and the reply it produced.">
+  <img src="./assets/readme/hero.svg" width="100%" alt="idiolect: make an AI character speak in character, and prove it got closer. Example cast: the five members of MyGO!!!!!. On the right, their five different real replies to the same message.">
 </p>
 
-**Make an AI character speak in character, and prove it got closer.**
+**Make an AI character speak in character, and prove it got closer — with numbers.**
 
-This repository distills verifiable style features from a character's original lines (length, sentence count, verbal tics, forms of address, scene classification), puts them into the system prompt, and then checks whether the character actually sounds closer with a probe and a set of gates. No fine-tuning. No original script text is shipped, only derived statistics.
+A general model playing a character slowly turns into the same customer-service voice every time: replies grow longer, "I completely understand how you feel" appears, and every conversation ends on a meaningful note. This repository does the opposite: it **measures how the character actually talks** in the original script — how long a line is, how many sentences, which verbal tics, what changes by scene — writes those measurements into the prompt as hard constraints, and then runs automated checks on whether the output really got closer. No fine-tuning, and no original script text in the repository, only the statistics.
 
-Three things you can do as soon as you clone it:
+The running example is the five members of **BanG Dream! It's MyGO!!!!!**: Anon, Tomori, Taki, Soyo, and Rana — the image above shows their five real replies to the same message. The method itself is show-agnostic and transfers to any character; this repository does exactly one thing — proving a reply sounds in character — and makes it standalone and reproducible.
+
+## Up and running in three minutes
+
+Python 3.11+. After cloning:
 
 ```bash
-py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --msg "你今天又想去哪找猫"   # the full prompt this character receives right now
-py -X utf8 tools/offline_smoke.py                                            # one-command health check (no writes, no LLM)
-py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic \
-    --registry --cats 通用场景 --runs 3                                       # run a real probe
+pip install .                                           # zero runtime dependencies
+python -m idiolect list                                 # the five built-in characters
+python -m idiolect prompt 乐奈 "你今天又想去哪找猫"      # the full system prompt for this message
+python -m idiolect chat 乐奈 "你今天又想去哪找猫"        # one real chat turn (see env vars below)
 ```
 
+On Windows, prefer `py -X utf8` over a bare `python` (which may resolve to an interpreter without the dependencies). `chat` works with any OpenAI-compatible endpoint: set `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` and `pip install "idiolect[llm]"`.
+
+From code:
+
+```python
+from idiolect.assemble import build_messages
+messages = build_messages("乐奈", "你今天又想去哪找猫")   # ready to send to the model
+```
+
+## The example cast: how differently five people talk
+
+The MyGO!!!!! five were not a convenience pick — their replies to the same message diverge wildly (the five replies in the hero image are real outputs, not invented). A method that keeps these five from blending into each other survives being moved to other characters. Measured from the original script:
+
+| Character | Typical line length (median) | Sentences per turn | Signature habits |
+|---|---|---|---|
+| Anon | 20 chars | 1.6 | 35% of lines have an exclamation mark; tics "啊、诶、哦" |
+| Tomori | 11 chars | 1.2 | 81% of lines carry ellipses, long runs of "······" |
+| Taki | 15 chars | 1.4 | Short and direct; 39% of her original lines open with a bare noun |
+| Soyo | 16 chars | 1.4 | Gentle and restrained; only 6% exclamation rate |
+| Rana | 6 chars | 1.2 | Extremely short, 3% exclamation rate, topic often hijacked by cats |
+
+Every median, sentence count and punctuation share in this table can be looked up in [`data/style_profiles.json`](data/style_profiles.json); Taki's noun-opening rate comes from the corpus-level counter, and `tools/score/_noun_initial.py <run-label>` prints the original baseline alongside the arm.
+
+The gap widens per scene: in a confession scene Rana says 7 characters, Soyo 17. That is why the constraints have to be "this character in this situation", not one shared average.
+
 <p align="center">
-  <img src="./assets/readme/section-01-what.svg" width="100%" alt="01 What it solves">
+  <img src="./assets/readme/section-01-what.svg" width="100%" alt="01 Why it exists">
 </p>
 
-## What it solves
+## Why it exists
 
-A general model playing a character drifts in the same direction every time: replies get long, empathy templates appear ("I completely understand how you feel"), a summary sentence lands at the end, and now and then the model talks about its own setup. None of this requires the model to fail. It is what the training objective produces. Character differentiation dies right there: if every character returns the same paragraph of comfort, they are the same character.
+A model playing a character makes the same four mistakes, and none of them require the model to fail — they are what the training objective produces:
 
-The method here turns "does it sound right" into measurable quantities, then iterates on those.
+1. **Replies get long**: where the character says 7 characters in the original, the model writes 700.
+2. **Empathy templates**: "I completely understand how you feel. When pressure surges like a tide..."
+3. **The meaningful ending**: every exchange lands a neat, positive conclusion.
+4. **Breaking cover**: the model talks about its own setup, leaking inner monologue or thinking tags.
 
-- **One reference frame**: the original lines of the same character in the same scene. Not general human speech statistics, not the character's global average. One character says 7 characters in a confession scene, another says 18 in the same scene, so a global median misleads both.
-- **Length deviation finds suspects, it does not convict.** One character's replies run 5x the reference, half of it because her twelve-dot pause counts as characters. You have to read the reply.
-- **Insufficient sample size means "no conclusion".** With 6 samples per cell, the median swings further than the effect. Measured: same scene, same prompt, one character's score moved from 0.551 to 0.350.
-- **No meta-narrative in character-visible text.** Words like "corpus", "measured", "median", "baseline" inside a prompt invite the model to discuss its own construction.
+If Rana and Soyo return the same paragraph of comfort, the two characters are the same character. So the whole method is one sentence: **turn "does it sound right" into a few measurable numbers, then iterate on the numbers**. Four working rules:
+
+- **Compare only against the same character in the same scene.** Not against general human speech, and not against the character's global average.
+- **Numbers raise suspects; they don't convict.** One character's output runs 5x the reference length, half of it because her ellipses count as characters — you have to read the reply to judge.
+- **Small samples mean "no conclusion".** With 6 replies per cell, the same scene and prompt can swing one character's score from 0.551 to 0.350 — more than the effect being measured.
+- **No meta vocabulary in character-visible text.** Words like "corpus", "median", or "baseline" inside a prompt invite the model to discuss its own construction.
 
 Full method: [`docs/00-methodology.md`](docs/00-methodology.md) (Chinese).
 
@@ -42,7 +76,7 @@ Full method: [`docs/00-methodology.md`](docs/00-methodology.md) (Chinese).
 
 ## Real output
 
-These numbers come from one real probe run, not from a design target:
+This table is one real probe run, not a design target. A probe sends each character a batch of messages and scores the replies:
 
 ```bash
 py -X utf8 tools/probe/probe_runner.py --label repo_standalone \
@@ -50,7 +84,7 @@ py -X utf8 tools/probe/probe_runner.py --label repo_standalone \
 py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,comfort --cat 通用场景
 ```
 
-| Character | Replies | fidelity | Hard-rule V | Leak rate | Scene distill |
+| Character | Replies | fidelity (100 = closest) | Red-line rate | Leak rate | Scene fit |
 |---|---|---|---|---|---|
 | Anon | 21 | 86.5 | 4.9% | 0% | 0.545 |
 | Soyo | 21 | 85.4 | 0.0% | 0% | 0.532 |
@@ -58,64 +92,59 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 | Tomori | 21 | 79.9 | 0.0% | 0% | 0.365 |
 | Rana | 21 | 79.9 | 0.0% | 0% | 0.504 |
 
-- Conditions: `deepseek-flash`, temperature 0.75, max_tokens 420, mock daytime clock (`2026-09-12T15:00:00+09:00`), 3 samples per cell, 105 replies, zero errors.
-- Scene distill measures agreement with the original distribution for the same character and scene (median length, p90, sentence count). 1.0 means agreement; the mean is 0.466 over 35 cells. It is a **relative** score for before/after comparison inside one batch.
-- Distinct replies within a cell: 93/105. Verbatim reuse of injected text: 1%, longest common substring 3 characters (that one copies a tic, not an example sentence).
-- Leak rate covers think tags, inner monologue, speaker echo, and Chinese stage directions. All zero here.
+- Conditions: `deepseek-flash`, temperature 0.75, max_tokens 420, clock pinned to daytime, 3 samples per cell, 105 replies, zero errors.
+- **Scene fit** measures agreement with the original same-character-same-scene distribution (length, sentence count); 1.0 is full agreement, this batch averages 0.466 over 35 cells. It is a **relative** score for before/after comparison inside one batch — not comparable across models, fixtures, or clocks.
+- Distinct replies within a cell: 93/105. Verbatim reuse of prompt text: 1%, and the 3 copied characters were a verbal tic, not an example sentence.
+- Leak rate covers thinking tags, inner monologue, speaker echo, and Chinese stage directions — all zero here.
 
-The same fixtures with an empty system prompt instead of the four layers:
+The same inputs with an empty system prompt instead of the four layers:
 
 | Scene | Empty system | Four layers |
 |---|---|---|
-| Rana / comfort | "I completely understand how you feel. When pressure surges like a tide..." (380 chars) | "Mm." "Cat. Under the eaves." (median 10) |
+| Rana / comforted | "I completely understand how you feel. When pressure surges like a tide..." (380 chars) | "Mm." "Cat. Under the eaves." (median 10) |
 | Rana / low mood | "When pressure surges and even breathing feels like effort..." (718 chars) | "Mm. ... A cat over there." |
 
-This single cell is not evidence; sample sizes on both sides are tiny. What it shows is that **a probe has to assemble its own prompt**: the placeholder fixtures ship with an empty system, so without `--assemble` you are measuring a model with no character prompt at all.
+This single cell is not evidence — both samples are tiny. What it shows is that **a probe must assemble its own prompt**: the shipped fixtures have an empty system field, so without `--assemble` you are measuring a bare model with no character prompt at all.
 
 <p align="center">
-  <img src="./assets/readme/section-03-layers.svg" width="100%" alt="03 Prompt layers">
+  <img src="./assets/readme/section-03-layers.svg" width="100%" alt="03 Four prompt layers">
 </p>
 
-## Four prompt layers
+## Four layers: how the prompt is assembled
 
-Everything distilled lands in four layers, in a fixed order. Stable prefixes come first so they stay cacheable, dynamic blocks last so they never pollute the prefix:
+Everything measured lands in four layers, in a fixed order — stable parts first (cache-friendly), per-turn parts last:
 
-| Layer | Content | Frequency | Characters for Rana / cat scene |
-|---|---|---|---|
-| `canon` | Who this character is, the long profile | static | 12223 |
-| `voice` | Tone manifest: sentence patterns, tics, relationship differences, anti-template constraints | static | 1972 |
-| `style_target` | Speaking scale: verifiable numbers for length, sentence count, sentence ending, first person | per turn (scene values when a scene matches) | 551 |
-| `turn_logic` | This turn's scene or topic guidance | per turn (only when it matches) | 846 |
+| Layer | Plain reading | Content | Frequency | Chars for Rana's cat scene |
+|---|---|---|---|---|
+| `canon` | Who she is | Long profile | static | 12223 |
+| `voice` | How she talks | Sentence patterns, tics, per-person attitude differences, anti-template hard constraints | static | 1972 |
+| `style_target` | How much to say this turn | Verifiable numbers for length, sentence count, endings, first person; scene-specific values on a match | per turn | 539 |
+| `turn_logic` | What situation this turn is | This turn's scene/topic guidance | per turn (only on match) | 846 |
 
-```python
-from idiolect.assemble import build_messages
-messages = build_messages("乐奈", "你今天又想去哪找猫")
-```
+These four layers are this repository's complete answer to "how do measured features reach the prompt". A real system can put memory, world state, and schedules in front of them; those layers are unrelated to the method.
 
-These four layers are this repository's complete answer to "how do distilled features reach the prompt". A real system can put memory, world state, and schedules in front of them; those layers are unrelated to the method.
-
-`dump_prompt.py` prints each layer so you can check the result, and `--phase before/after` leaves a diffable pair produced by the same script, the same input, and the same mock clock.
+`tools/gates/dump_prompt.py` prints each layer for inspection; `--phase before/after` writes a pair produced by the same script, the same input, and the same clock, so the diff is clean.
 
 <p align="center">
-  <img src="./assets/readme/section-04-start.svg" width="100%" alt="04 Get started">
+  <img src="./assets/readme/section-04-start.svg" width="100%" alt="04 Run the tooling">
 </p>
 
-## Get started
+## Run the tooling
 
-Python 3.11+. On Windows always call `py -X utf8`; a bare `python` may resolve to an interpreter without the dependencies.
+The three-minute section above used the installed package; the repository also ships the full toolchain (requires a clone):
 
 ```bash
 py -X utf8 -m pip install -r requirements.txt
 ```
 
-**Inspect a prompt** (no API key, no corpus):
+**Inspect prompts** (no API key, no corpus):
 
 ```bash
-py -X utf8 tools/gates/dump_prompt.py --all --matrix
+py -X utf8 tools/gates/dump_prompt.py --all --matrix        # five characters × four messages that hit different layers
 py -X utf8 tools/gates/dump_prompt.py --char 灯 --msg "我一直在哭" --layers canon,voice
 ```
 
-**Health check**:
+**One-command health check** (no LLM calls, no repository writes; good pre-commit gate):
 
 ```bash
 py -X utf8 tools/offline_smoke.py          # assembly, scene coverage, trigger matrix, content red lines, data shapes, gates, unit tests, zero-write check
@@ -131,13 +160,13 @@ py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --re
 py -X utf8 tools/score/probe_report.py --label run1 --scenes crisis,comfort --cat 通用场景
 ```
 
-**The evaluation clock** is pinned to mock daytime (`tools/mock_clock.py`). Characters react to the hour, so evaluating against the wall clock turns "what time is it" into a hidden variable:
+**The evaluation clock**: characters react to the hour (3 AM answers differ from 3 PM answers), so evaluation uses a clock pinned to daytime (`tools/mock_clock.py`) instead of letting "what time is it" become a hidden variable:
 
 ```bash
 py -X utf8 tools/mock_clock.py --set 2026-09-12T03:00:00+09:00
 ```
 
-**Recompute from your own corpus** (you fetch the corpus yourself, see [`docs/02-corpus.md`](docs/02-corpus.md)):
+**Recompute every number from your own corpus** (you fetch the corpus yourself, see [`docs/02-corpus.md`](docs/02-corpus.md)):
 
 ```bash
 $env:IDIOLECT_CORPUS_DIR = "D:\corpus\mygo-gold"
@@ -148,27 +177,27 @@ py -X utf8 tools/distill/export_profiles.py          # scoring profiles
 py -X utf8 tools/distill/export_profiles.py --check  # verify shipped profiles against the corpus
 ```
 
-Probes run without a corpus too: the scoring profile ships with the repository (`data/style_profiles.json`), and the startup log prints which source it used.
+Probes also run without a corpus: the scoring profile ships with the repository (`data/style_profiles.json`), and the startup log prints which source it used.
 
 <p align="center">
-  <img src="./assets/readme/section-05-limits.svg" width="100%" alt="05 Limits and docs">
+  <img src="./assets/readme/section-05-limits.svg" width="100%" alt="05 Limits and things you should know">
 </p>
 
 ## Limits and things you should know
 
-**No original script text is shipped.** The repository contains aggregate quantities only: length distributions, sentence counts, punctuation rates, tic frequencies, per-scene baselines (130 character-scene cells), and scoring profiles. Example-sentence fields were stripped before publication, and both `offline_smoke` and the unit tests guard that line. Character and franchise rights belong to Bushiroad, Craft Egg, and related rights holders; this project is unaffiliated. See [`NOTICE.md`](NOTICE.md).
+**No original script text is shipped.** The repository contains aggregate numbers only: length distributions, sentence counts, punctuation rates, tic frequencies, per-scene baselines (130 character-scene cells), and scoring profiles. Example-sentence fields were stripped before publication, and both the health check and the unit tests guard that line. Character and franchise rights belong to Bushiroad, Craft Egg, and related rights holders; this project is unaffiliated. See [`NOTICE.md`](NOTICE.md).
 
-**The metrics are relative.** Distill and fidelity scores compare before/after inside one batch. They do not travel across batches, models, fixtures, or clocks.
+**Scores are relative.** Scene fit and fidelity compare before/after inside one batch. They do not travel across batches, models, fixtures, or clocks.
 
 **Known and unsolved:**
 
 - The cost of zero-example wording: after banning copyable example sentences, length agreement fell from 0.512 to 0.461. The trade was accepted on purpose.
-- One character's sentence openings are over-corrected: 39% of her original turns start with a bare noun, while the current prompt pushes that to 95%.
-- Silent-turn accounting: the reference frame drops silent turns, but one character's twelve-dot pause is content, not padding.
+- Taki's sentence openings are over-corrected: 39% of her original turns start with a bare noun, and the current arm pushes that to 62% (`tools/score/_noun_initial.py <run-label>` prints the original baseline alongside the arm) — the direction overshot.
+- Tomori's pause accounting: the reference frame drops silent turns, but her twelve-dot pause is content, not padding.
 - Fixture measurability: "what did you mean by that" needs a referable previous sentence, and placeholder fixtures have no history, so those cells are unreadable.
-- The two lowest scene distill scores are 0.386 and 0.365.
+- Taki and Tomori still hold the two lowest scene fit scores (0.386 / 0.365).
 
-**The corpus is a snapshot.** New story content keeps appearing, so a re-fetch yields different distributions. Every derived statistic records the script that generated it, so it can be rebuilt.
+**The corpus is a snapshot.** New official stories keep appearing, so a re-fetch yields different distributions. Every derived statistic records the script that generated it, so it can be rebuilt.
 
 ## Docs
 
@@ -184,6 +213,7 @@ The methodology documents are written in Chinese. Each file stands alone.
 | [`docs/05-tooling.md`](docs/05-tooling.md) | Tool reference, including prompt dump, mock clock, and offline smoke |
 | [`docs/06-lessons.md`](docs/06-lessons.md) | The pitfall list: what taught each constraint |
 | [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | Building turn_logic modules and voice_check post-processing: wiring, gates, acceptance |
+| [`docs/08-context-workspace.md`](docs/08-context-workspace.md) | The context workspace: what surrounds the four layers in a real chat system |
 
 ## License
 
