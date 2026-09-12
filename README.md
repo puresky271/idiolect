@@ -213,6 +213,8 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 
 ## 文档
 
+不确定从哪篇看起，先翻 [`docs/README.md`](docs/README.md)：它按「你想做什么」分三条路，另有一张名词表（回合 / 场景 / 四层 / 探针 / 夹具 / 臂 / 门禁…）。
+
 | 文档 | 内容 |
 |---|---|
 | [`docs/00-methodology.md`](docs/00-methodology.md) | 方法总纲：闭环、四条不变量、证据分级、已知残余 |

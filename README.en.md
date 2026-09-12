@@ -201,7 +201,7 @@ Probes also run without a corpus: the scoring profile ships with the repository 
 
 ## Docs
 
-The methodology documents are written in Chinese. Each file stands alone.
+The methodology documents are written in Chinese. Each file stands alone; if you are not sure where to start, open [`docs/README.md`](docs/README.md) — it splits the nine documents into three reading paths by intent and carries a short glossary (turn / scene / the four layers / probe / fixture / arm / gate).
 
 | Document | Content |
 |---|---|

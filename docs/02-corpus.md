@@ -1,5 +1,7 @@
 # 语料获取与派生统计
 
+> 讲什么：语料从哪来、怎么抓与切分、怎么审计，以及 `data/` 里每个数字由哪条命令产出。 ｜ 前置：要重算数字或换一部作品时才需要读这篇。
+
 ## 1. 语料是什么
 
 语料是五名角色的原作台词，一行一个 JSON 对象，落盘为 `{lang}.jsonl`（`lang` 取 `jp` 或 `cn`）。`tools/corpus/build_gold.py` 写出的每一行有七个字段：
@@ -44,7 +46,11 @@ py -X utf8 tools/corpus/crawl_bestdori.py --locales jp,cn --workers 8 --limit 0
 py -X utf8 tools/corpus/prep_hf_corpus.py
 ```
 
-对 `jp` / `cn` / `en` 三种语言各读一次 `tools/raw/{lang}.parquet`，缺文件就跳过。产物 `tools/corpus/raw/hf/{lang}.jsonl` 加 `_summary.json`，行字段 `character_id` / `character` / `text` / `source`（固定 `hf_eventstory`）/ `event_id` / `chapter` / `lang`。下一步合并时只用 `jp` 与 `cn`。
+对 `jp` / `cn` / `en` 三种语言各读一次 `tools/raw/{lang}.parquet`，缺文件就跳过。
+
+- **产物**：`tools/corpus/raw/hf/{lang}.jsonl` 加 `_summary.json`。
+- **行字段**：`character_id` / `character` / `text` / `source`（固定 `hf_eventstory`）/ `event_id` / `chapter` / `lang`。
+- 下一步合并时只用 `jp` 与 `cn`。
 
 **第三步：合并成 gold。**
 
@@ -52,7 +58,11 @@ py -X utf8 tools/corpus/prep_hf_corpus.py
 py -X utf8 tools/corpus/build_gold.py
 ```
 
-读上一步的两个目录，产出写在 `tools/_paths.py` 的 `CORPUS_DIR` 下（默认 `<repo>/raw/gold`，可用 `IDIOLECT_CORPUS_DIR` 改），文件是 `{lang}.jsonl` 与 `gold_stats.json`。合并顺序是 bestdori 先、hf 后，同语言内按 `(character, text)` 去重，重复行只把来源追加进 `also`，`source` 保留首次出现的那一个。跨语言不去重，同一句中文和日文各留一行。
+读上一步的两个目录，产出写在 `tools/_paths.py` 的 `CORPUS_DIR` 下（默认 `<repo>/raw/gold`，可用 `IDIOLECT_CORPUS_DIR` 改），文件是 `{lang}.jsonl` 与 `gold_stats.json`。
+
+- **合并顺序**：bestdori 先、hf 后。
+- **去重**：同语言内按 `(character, text)` 去重；重复行只把来源追加进 `also`，`source` 保留首次出现的那一个。
+- **跨语言不去重**：同一句中文和日文各留一行。
 
 **split 怎么切。** `build_gold.py` 的切分依据是文本哈希，与行号、抓取顺序无关：
 
@@ -61,9 +71,13 @@ h = int(hashlib.sha256(text.encode("utf-8")).hexdigest()[:8], 16)
 split = "holdout" if (h % 100) < HOLDOUT_RATIO * 100 else "train"   # HOLDOUT_RATIO = 0.2
 ```
 
-哈希只吃 `text`，所以同一句台词在哪一行都是同一个 split；两个语言文件也各自独立判。比例常量是 0.2，即约 20% 的留出。`tools/_paths.py` 的格式注释写的是 `"train"|"test"`，与实际写入的 `holdout` 不一致，以代码为准。消费端目前只读 `train`：`scene_char_baseline.py`、`scene_stats.py`、`tic_profile.py`、`tic_by_scene.py`、`validate_scenes.py`、`export_profiles.py`、`probe_runner.py` 都显式过滤 `split == "train"`，全仓库没有任何脚本读取 `holdout`。
+哈希只吃 `text`，所以同一句台词在哪一行都是同一个 split；两个语言文件也各自独立判。比例常量是 0.2，即约 20% 的留出。
 
-有一处例外要说清：`tools/distill/export_targets.py` 读语料时不过滤 split，所以它算出的 `n` 含留出行。`data/style_targets.json` 里 `cn.anon.n` 是 1579，`data/style_profiles.json` 里 `anon.n` 是 1244，两者差约 1.27 倍，来源就是这条口径差异。`idiolect/characters/taki/voice.py` 的注释里也记着「含 holdout 的旧口径」这个坑。
+三处口径细节容易踩：
+
+- `tools/_paths.py` 的格式注释写的是 `"train"|"test"`，与实际写入的 `holdout` 不一致，以代码为准。
+- 消费端目前只读 `train`：`scene_char_baseline.py`、`scene_stats.py`、`tic_profile.py`、`tic_by_scene.py`、`validate_scenes.py`、`export_profiles.py`、`probe_runner.py` 都显式过滤 `split == "train"`，全仓库没有任何脚本读取 `holdout`。
+- **一个例外**：`tools/distill/export_targets.py` 读语料时不过滤 split，所以它算出的 `n` 含留出行。`data/style_targets.json` 里 `cn.anon.n` 是 1579，`data/style_profiles.json` 里 `anon.n` 是 1244，差约 1.27 倍，来源就是这条口径差异。`idiolect/characters/taki/voice.py` 的注释里也记着「含 holdout 的旧口径」这个坑。
 
 ## 3. 质量审计
 
@@ -71,23 +85,47 @@ split = "holdout" if (h % 100) < HOLDOUT_RATIO * 100 else "train"   # HOLDOUT_RA
 py -X utf8 tools/corpus/audit_corpus_quality.py
 ```
 
-`audit_corpus_quality.py` 读的是抓取层的原始文件（`raw/bestdori/{lang}.jsonl` 与 `raw/hf/{lang}.jsonl`），不读 gold。按语言、按角色输出一张表：原始行数、唯一文本数、重复率、含全角间隔号 `・` 的多人行数、两个来源各自的行数、唯一文本的中位字长；再算「来源重合」，即 bestdori 文本集合与 hf 文本集合的交集与覆盖率；最后打印最长的一行（截前 120 字）。结果写到 `REPORT/corpus_audit.md`，同时打到 stdout。
+`audit_corpus_quality.py` 读的是抓取层的原始文件（`raw/bestdori/{lang}.jsonl` 与 `raw/hf/{lang}.jsonl`），不读 gold。它按语言、按角色打一张表，列是：
 
-这些异常需要人工看：重复率高说明同一句被多个场景复用，不去重会把分布带偏；多人行占比高说明归属不可靠；来源重合高说明两条路径抓到了同一批活动剧情。脚本本身没有阈值也没有失败分支，`main()` 恒定 `return 0`，所以它拦不住任何流程。
+| 列 | 看什么 |
+|---|---|
+| 原始行数 / 唯一文本数 | 抓到了多少、去重后剩多少 |
+| 重复率 | 高 = 同一句被多个场景复用，不去重会把分布带偏 |
+| 全角间隔号 `・` 行数 | 高 = 多人口径行多，归属不可靠 |
+| 两个来源各自行数 | bestdori 与 hf 各贡献多少 |
+| 唯一文本中位字长 | 粗看文本形态是否合理 |
+| 来源重合 | bestdori 与 hf 文本集合的交集与覆盖率，高 = 两条路径抓到了同一批活动剧情 |
+
+最后打印最长的一行（截前 120 字）。结果写到 `REPORT/corpus_audit.md`，同时打到 stdout。
+
+这个脚本只是**体检表**：没有阈值、没有失败分支，`main()` 恒定 `return 0`，拦不住任何流程。
 
 真正会让后续步骤停下来的地方在别处：
 
 - `tools/_paths.py::corpus_file()`：`CORPUS_DIR/{lang}.jsonl` 不存在时抛 `FileNotFoundError`，提示信息指向 `docs/02-corpus.md`（本文件）。
 - `tools/probe/probe_runner.py`：既没有语料也没有 `data/style_profiles.json` 时打印提示并 `return 2`。
 - `tools/distill/export_profiles.py --check`：文件缺失或画像与语料对不上时 `return 1`。
-- `tools/distill/scene_char_baseline.py --min-n 12`：近邻条数不足的 `(角色, 场景)` 组合直接不产出。下游 `prompt_patch.py` 的 `targets_scene` 臂遇到缺失的 cell 会 `raise SystemExit`，不再静默退回全局值。- `tools/offline_smoke.py::check_data`：`style_targets.json`、`scene_char_baseline.json`、`scene_stats.json`、`tic_profile.json`、`tic_by_scene.json` 缺任何一个都判 FAIL。
+- `tools/distill/scene_char_baseline.py --min-n 12`：近邻条数不足的 `(角色, 场景)` 组合直接不产出。下游 `prompt_patch.py` 的 `targets_scene` 臂遇到缺失的 cell 会 `raise SystemExit`，不再静默退回全局值。
+- `tools/offline_smoke.py::check_data`：`style_targets.json`、`scene_char_baseline.json`、`scene_stats.json`、`tic_profile.json`、`tic_by_scene.json` 缺任何一个都判 FAIL。
 - `tools/distill/validate_scenes.py` 的冗余判据（场景两两 Top-25 Jaccard > 0.6）与纯度判据（< 0.30）只写进 `report/scene_separation.md`，返回码仍是 0。
 
 ## 4. 派生统计清单
 
-除 `export_profiles.py`（按 `--out` 或 `DATA/style_profiles.json` 落盘）与 `export_scene_targets.py`（生成 `idiolect/scene_length_targets.py`）之外，下面每个脚本都把结果写进 `REPORT`（默认 `report/`）。要复现 `data/`，用 `--out` 指定目标路径（`scene_char_baseline.py` / `scene_stats.py` 还要加 `--no-exemplars`），或把 `IDIOLECT_REPORT_DIR` 指到 `data/` 再跑（代价是各脚本的 `.md` 产物也会落进 `data/`）。
+除 `export_profiles.py`（按 `--out` 或 `DATA/style_profiles.json` 落盘）与 `export_scene_targets.py`（生成 `idiolect/scene_length_targets.py`）之外，下面每个脚本都把结果写进 `REPORT`（默认 `report/`）。
 
-**`style_targets.json`**：`{"cn": {...}, "jp": {...}}`，每个角色一份全局数值目标。cn 侧 17 个字段：`name`、`n`、`median_chars`、`mean_chars`、`p90_chars`、`sent_per_turn`、`clause_per_turn`、`ellipsis_rate`、`exclaim_rate`、`question_rate`、`period_rate`、`comma_rate`、`dash_rate`、`first_person_rate`、`filler_rate`、`laugh_rate`、`top_interjections`；jp 侧多 `sent_final_per_turn` 与 `long_vowel_rate`（`style_features.style_targets`）。生成者是 `tools/distill/export_targets.py`。本仓库发布的这份**没有嵌套的场景格**（场景级目标在 `idiolect/scene_length_targets.py`），cn 每个角色就是上面那组标量。生成脚本**不过滤 split**，所以这里的 `n` 含留出行，与 `style_profiles.json` 的 train-only `n` 不同（cn.anon 1579 vs 1244），这是刻意的口径差异，理由写在脚本头部。消费方：`tools/probe/prompt_patch.py`（`TARGETS_PATH`）、`tools/probe/probe_runner.py`（经 `PP.load_targets("cn")` 传给补丁臂）、`tools/offline_smoke.py`。生产 prompt 不读这个文件：`idiolect/style_target.py` 里手抄了一份 `STYLE_TARGETS`，与 `data/style_targets.json` 的 cn 全局字段逐项对齐（中位、p90、句数、小句数相同，六个出现率是同一个数保留两位小数）；乐奈的 `top_interjections` 例外，生产版只留 `["嗯", "啊", "唔", "哦"]`，data 版是 6 个，多出 `ん`、`あ`。
+要复现 `data/`，两条路选一条：
+
+- 给每个脚本加 `--out` 指定目标路径（`scene_char_baseline.py` / `scene_stats.py` 还要加 `--no-exemplars`）；
+- 或把 `IDIOLECT_REPORT_DIR` 指到 `data/` 再跑——代价是各脚本的 `.md` 产物也会落进 `data/`。
+
+**`style_targets.json`** —— 每个角色一份全局数值目标，`{"cn": {...}, "jp": {...}}`。
+
+- **字段**：cn 侧 17 个——`name`、`n`、`median_chars`、`mean_chars`、`p90_chars`、`sent_per_turn`、`clause_per_turn`、`ellipsis_rate`、`exclaim_rate`、`question_rate`、`period_rate`、`comma_rate`、`dash_rate`、`first_person_rate`、`filler_rate`、`laugh_rate`、`top_interjections`；jp 侧多 `sent_final_per_turn` 与 `long_vowel_rate`（见 `style_features.style_targets`）。
+- **生成者**：`tools/distill/export_targets.py`。
+- **没有嵌套的场景格**：场景级目标在 `idiolect/scene_length_targets.py`，cn 每个角色就是上面那组标量。
+- **`n` 含留出行**：生成脚本不过滤 split，所以 `cn.anon.n = 1579`，而 train-only 的 `style_profiles.json` 是 `1244`。这是刻意的口径差异，理由写在脚本头部。
+- **谁读它**：`tools/probe/prompt_patch.py`（`TARGETS_PATH`）、`tools/probe/probe_runner.py`（经 `PP.load_targets("cn")` 传给补丁臂）、`tools/offline_smoke.py`。
+- **生产 prompt 不读它**：`idiolect/style_target.py` 手抄了一份 `STYLE_TARGETS`，与本文档的 cn 全局字段逐项对齐（中位、p90、句数、小句数相同，六个出现率同值保留两位小数）。唯一例外是乐奈的 `top_interjections`：生产版只留 `["嗯", "啊", "唔", "哦"]`，data 版是 6 个（多 `ん`、`あ`）。
 
 **`scene_char_baseline.json`**：130 个键，形如 `灯|crisis`，5 个中文角色名 × 26 个场景。每格字段 `char`、`scene`、`n`、`length`、`n_sent`、`n_clause`、`punct_rate`、`first_person_rate`、`filler_rate`、`anchor_density`。生成者 `tools/distill/scene_char_baseline.py`：先按角色过滤 train 语料，再用 `BAAI/bge-small-zh-v1.5` 对 26 个场景原型各取 top-k 近邻（`--k` 默认 40），样本不足 `--min-n`（默认 12）的组合不产出。原始产物的每格还带 `exemplars`（前 8 条原句），发布版已剥离。消费方都在 `tools/score/`：`scene_distill.py`、`scene_ab_compare.py`、`_pool_arms.py`、`scene_feedback.py`，以及 `tools/distill/export_scene_targets.py` 与 `tools/offline_smoke.py`。
 
@@ -159,7 +197,9 @@ py -X utf8 tools/distill/export_profiles.py
 - `IDIOLECT_DATA_DIR`：派生统计目录，默认 `<repo>/data`
 - `IDIOLECT_MOCK_NOW`：mock 时钟，默认 `2026-09-12T15:00:00+09:00`（周六下午）；填 `real` 关掉 pin，但那样产出的数字不可跨批次比较
 
-`export_profiles.py --check` 的用途是语料换代后的口径校验：它按当前语料重算画像，与已发布的 `data/style_profiles.json` 逐角色比 `n`、`length`、`n_sent`、`punct_rate`、`first_person_rate` 五项，有差异就打印前 12 条并返回 1，提示重跑导出。它只守这五项，也不比对 `style_targets.json` 和 `scene_length_targets.py`。本次在无语料的机器上实测：它直接抛 `FileNotFoundError`（退出码 1），走不到那个「FAIL」分支。
+`export_profiles.py --check` 的用途是**语料换代后的口径校验**：按当前语料重算画像，与已发布的 `data/style_profiles.json` 逐角色比 `n`、`length`、`n_sent`、`punct_rate`、`first_person_rate` 五项，有差异就打印前 12 条并返回 1，提示重跑导出。
+
+两点边界：它只守这五项，不比对 `style_targets.json` 与 `scene_length_targets.py`；语料目录整个缺失时它走前置检查，打印一行 `[stop] …` 并以退出码 1 结束，走不到那个「FAIL」分支。
 
 探针还有两个前置条件：`fixtures/` 里那 5 份夹具是占位件，system 段为空，所以必须带 `--assemble`（否则模型收到空 system）；`--registry` 用 `probe_registry` 的 26 场景夹具，不带它则退回 `probe_scenarios` 的 v1 手写场景。
 
@@ -173,9 +213,9 @@ py -X utf8 tools/distill/export_profiles.py
 
 **锚点口径在两处都不完整。** `scene_char_baseline.json` 每格带 `anchor_density`，由 `style_features.anchor_density(lines)` 算出；但 `profile_from_texts` 不产这个字段，`data/style_profiles.json` 里也就没有。`style_features.composite_score` 靠 `gold.get("anchor_density")` 定满分线，取不到就退回 `1.0`，而该函数在本仓库没有调用点（全仓库只有定义那一行）。实际在用的是 `tools/score/scene_distill.py`，它的注释写明 2026-09-12 把 anchor 移出了复合分，只留固定占位值 `1.8` 作诊断列，基线锚点另从 `scene_char_baseline.json` 取。
 
-**验证状态（2026-09-13）。** 本仓库的所有脚本都做过两级冒烟：57 个脚本逐个跑 `--help`（查 import 与语法），其中 15 个需要语料或派生产物的脚本用真实金标准语料**实跑**过一遍，全部退出码 0。
+**验证状态（2026-09-13）。** 本仓库的所有脚本都做过两级冒烟：58 个脚本逐个跑 `--help`（查 import 与语法），其中 15 个需要语料或派生产物的脚本用真实金标准语料**实跑**过一遍，全部退出码 0。
 
-实跑通过：`analyze_corpus`、`verbal_tics`、`tic_profile`、`char_topic_vocab`、`export_targets`、`verify_triggers`、`export_scene_targets`、`export_profiles`、`scene_char_baseline`、`scene_stats`、`tic_by_scene`、`validate_scenes`、`audit_corpus_quality`、`probe_registry --list`、`power_calc`。另外在**新克隆的仓库**里跑通了 `pytest tests`（107 项）、`offline_smoke`（1 skipped）与探针 dry-run（35 条记录，system 段 12368~24501 字符，无需语料）。
+实跑通过：`analyze_corpus`、`verbal_tics`、`tic_profile`、`char_topic_vocab`、`export_targets`、`verify_triggers`、`export_scene_targets`、`export_profiles`、`scene_char_baseline`、`scene_stats`、`tic_by_scene`、`validate_scenes`、`audit_corpus_quality`、`probe_registry --list`、`power_calc`。另外在**新克隆的仓库**里跑通了 `pytest tests`（124 项）、`offline_smoke`（1 skipped）与探针 dry-run（35 条记录，system 段 12368~24501 字符，无需语料）。
 
 仍未验证的两项，都因为需要外部资源：
 
@@ -183,3 +223,7 @@ py -X utf8 tools/distill/export_profiles.py
 - `tools/corpus/prep_hf_corpus.py`：要自己准备 `raw/{lang}.parquet`（本仓库不含下载脚本，也没有数据集的再分发许可）。它整理出来的中间层，正是 `raw/hf/{lang}.jsonl`。
 
 `tools/corpus/build_gold.py` 在宿主环境里实跑过一次（产出 cn 5548 / jp 5729 条，切分 4392/1156 与 4633/1096）；在本仓库里它只跑了「没有源文件时拒绝写出」与 `--dry-run` 两条路径，因为它的源文件不由本仓库分发。
+
+---
+
+**上一站**：[`01-quickstart.md`](01-quickstart.md) ｜ **下一站**：[`03-features.md`](03-features.md) ｜ **索引**：[`README.md`](README.md)

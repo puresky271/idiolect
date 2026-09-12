@@ -1,5 +1,7 @@
 # 工具手册
 
+> 讲什么：工具手册——每个脚本干什么、怎么调，含「加一个角色 / 加一个场景」的完整步骤。 ｜ 前置：无；找命令时直接来这篇。
+
 所有命令在仓库根跑，统一用 `py -X utf8`（Windows 上裸 `python` 可能解析到没装依赖的解释器）。产物默认写进 `report/`，可用 `IDIOLECT_REPORT_DIR` 改。
 
 ## 1. 路径与环境变量
@@ -169,3 +171,7 @@ py -X utf8 tools/distill/scene_stats.py        --no-exemplars --out data/scene_s
 ## 10. 密钥
 
 探针按顺序取 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`：进程环境变量优先，其次仓库根的 `.env`，最后 `.streamlit/secrets.toml`（顺序实现见 `tools/secrets_loader.py`）。三者都不入库。
+
+---
+
+**上一站**：[`04-evaluation.md`](04-evaluation.md) ｜ **下一站**：[`06-lessons.md`](06-lessons.md) ｜ **索引**：[`README.md`](README.md)

@@ -1,5 +1,7 @@
 # 快速开始
 
+> 讲什么：从零跑通全链路——装包、看四层 prompt、体检、跑一次真探针、换成自己的语料。 ｜ 前置：Python 3.11+；跑探针需要一个 OpenAI 兼容端点。
+
 ## 你需要什么
 
 - Python 3.11 或更高。Windows 上统一用 `py -X utf8` 启动，裸 `python` 可能解析到没装依赖的解释器。
@@ -122,3 +124,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 - 一次真实探针：5 角色 × 7 场景 × 3 次 = 105 条回复（数字见 README）。
 - 把仓库克隆到空目录后重跑：`pytest`、`offline_smoke`、探针 dry-run 均通过，不需要任何环境变量。
 - 发布数据可重建：用金标准 cn 语料重跑六条生成命令，`data/` 六个文件与发布版本逐字节相同。
+
+---
+
+**上一站**：[`00-methodology.md`](00-methodology.md) ｜ **下一站**：[`02-corpus.md`](02-corpus.md) ｜ **索引**：[`README.md`](README.md)

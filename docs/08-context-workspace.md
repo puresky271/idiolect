@@ -1,7 +1,6 @@
-# 08 上下文工作区：四层在真实系统里的前后文
+# 上下文工作区：四层在真实系统里的前后文
 
-> 本文与 `idiolect/workspace.py` 配套。本文讲清「工作区模式」是什么，
-> 代码是它的零依赖实现。阅读顺序：先看第 1～2 节建立直觉，再拿代码对照第 3～4 节。
+> 讲什么：四层之外的上下文骨架——12 层固定层序、预算裁剪、事实选择器的打分模型。 ｜ 前置：[`03-features.md`](03-features.md)；配套代码 [`idiolect/workspace.py`](../idiolect/workspace.py)。
 
 ## 1. 工作区模式是什么
 
@@ -104,3 +103,7 @@ memory_recall 0.8 > gossip -0.2`。memory_recall 曾是 0.2，真实聊天日志
 工作区让「该看的材料」也变成可评测对象：候选集固定 → 选择结果确定 →
 注入内容可 diff。改打分参数与改四层同纪律：先 dump 基线、改后再 dump、
 逐场景审 diff（见 `docs/04-evaluation.md` 与 `docs/05-tooling.md`）。
+
+---
+
+**上一站**：[`07-turn-logic-and-postprocessing.md`](07-turn-logic-and-postprocessing.md) ｜ **索引**：[`README.md`](README.md)

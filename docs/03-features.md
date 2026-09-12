@@ -1,5 +1,7 @@
 # 蒸馏出哪些特征，怎么算，落在哪
 
+> 讲什么：五类特征各自的计算脚本、产物与落点，以及写进 prompt 的措辞规范。 ｜ 前置：先读 [`00-methodology.md`](00-methodology.md) 建立全局观。
+
 ## 1. 五类特征一览
 
 | 特征 | 计算脚本 | 产物 | 落点 |
@@ -110,3 +112,7 @@
 | 任何会进 prompt 的改动 | `offline_smoke.py` 全套，然后 `probe_runner.py --assemble --turn-logic` 跑一轮真探针 |
 
 探针跑完的收尾见 `docs/04-evaluation.md`；工具参数见 `docs/05-tooling.md`。
+
+---
+
+**上一站**：[`02-corpus.md`](02-corpus.md) ｜ **下一站**：[`04-evaluation.md`](04-evaluation.md) ｜ **索引**：[`README.md`](README.md)
