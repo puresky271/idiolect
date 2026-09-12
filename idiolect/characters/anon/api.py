@@ -4,9 +4,9 @@
   让主流程调用方保持「我只 import anon.api、调几个明确函数」的形态、
   不被爱音专属子系统的内部重构波及。
 
-当前 stub 状态：
-  函数签名先固定下来、内部 return 空字符串 / pass-through、
-  让骨架可以被主流程接进去而不影响行为。等子系统真做完再换实现。
+当前状态：
+  · render_supplemental_blocks 已接通 turn_logic（美妆 / 穿搭 / 社交平台 / 留学防御）；
+  · post_reply_voice_check 仍是 stub（voice_check 子系统未接线，永远 skipped）。
 """
 from __future__ import annotations
 
@@ -42,11 +42,8 @@ def render_supplemental_blocks(
     返回字符串 = 拼好的、以 `\\n\\n` 分隔的若干 block；
     无内容时返 ""。caller 把它当作普通 prompt 片段拼到 system prompt 末尾。
 
-    将来内部会按子系统组合：
-      - turn_logic.build_anon_special_block（留学防御 / 灯灯 / sumimi / Ave Mujica）
-      - lng_style.surface（如果场景能引用爱音 SNS / 自拍 / 时尚关注点）
-
-    现在是 stub、永远返 ""——等子系统实现后逐个开。
+    内部已接通 turn_logic.build_anon_special_block（美妆 / 穿搭 / 社交平台 / 留学防御）；
+    lng_style.surface 与灯灯 / sumimi / Ave Mujica 子系统仍是 TODO。
     """
     if not is_anon(character):
         return ""

@@ -9,9 +9,9 @@
               caller 不需要知道具体分支
   - **可关闭**：env flag `TOMORI_TURN_LOGIC_ENABLED=0` 一键回退
 
-当前状态：
-  · 空 stub、永远返 ""、不破坏现有 prompt 输出
-  · 后续按子系统（笔记本 / 歌词流 / 收集癖 / 等）逐个实现
+当前子系统：
+  · text-driven（依赖 user_text）：歌词 / 海洋生物 / 昆虫 / 天文 / 石头
+  · time-driven（不依赖 user_text）：凌晨窗口 late_night_window（凌晨 + night_owl_today）
 
 注：本模块产物注入在 prompt 的 `lyrics_context` slot
 （保留这个 key 名向后兼容、内部已不止"歌词"用途）。

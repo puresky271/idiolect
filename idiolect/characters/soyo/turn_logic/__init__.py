@@ -74,7 +74,7 @@ def _build_deep_blocks(
             continue
         if blk:
             # 统一追加反照抄脚注：深模块的正例是语义锚、不是台词库。
-            # 依据见 `character_scene_turn_logic.NO_LITERAL_COPY` 的注释（真实探针证据）。
+            # 依据见 `idiolect.scene_engine.NO_LITERAL_COPY` 的注释（真实探针证据）。
             out.append(f"{blk.rstrip()}\n{NO_LITERAL_COPY}")
             fired.append(key)
     return out, fired

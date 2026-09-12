@@ -8,7 +8,8 @@ env flag + block 构建」，6 个场景就要抄 6 遍。这里把这层样板�
   · 窄入口：只暴露 `build_scene_block(user_text, scene_key, ...)`
   · 可关闭：env flag `<PREFIX>_TURN_LOGIC_<SCENE>_ENABLED=0`
   · per-session 去重：同一场景在同一 session 内只注入一次，避免每轮复读
-  · 无副作用：不读写全局状态（去重状态按 session 存于模块内字典）
+  · 状态集中：唯一的模块级状态是 `_fired` 去重表（按 session 分桶、
+    `reset_session()` 可清空），此外不读写任何调用方状态
 """
 from __future__ import annotations
 

@@ -4,9 +4,10 @@
   让主流程调用方保持「我只 import tomori.api、调几个明确函数」的形态、
   不被灯专属子系统的内部重构波及。
 
-当前 stub 状态：
-  函数签名先固定下来、内部 return 空字符串 / pass-through、
-  让骨架可以被主流程接进去而不影响行为。等子系统真做完再换实现。
+当前状态：
+  · render_supplemental_blocks 已接通 turn_logic（歌词 / 海洋生物 / 昆虫 / 天文 / 石头
+    / 凌晨窗口，2026-05-20 起）；
+  · post_reply_voice_check 仍是 stub（voice_check 子系统未接线，永远 skipped）。
 """
 from __future__ import annotations
 

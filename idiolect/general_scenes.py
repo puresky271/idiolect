@@ -41,7 +41,11 @@ from idiolect.scene_engine import NO_LITERAL_COPY, SceneModule, build_scene_bloc
 
 _ENV = "GENERAL_SCENE_TURN_LOGIC"
 
-# 示好 / 亲密信号（正则片段，**不要 re.escape**；见 character_scene_turn_logic 的教训）
+# 示好 / 亲密信号（正则片段，**不要 re.escape**；见 idiolect.scene_engine 的教训）。
+# 与 `scene_classifier` 的 affection 规则**有意不同步**：分类器是单正则偏召回
+# （`我喜欢你` 字面、无指向要求）；这里信号更宽（`喜欢你` 前缀即可、另收
+# `最喜歡你` / `喜欢你哦`），但靠下面的「与逻辑」要求第二人称指向同现。
+# 两处是「召回判据」与「注入判据」的分工，改任何一边都要对照另一边评估。
 _AFFECTION_SIGNAL = (
     r"(喜欢你|我爱你|爱你|最喜歡你|最喜欢你|离不开你|不能没有你|"
     r"想你(?!帮|做|看|说|听|来|去|给|问)|好想你|想见你|"
