@@ -2,6 +2,8 @@
 
 > 讲什么：五类特征各自的计算脚本、产物与落点，以及写进 prompt 的措辞规范。 ｜ 前置：先读 [`00-methodology.md`](00-methodology.md) 建立全局观。
 
+**目录**：[1 五类特征一览](#1-五类特征一览) ｜ [2 场景体系](#2-场景体系) ｜ [3 每场景长度目标](#3-每场景长度目标) ｜ [4 口癖、句式、词表](#4-口癖句式词表) ｜ [5 写进 prompt 的措辞规范](#5-写进-prompt-的措辞规范) ｜ [6 触发词纪律](#6-触发词纪律) ｜ [7 改一层要跑什么](#7-改一层要跑什么)
+
 ## 1. 五类特征一览
 
 | 特征 | 计算脚本 | 产物 | 落点 |
@@ -20,7 +22,7 @@
 
 26 个场景，13 个通用 + 13 个角色专属：
 
-```
+```text
 通用：play_along affection crisis comfort low_mood wellwish schedule request
       fact_qa banter meta_language probe_stance third_party
 角色：anon_beauty anon_sns / tomori_lyrics tomori_nature

@@ -34,7 +34,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 
 ## 目录与模块划分
 
-```
+```text
 idiolect/            # 运行时包：把特征写成 prompt 约束
   assemble.py        #   四层装配器（核心入口，build_messages / build_system_prompt）
   registry.py        #   角色名 → 角色包的唯一分发点（含别名归一化）

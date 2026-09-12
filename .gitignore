@@ -16,6 +16,9 @@ __pycache__/
 .venv/
 venv/
 *.egg-info/
+# `pip install .` / `pip wheel .` 会在仓库根留这两个目录（干净克隆验证时踩到）
+build/
+dist/
 
 # 编辑器与系统
 .vscode/

@@ -2,6 +2,8 @@
 
 > 讲什么：两个动态部件——turn_logic（这一轮该做什么）与 voice_check（回复出门前的那道处理）的搭建流程与契约边界。 ｜ 前置：[`03-features.md`](03-features.md) 的五类特征。
 
+**目录**：[1 turn_logic](#1-turn_logic) ｜ [2 后处理（voice_check）](#2-后处理voice_check) ｜ [3 加东西的清单](#3-加东西的清单) ｜ [4 反思](#4-反思)
+
 前面几篇讲的是「静态特征怎么落进 prompt」。这一篇讲两个动态部件：**turn_logic**（这一轮该做什么）和 **voice_check**（回复出门前的那道处理）。
 
 ## 1. turn_logic
@@ -62,7 +64,7 @@
 
 **第六步：接线。** 一个模块要能被调用，需要：
 
-```
+```text
 SceneModule(...)  →  角色包 turn_logic/__init__.py 的模块列表
                   →  build_scene_blocks(user_text, modules, session_id=…)
                   →  <char>/api.py::render_supplemental_blocks
