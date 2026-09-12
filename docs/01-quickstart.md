@@ -8,6 +8,17 @@
 
 ## 安装
 
+只想用装配库（不碰工具链）的话，装成包最省事——运行时零第三方依赖：
+
+```bash
+pip install .
+python -m idiolect list                                  # 五个示例角色
+python -m idiolect prompt 乐奈 "你今天又想去哪找猫"       # 这句话此刻的完整 system prompt
+python -m idiolect chat 乐奈 "你今天又想去哪找猫"         # 真聊一轮（需 openai 与 LLM_* 环境变量）
+```
+
+要跑仓库自带的工具链（门禁 / 探针 / 蒸馏），装依赖：
+
 ```bash
 py -X utf8 -m pip install -r requirements.txt
 ```
