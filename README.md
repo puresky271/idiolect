@@ -10,7 +10,13 @@
 
 通用模型扮演角色，说着说着就会变成同一个客服腔：话越来越长、爱说「你的感受我完全能理解」、结尾还要升华一下。这个仓库的做法是：先从角色原来的台词里**量出 ta 说话的习惯**——一句话多长、说几句、爱用什么口头禅、什么场合说什么话——把这些习惯写成 prompt 里的硬约束，再用一套自动检查验证「这次是不是真的更像了」。不做微调，仓库里也没有原作台词，只有统计出来的数字。
 
-为了让方法看得见摸得着，全程用《BanG Dream! It's MyGO!!!!!》的五名成员做**示例角色**：爱音、灯、立希、素世、乐奈（上面那张图里就是她们对同一句话的五种真实回复）。方法本身和具体作品无关，换成任何角色都成立；本仓库只解决一件事——怎么证明「说话像」，并把它做成独立、可复现的一套。
+为了让方法看得见摸得着，全程用《BanG Dream! It's MyGO!!!!!》的五名成员做**示例角色**：爱音、灯、立希、素世、乐奈。方法本身和具体作品无关，换成任何角色都成立；本仓库只解决一件事——怎么证明「说话像」，并把它做成独立、可复现的一套。
+
+> **权利与许可，先说清楚。**
+> **代码**（`idiolect/`、`tools/`、`docs/`、`tests/`）以 MIT 发布，随便用（[`LICENSE`](LICENSE)）。
+> **角色与作品不属于本仓库**：MyGO!!!!! 的角色、设定、剧情与音乐的权利属于 **Bushiroad / Craft Egg 及相关权利方**。这是一个**非官方同人技术项目**，与权利方无关联、未获授权或背书。
+> **仓库不含任何原作文本**（剧本、台词、歌词）与音频，`data/` 只有统计出来的聚合数字；示例插画是同人性质的使用，不是官方素材。
+> 细节见 [`NOTICE.md`](NOTICE.md) 与文末的[版权、许可与免责](#版权许可与免责)。
 
 ## 三分钟跑起来
 
@@ -209,6 +215,35 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 | [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | turn_logic 模块与 voice_check 后处理的搭建流程、接线与验收 |
 | [`docs/08-context-workspace.md`](docs/08-context-workspace.md) | 上下文工作区：四层在真实聊天系统里的前后文 |
 
-## 许可
+## 版权、许可与免责
 
-代码以 MIT 发布，见 [`LICENSE`](LICENSE)。角色与作品权利、以及「不分发原作文本」的说明见 [`NOTICE.md`](NOTICE.md)。
+### 代码：MIT
+
+`idiolect/`、`tools/`、`docs/`、`tests/`、`conftest.py`、`pyproject.toml` 以 **MIT** 发布，见 [`LICENSE`](LICENSE)（`Copyright (c) 2026 puresky`）。商用、改写、再发布都可以，保留版权声明即可。
+
+### 角色与作品：不属于本仓库
+
+《BanG Dream! It's MyGO!!!!!》的角色名、角色设定、世界观、剧情与音乐的权利属于 **Bushiroad / Craft Egg 及相关权利方**。本仓库是一个**非官方同人技术项目**：
+
+- 与权利方**没有任何关联**，未获得授权、赞助或背书；
+- 角色长档案（`idiolect/characters/*/canon.py`）由本仓库作者**根据公开资料整理**，用于技术研究，不是官方设定；
+- 示例插画（[`assets/readme/hero.png`](assets/readme/hero.png)）**不是官方素材**，属于同人性质的使用；角色权利仍属权利方，若权利方提出要求会立即移除。
+
+### 仓库里有什么、没有什么
+
+| | |
+|---|---|
+| **有** | 装配与后处理代码；抓取 / 蒸馏 / 评分脚本；`data/` 六个**聚合统计**文件（字数分位、句数、标点出现率、口癖频次、场景基线、评分画像）；十篇方法论文档 |
+| **没有** | 原作剧本、台词、歌词、音频、游戏素材；任何微调后的模型权重；任何原句级语料 |
+
+`data/` 里最长的字符串是 56 字的说明字段；`scene_char_baseline.json` 与 `scene_stats.json` 的例句字段在发布前已被 `--no-exemplars` 剥掉。两道检查盯着这条线：`tests/test_tooling_contracts.py::test_shipped_profiles_have_no_text` 与 `offline_smoke.py` 的「数据.无原作文本」项。
+
+### 你要自己抓语料的话
+
+`tools/corpus/` 只是抓取与清洗工具，**不含数据**。使用者需自行确认来源站点的服务条款与所在地区的法律，并自行承担相应责任。本仓库不附带 HuggingFace 数据集（`KomeijiForce/BanG_Dream_Events`）的副本，只保留把它整理成统一形态的脚本。
+
+### 不做的事
+
+不做角色微调（fine-tuning），不训练、不分发任何基于原作品训练的模型权重。全部方法作用在 prompt 装配与后处理上。
+
+完整声明见 [`NOTICE.md`](NOTICE.md)。

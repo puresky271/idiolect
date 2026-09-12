@@ -10,7 +10,13 @@
 
 A general model playing a character slowly turns into the same customer-service voice every time: replies grow longer, "I completely understand how you feel" appears, and every conversation ends on a meaningful note. This repository does the opposite: it **measures how the character actually talks** in the original script — how long a line is, how many sentences, which verbal tics, what changes by scene — writes those measurements into the prompt as hard constraints, and then runs automated checks on whether the output really got closer. No fine-tuning, and no original script text in the repository, only the statistics.
 
-The running example is the five members of **BanG Dream! It's MyGO!!!!!**: Anon, Tomori, Taki, Soyo, and Rana — the image above shows their five real replies to the same message. The method itself is show-agnostic and transfers to any character; this repository does exactly one thing — proving a reply sounds in character — and makes it standalone and reproducible.
+The running example is the five members of **BanG Dream! It's MyGO!!!!!**: Anon, Tomori, Taki, Soyo, and Rana. The method itself is show-agnostic and transfers to any character; this repository does exactly one thing — proving a reply sounds in character — and makes it standalone and reproducible.
+
+> **Rights and licensing, up front.**
+> **Code** (`idiolect/`, `tools/`, `docs/`, `tests/`) is MIT — use it freely ([`LICENSE`](LICENSE)).
+> **The characters and the work are not ours**: MyGO!!!!! characters, settings, story and music belong to **Bushiroad / Craft Egg and the relevant rights holders**. This is an **unofficial fan-made technical project**, not affiliated with, authorised by, or endorsed by them.
+> **The repository contains no original script text** (no game script, dialogue or lyrics) and no audio; `data/` holds aggregate statistics only, and the sample illustration is fan usage, not official artwork.
+> Details in [`NOTICE.md`](NOTICE.md) and the [Copyright, licence and disclaimer](#copyright-licence-and-disclaimer) section below.
 
 ## Up and running in three minutes
 
@@ -197,6 +203,35 @@ The methodology documents are written in Chinese. Each file stands alone; if you
 | [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | Building turn_logic modules and voice_check post-processing: wiring, gates, acceptance |
 | [`docs/08-context-workspace.md`](docs/08-context-workspace.md) | The context workspace: what surrounds the four layers in a real chat system |
 
-## License
+## Copyright, licence and disclaimer
 
-Code is MIT, see [`LICENSE`](LICENSE). Character rights and the no-original-text policy are described in [`NOTICE.md`](NOTICE.md).
+### Code: MIT
+
+`idiolect/`, `tools/`, `docs/`, `tests/`, `conftest.py` and `pyproject.toml` are released under **MIT** — see [`LICENSE`](LICENSE) (`Copyright (c) 2026 puresky`). Commercial use, modification and redistribution are fine; keep the copyright notice.
+
+### Characters and the work: not ours
+
+The character names, settings, world, story and music of *BanG Dream! It's MyGO!!!!!* belong to **Bushiroad / Craft Egg and the relevant rights holders**. This repository is an **unofficial fan-made technical project**:
+
+- it is **not affiliated** with the rights holders in any way, and has no authorisation, sponsorship or endorsement;
+- the character profiles (`idiolect/characters/*/canon.py`) were **compiled by the author from public material** for technical study — they are not official settings;
+- the sample illustration ([`assets/readme/hero.png`](assets/readme/hero.png)) is **not official artwork**; it is fan usage, the characters remain the rights holders', and it will be removed on request.
+
+### What is in the repository, and what is not
+
+| | |
+|---|---|
+| **In** | Assembly and post-processing code; corpus, distillation and scoring scripts; six **aggregate statistics** files under `data/` (length quantiles, sentence counts, punctuation rates, tic frequencies, per-scene baselines, scoring profiles); ten methodology documents |
+| **Not in** | Original game script, dialogue, lyrics, audio or game assets; any fine-tuned model weights; any sentence-level corpus |
+
+The longest string in `data/` is a 56-character note field; the example-sentence fields of `scene_char_baseline.json` and `scene_stats.json` were stripped by `--no-exemplars` before publishing. Two checks guard that line: `tests/test_tooling_contracts.py::test_shipped_profiles_have_no_text` and the "数据.无原作文本" item in `offline_smoke.py`.
+
+### If you fetch the corpus yourself
+
+`tools/corpus/` is tooling only and **ships no data**. You are responsible for checking the source site's terms of service and the law where you live. This repository does not carry a copy of the HuggingFace dataset (`KomeijiForce/BanG_Dream_Events`), only the script that normalises it.
+
+### What this project does not do
+
+No character fine-tuning. No training and no distribution of model weights derived from the work. Everything happens in prompt assembly and post-processing.
+
+The complete statement is in [`NOTICE.md`](NOTICE.md).
