@@ -9,7 +9,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]
@@ -271,8 +271,8 @@ def apply_patch(system: str, char_key: str, patch: str, targets: dict,
         name = SCENE_CHAR_NAME.get(char_key, t.get("name", char_key))
         # 数据来自随仓库发布的 `idiolect/scene_length_targets.py`（130 个 角色 × 场景 目标，
         # 由 tools/distill/export_scene_targets.py 生成）。
-        # 2026-09-13 修：原实现 import 只存在于原项目的 `scene_targets` 模块，
-        # 在本仓库必然 ImportError —— 这条臂此前是死的。
+        # 2026-09-13 修：这条臂的 import 曾指向一个不存在的 `scene_targets` 模块、
+        # 必然 ImportError —— 此前是死的。
         from idiolect.scene_length_targets import get_scene_target
         st = get_scene_target(name, scene)
         if not st:

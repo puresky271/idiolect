@@ -1,8 +1,7 @@
 """anon.turn_logic — 爱音本轮对话特殊逻辑入口（仿 tomori.turn_logic）。
 
 设计意图：
-  原 mygo.py / character_profiles.py 通用 prompt 路径不该堆爱音专属热词触发。
-  这里是新家：
+  通用 prompt 路径不该堆爱音专属热词触发，爱音专属逻辑集中在这里：
 
   - **本轮触发**：每次 chat reply 前根据 user_text 判断是否注入特殊指引
   - **窄入口**：只暴露 build_anon_special_block(user_text, character, *, session_id)
@@ -17,7 +16,7 @@
   · 子系统 4：留学失败防御态（london_defense.py）— **心理 canon 不是知识库**、5 motive posture + 1 轮情绪余波
   · 后续按子系统（灯灯 / sumimi / Ave Mujica）逐个加
 
-注：本模块产物注入到 chat_server prompt slot（细节看接入点；目前供 anon.api
+注：本模块产物注入到 prompt 补充 slot（供 anon.api
    render_supplemental_blocks 调用）。
 """
 from __future__ import annotations

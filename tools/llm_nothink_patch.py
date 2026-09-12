@@ -11,15 +11,13 @@
   · Qwen 系列通常用 enable_thinking=False 关；强制思考型号保留 thinking。
   · 这个 patch 必须在 import openai client 之前应用、对所有 entry point 都生效。
 
-2026-05-20 root cause: chat_server.py 顶层有这个 patch、但**只在 chat_server 启动时
-生效**。如果是 Streamlit / KAIROS 后台 thread / offline smoke / QQ-only mode 等
-其他 entry point、patch 不会被加载、KAIROS 调 town_sim._generate_daily_seeds 时
-LLM 返回 empty → 整天 plan 落入 _pick_plan_step_title fallback、用户感知是
-"今天 AI 没创意"。
+2026-05-20 root cause: 这个 patch 曾经只挂在某一个入口模块的顶层、**只在该入口
+启动时生效**。其他 entry point（后台 thread / offline smoke / 测试脚本等）不会
+加载它，那些路径上的 LLM 调用会带着错误的 thinking 默认行为发出，故障隐蔽且难定位。
 
-修复：把 patch 提取到本独立 module、所有可能调 LLM 的入口（chat_server / town_sim /
-kairos_scheduler / mygo / 测试脚本）都在 import openai 之前 `import llm_nothink_patch`。
-patch 是 idempotent 的（setdefault 不覆盖已设值）、重复 import 安全。
+修复：把 patch 提取到本独立 module、所有可能调 LLM 的入口都在 import openai 之前
+`import llm_nothink_patch`。patch 是 idempotent 的（setdefault 不覆盖已设值）、
+重复 import 安全。
 
 Usage:
   import llm_nothink_patch  # noqa: F401 — side-effect: patches openai client
@@ -32,7 +30,7 @@ Idempotency:
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]

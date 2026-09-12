@@ -31,12 +31,12 @@ Mode 定义：
 
   Mode A 默认（无 block）
 
-context dict 字段（caller 预 compute、由 mygo.py / chat_server.py 注入）：
-  · user_emotion:    dict {emotion, intensity, valence}（来自 mygo._detect_user_emotion_rule）
+context dict 字段（caller 预 compute 后注入）：
+  · user_emotion:    dict {emotion, intensity, valence}（情绪规则检测结果）
   · relation_tier:   str（"初识"/"相熟"/"好友"/"挚交"）
-  · deep_moment:     dict {is_deep, score, reasons}（来自 cognitive_sim.detect_deep_private_moment）
+  · deep_moment:     dict {is_deep, score, reasons}（深度私密时刻检测结果）
   · history:         list（最近 user 消息历史、用于 streak 计算）
-  · session_id:      ws session id（dedup + residue 用）
+  · session_id:      会话 id（dedup + residue 用）
 
 API:
   build_scene_mode_adapter_block(user_text, *, session_id, is_developer, context) -> str
@@ -64,10 +64,10 @@ _MODE_C_GATE_TIER = 1.0    # **挚交** 才考虑 Mode C（2026-05-12 拍板收�
 _MODE_B_SCORE_THRESHOLD = 0.50  # 2026-05-12 收紧：0.40 → 0.50
 _MODE_C_SCORE_THRESHOLD = 0.65  # 2026-05-12 收紧：0.55 → 0.65
 
-# Negative-valence 情绪标签（mygo._detect_user_emotion_rule 输出）
+# Negative-valence 情绪标签（情绪规则检测输出）
 _NEGATIVE_EMOTIONS = {"难过", "疲惫", "焦虑", "烦躁", "低落", "孤独", "受挫", "睡眠不稳", "食欲低落"}
 
-# 脆弱关键词（参考 cognitive_sim._USER_FACT_TRANSIENT_RE、本地复制避免依赖）
+# 脆弱关键词（本地词表、避免外部依赖）
 _VULNERABLE_KW_RE = re.compile(
     r"(压力|吃不下|睡不着|出错|崩溃|低落|难过|焦虑|烦|生气|郁闷|孤独|紧张|疲惫|很累|太累|好累|困|"
     r"撑不住|扛不住|想哭|不知道怎么办|失眠|没动力|心累|心力交瘁)"
@@ -159,7 +159,7 @@ def _compute_signals(user_text: str, context: dict) -> dict:
         if ell_count >= 2:
             ellipsis_score = min(1.0, ell_count * 0.5)
 
-    # 信号 5：deep_moment 分（直接从 cognitive_sim 拿）
+    # 信号 5：deep_moment 分（caller 预 compute 传入）
     deep_score = float(deep_moment.get("score", 0.0) or 0.0)
     deep_score = max(0.0, min(1.0, deep_score))
 

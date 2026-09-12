@@ -69,7 +69,7 @@ py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase after
 
 审查 diff 时逐项确认：层顺序、块边界是否闭合、触发是否只在该触发的场景里发生、无关场景零漂移、预算未超。
 
-顺带一条容易踩的坑：真实运行时那条 dump 路径（原项目的 `dump_live_chat_prompt.py`）看不到 turn_logic，因为它在开发者模式下按设计不触发。这类「门禁看不到目标路径」的问题在这条链上出现过两次，所以 `tools/gates/dump_prompt.py` 直接调装配层，绕开模式判断。
+顺带一条容易踩的坑：从调用方一侧 dump 真实运行路径时可能看不到 turn_logic——它在开发者模式下按设计不触发。这类「门禁看不到目标路径」的问题在这条链上出现过两次，所以 `tools/gates/dump_prompt.py` 直接调装配层，绕开模式判断。
 
 ## 6. 夹具设计
 

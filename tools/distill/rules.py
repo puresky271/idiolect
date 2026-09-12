@@ -1,10 +1,10 @@
 """硬规则层：确定性违规检测（不调 LLM、可复现）。
 
 每条规则都对应一份**仓库内已存在的约束来源**，不是凭空发明：
-  - persona card 通用块    turn_agents/prompt_cards.py::_ANTI_ASSISTANT_DRIFT_PREAMBLE
-  - 角色 manifest 硬约束    <char>/voice.py::VOICE_MANIFEST（含"硬约束"小节）
-  - 台词语域               turn_agents/reply_register.py
-  - canon                  <char>/canon.py
+  - 反客服腔共用块       <char>/voice.py::VOICE_MANIFEST（五角色共用的反客服腔硬约束小节）
+  - 角色 manifest 硬约束  <char>/voice.py::VOICE_MANIFEST（含"硬约束"小节）
+  - 台词语域            <char>/voice.py::VOICE_MANIFEST（【台词语域硬约束】小节）
+  - canon              <char>/canon.py
 
 规则分级：
   V = violation（明确违反，计负分）
@@ -14,7 +14,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]
@@ -87,7 +87,7 @@ MOTIF_REPEAT = [
     r"加油(?:哦|啊|！|!)?",
 ]
 
-# 6 客服腔词表（与 reply_register 的语域约束对齐，取其高置信子集）
+# 6 客服腔词表（与 voice manifest 的台词语域约束对齐，取其高置信子集）
 CUSTOMER_SERVICE = [
     r"有什么(?:我可以|能)(?:帮|为)(?:你|您)",
     r"(?:很)?(?:抱歉|不好意思)[，,]?(?:我|让)",
@@ -98,7 +98,7 @@ CUSTOMER_SERVICE = [
     r"(?:随时|有事)(?:可以)?(?:找|叫|喊)我",
     r"(?:一起|共同)(?:面对|解决|克服)",
 ]
-# 连接词报幕（reply_register 已管；这里只收最硬的）
+# 连接词报幕（voice manifest 的台词语域块已管；这里只收最硬的）
 CONNECTIVE_ANNOUNCE = [
     r"^(?:首先|其次|另外|最后|总之|总而言之)[，,、]",
     r"(?:顺便说|话说回来|值得一提的是)[一一下]?[，,]",

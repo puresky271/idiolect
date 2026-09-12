@@ -1,7 +1,7 @@
 """生产场景分类器：`user_text` → 场景 key（26 场景体系）。
 
-**为什么需要它**：此前的「每场景长度目标」只存在于 bench 的 prompt_patch 里，
-生产 `_build_style_target_block` 对所有轮次都用同一个全局基线——
+**为什么需要它**：此前的「每场景长度目标」只存在于探针工具
+（`tools/probe/prompt_patch.py`）里，装配器对所有轮次都用同一个全局基线——
 于是「附和/同感」和「打工接客」拿到同一个上限，而原作里两者差 2~3 倍。
 
 **设计约束**
@@ -10,7 +10,7 @@
   · **顺序敏感**：强信号场景（crisis / affection / comfort）先判，泛场景（banter / third_party）最后。
   · 角色专属场景要求 `char` 命中才判——同一个词对不同角色意义不同
     （「练习」对立希是本职，对其他人只是普通话题）。
-  · key 与 `_audit_scratch/v41/bench/scenes.py` 的 26 场景定义对齐。
+  · key 与发布数据 `data/scene_stats.json` 的 26 场景定义对齐。
 
 用法：
     from idiolect.scene_classifier import classify

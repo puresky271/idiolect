@@ -13,9 +13,9 @@
      · 顿号 / 破折号 / 波浪号 / ♪ 基本不用 → 出现即告警
      · 称呼习惯：对同伴几乎总是加「小」（小灯 83 / 小立希 77 / 小爱音 67 / 小乐奈 38）
        → 同一轮内出现 ≥2 次**不带「小」**的同伴本名时告警
-  B. **确定性助手腔/越界检测**（v41 报告 §6 的「方案 C」）
-     · 2026-09-12 起与乐奈统一走**结构级**检测器 `turn_agents.assistant_tone`：
-       字面黑名单对 v41 人工实例召回仅 33%，结构级 83%、真台词误报 0.34%。
+  B. **确定性助手腔/越界检测**（结构级方案）
+     · 2026-09-12 起与乐奈统一走**结构级**检测器 `idiolect.tone`：
+       字面黑名单对人工标注实例召回仅 33%，结构级 83%、真台词误报 0.34%。
      · 素世专属 canon：**不替对方命名感受**（`tone.NAMING_FEELING` 单独判）
 
 设计原则：清洗只做无损替换，任何会改语义的一律只告警。
@@ -28,7 +28,7 @@ from typing import Any
 
 from .nickname import normalize_peer_nicknames
 from .punctuation import downgrade_exclaims, normalize_ellipsis
-from .thresholds import (  # noqa: F401  （re-export，供 test / bench 按旧路径取用）
+from .thresholds import (  # noqa: F401  （re-export，兼容旧导入路径）
     EXCLAIM_MAX_PER_TURN,
     FIRST_PERSON_MAX,
     LEN_HARD,

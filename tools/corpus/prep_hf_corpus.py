@@ -4,12 +4,12 @@
   - speaker 列是占位符，真正的说话人在 windowDisplayName
   - 多人为「爱音・立希」这种全角间隔号拼接，只保留纯单人行（避免归属污染）
 
-产出: bench/raw/hf/{lang}.jsonl
+产出: tools/corpus/raw/hf/{lang}.jsonl（默认，可用 --out-dir 改）
   每行 {"character_id","character","text","source","event_id","chapter","lang"}
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]
@@ -25,7 +25,7 @@ from pathlib import Path
 import pandas as pd
 
 HERE = Path(__file__).resolve().parent
-RAW = HERE.parent / "raw"          # 与 v41 主目录共用已下载的 parquet
+RAW = HERE.parent / "raw"          # 已下载 parquet 的默认读取位置（可用 --src-dir 改）
 OUT = HERE / "raw" / "hf"
 OUT.mkdir(parents=True, exist_ok=True)
 

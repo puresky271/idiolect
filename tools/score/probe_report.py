@@ -5,7 +5,7 @@
 **示例复述审计**（直接量回复有没有照抄注入正文）、
 **池化比较**（单臂 n=6 的摆动大于效应，结论只认池化）。
 零散的脚本容易漏跑，所以这里合成一条入口。方法学见
-`docs/brain/character/prompt_distillation_evaluation.md`。
+`docs/04-evaluation.md`。
 
 用法：
     # 最小：打分 + 单场景并排
@@ -30,7 +30,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]

@@ -1,7 +1,7 @@
 """tomori — 灯（高松燈）的角色专属逻辑包。
 
 为什么单独成包：
-  五个角色用一套通用基建（mygo.py / pet_prompt_registry / character_profiles）够用、
+  五个角色用一套通用基建本够用、
   但灯是 MyGO 的语义中心、需要更深的角色独有处理：
     - 笔记本物件系统（B5 笔记本 + 自动铅笔的随身写作素材链）
     - 歌词创作流（不是被动 reference、是从灯当下感官 → 笔记 → 歌词的因果链）
@@ -11,13 +11,9 @@
     - 天文部独社员 + 月之森附近的家 + 神田川散步路径 等专属物理基建
     - 沉默/省略号/不完成句的语义而非装饰使用
 
-所有灯专属代码逐步从 mygo.py / character_profiles.py 抽出来或者新建到这里、
-不再让灯的特殊性把通用代码膨胀。
+所有灯专属代码都集中在本包、不让灯的特殊性把通用代码膨胀。
 
-Entry hook: caller (mygo / chat_server) 通过 `tomori.api` 拿入口、
-不直接 import 内部子模块。
-
-进度跟踪：见 `tomori/PROGRESS.md`。
+Entry hook: 调用方通过 `tomori.api` 拿入口、不直接 import 内部子模块。
 """
 from __future__ import annotations
 

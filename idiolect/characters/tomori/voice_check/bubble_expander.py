@@ -22,7 +22,7 @@
   · 「bubble」 = 用 `\\n` 分隔的每一行（前端按行渲染成 chat bubble）
   · 单行 reply 整体被当成一个 bubble
   · 必须在 ellipsis normalize 之后跑、否则 12 中点会被归一回 6
-  · 实际 chat 多 bubble 输出依赖 chat_server 的 chunking、那是另一层
+  · 实际 chat 多 bubble 输出依赖调用方的分泡（chunking）、那是另一层
 """
 from __future__ import annotations
 

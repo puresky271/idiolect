@@ -1,5 +1,5 @@
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]
@@ -15,9 +15,9 @@ from pathlib import Path
 
 PKGS = ['anon', 'soyo', 'tomori', 'taki', 'rana']
 PKG_DIR = ROOT / 'idiolect' / 'characters'
-PKG_DIR = ROOT / 'idiolect' / 'characters'
-COMPONENTS = ['__init__.py', 'api.py', 'canon.py', 'voice.py', 'VOICE_CONSTRAINTS.md',
-              'PROGRESS.md', 'voice_mood.py', 'voice_check', 'turn_logic']
+# 宿主项目里的 VOICE_CONSTRAINTS.md / PROGRESS.md / voice_mood.py 不随本仓库发布
+# （前两份是开发记录，后一份依赖宿主的 mood 基建），所以不列进来当期望组件。
+COMPONENTS = ['__init__.py', 'api.py', 'canon.py', 'voice.py', 'voice_check', 'turn_logic']
 
 print(f"{'组件':22}" + ''.join(f'{p:>8}' for p in PKGS))
 print('-' * 62)
@@ -29,7 +29,7 @@ for comp in COMPONENTS:
     print(row)
 
 print()
-print('=== 角色包 API 契约（character_role_packages 暴露的）===')
+print('=== 角色包 API 契约（idiolect/registry.py 暴露的）===')
 import sys
 sys.path.insert(0, str(ROOT))
 import idiolect.registry as rp

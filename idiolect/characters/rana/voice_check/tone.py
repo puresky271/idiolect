@@ -1,7 +1,7 @@
 """乐奈的语气/越界**诊断**（只报不改）。
 
   A. 角色阈值：感叹号配额、泡长（p90/硬上限）、不用符号、自称率、口癖禁词
-  B. 助手腔/越界：结构级检测器 `turn_agents.assistant_tone`
+  B. 助手腔/越界：结构级检测器 `idiolect.tone`
      （与 persona card 的【反客服腔硬约束】同源；prompt 让模型不写，这里兜住漏网的）
 """
 from __future__ import annotations
@@ -29,8 +29,8 @@ def split_bubbles(text: str) -> list[str]:
 def inspect(reply: str) -> dict[str, Any]:
     """只诊断、不修改。返回 violations（规则名 → 证据列表）。
 
-    助手腔部分走**结构级检测器** `turn_agents.assistant_tone`（2026-09-11 换）：
-    字面黑名单对 v41 人工实例的召回只有 33%，漏掉「我在。」这类最基本形态
+    助手腔部分走**结构级检测器** `idiolect.tone`（2026-09-11 换）：
+    字面黑名单对人工标注实例的召回只有 33%，漏掉「我在。」这类最基本形态
     与全部变体；结构级检测器在同一评测集上召回 83%、真台词误报 0.34%。
     """
     text = str(reply or "")

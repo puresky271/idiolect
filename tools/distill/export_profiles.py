@@ -2,8 +2,8 @@
 
 为什么需要它：探针的 fidelity 评分要把「模型的产出」和「原作的分布」对齐，而分布
 需要 mean/sd/分位数——`style_targets.json` 只有中位与 p90，够写 prompt，不够算分。
-原项目里这个 gold 画像是**每次探针现场从语料算**的，于是没有语料就跑不了探针；
-本仓库把画像作为派生统计发出去，让「clone → 探针 → 出分」这条链闭合。
+如果这份 gold 画像**每次探针都现场从语料算**，没有语料就跑不了探针；
+所以画像作为派生统计随仓库发布，让「clone → 探针 → 出分」这条链闭合。
 
 画像 = `style_features.profile_from_texts(train 台词)`，逐字段都是聚合量
 （n / 均值 / 标准差 / 分位数 / 出现率 / 高频语气词），**没有任何一句原作台词**。
@@ -15,7 +15,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]

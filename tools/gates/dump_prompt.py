@@ -1,10 +1,8 @@
 """全量 prompt dump：回答「这个角色这一刻发给模型的 prompt 到底长什么样」。
 
-对应原项目的 `scripts/dump_live_chat_prompt.py`（那条路径经 offline_smoke →
-chat_server 装配真实运行时 prompt）。本仓库没有 session / 记忆 / 世界状态，
-能 dump 的就是「角色怎么说话」这条线：canon + 语气 manifest + 场景化长度目标
-+ turn_logic。方法论上这四层是**唯一**被蒸馏特征直接改写的部分，所以 dump 它们
-就足以回答「特征有没有真的进 prompt」。
+本仓库没有 session / 记忆 / 世界状态，能 dump 的就是「角色怎么说话」这条线：
+canon + 语气 manifest + 场景化长度目标 + turn_logic。方法论上这四层是**唯一**
+被蒸馏特征直接改写的部分，所以 dump 它们就足以回答「特征有没有真的进 prompt」。
 
 三件产物（都在 `report/`，可用 `IDIOLECT_REPORT_DIR` 改）：
 
@@ -33,7 +31,7 @@ chat_server 装配真实运行时 prompt）。本仓库没有 session / 记忆 /
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]

@@ -1,8 +1,8 @@
 """tomori 公共入口——caller 只导这个、不直接 import 子模块。
 
 设计意图：
-  让 mygo / chat_server / pilot_registry 这些主流程文件保持「我只 import tomori.api、
-  调几个明确函数」的形态、不被灯专属子系统的内部重构波及。
+  让主流程调用方保持「我只 import tomori.api、调几个明确函数」的形态、
+  不被灯专属子系统的内部重构波及。
 
 当前 stub 状态：
   函数签名先固定下来、内部 return 空字符串 / pass-through、

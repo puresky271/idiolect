@@ -19,7 +19,7 @@
 - **Bestdori**（`tools/corpus/bd_api.py` + `crawl_bestdori.py`）。直接请求 `https://bestdori.com/api/explorer/{locale}/assets/_info.json` 一类的资产接口，抓 `.asset` JSON 剧本，不下载 mp3。取 `Base.talkData[]` 里的 `body`、`voices`、`talkCharacters`，只保留 `characterId` 属于 `{"36": "tomori", "37": "anon", "38": "rana", "39": "soyo", "40": "taki"}` 的行。抓取范围是 11 类剧本目录：`eventstory`、`actionset`、`band`、`birthdaystory`、`main`、`loginstory`、`area_opening_story`、`precedingstory`、`afterlivetalk`、`digeststory`、`backstagestory`（`crawl_bestdori.py` 的 `BUCKETS`，`effects` 明确排除）。`build_gold.py` 把 bestdori 排在前面合并，注释给的理由是它「覆盖更广、含 area/talkset」。这条路的代价是要打上千次接口，好处是能随官方更新重抓。
 - **HuggingFace**（`tools/corpus/prep_hf_corpus.py`）。读 `KomeijiForce/BanG_Dream_Events` 的 parquet 快照，列是 `event_id` / `chapter` / `speaker` / `windowDisplayName` / `text`。真正的说话人在 `windowDisplayName`，`speaker` 列是占位符。`windowDisplayName` 含全角间隔号的多人口径整行丢弃，避免归属污染。它只有活动剧情，附带 `event_id` 与 `chapter` 结构，比 Bestdori 少一层抓取。
 
-`prep_hf_corpus.py` 的输入路径是 `tools/raw/{lang}.parquet`（`RAW = HERE.parent / "raw"`），文件头注释说明它共用原项目已下载的 parquet。本仓库没有下载该数据集的脚本，要走这条路得自己准备 parquet 文件。
+`prep_hf_corpus.py` 的输入路径是 `tools/raw/{lang}.parquet`（`RAW = HERE.parent / "raw"`），parquet 文件需要自己准备（本仓库不带下载该数据集的脚本，字段要求见文件头注释）。
 
 **为什么不分发。** `tools/_paths.py` 的文件头写明语料目录「不入库，需自己跑 `tools/corpus/` 生成」，`corpus_file()` 找不到文件时抛的 `FileNotFoundError` 也带着同样的说明。仓库只发 `data/` 下的聚合量。实测 `data/` 六个 JSON 里最长的字符串是 56 字，内容是 `style_profiles.json` 的 `note` 说明字段；`scene_char_baseline.json` 与 `scene_stats.json` 的原始产物本来带 `exemplars`（整句原台词），发布的那份已经剥离，130 个 `(角色, 场景)` 键里没有一个含 `exemplars`。两道检查盯着这条线：`tests/test_tooling_contracts.py::test_shipped_profiles_have_no_text` 断言画像里没有 `texts` / `examples` 字段，`tools/offline_smoke.py::check_data` 的「数据.无原作文本」项扫 `exemplars`。
 

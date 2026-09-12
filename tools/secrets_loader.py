@@ -1,7 +1,7 @@
 """可选的密钥注入垫片。
 
-原项目从 `.streamlit/secrets.toml` 读密钥再灌进进程环境；本仓库直接读环境变量，
-这里保留同名函数只为让 `tools/probe/probe_runner.py` 不用改。
+探针等入口直接读进程环境变量；这个薄垫片在启动时把本地密钥文件灌进环境，
+让 `tools/probe/probe_runner.py` 等调用点不用关心密钥来自哪里。
 
 支持两种可选来源（都没有就什么都不做）：
   · 仓库根的 `.env`（`KEY=VALUE` 每行一条）
@@ -11,7 +11,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]

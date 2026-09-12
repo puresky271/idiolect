@@ -1,4 +1,4 @@
-"""Bestdori 资产访问层（bench 专用，只读）。
+"""Bestdori 资产访问层（语料抓取专用，只读）。
 
 链路（与 zyf722/bestdori-voice-extractor 一致，但不需要下载 14GB 语音）：
   - 目录树:  https://bestdori.com/api/explorer/{locale}/assets/_info.json
@@ -10,7 +10,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]
@@ -31,7 +31,7 @@ MYGO = {"36": "tomori", "37": "anon", "38": "rana", "39": "soyo", "40": "taki"}
 MYGO_ID_TO_CN = {"36": "灯", "37": "爱音", "38": "乐奈", "39": "爽世", "40": "立希"}
 
 _session = requests.Session()
-_session.headers.update({"User-Agent": "Mozilla/5.0 (mygo-chat bench; read-only)"})
+_session.headers.update({"User-Agent": "Mozilla/5.0 (idiolect corpus fetch; read-only)"})
 try:
     from requests.adapters import HTTPAdapter
     from urllib3.util.retry import Retry

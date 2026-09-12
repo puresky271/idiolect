@@ -4,15 +4,15 @@
   1. **夹具逐字节固定**：对每个角色取一份真实 messages dump，只替换最后一条 user 内容。
      整段 system prompt（含当天记忆/日程/世界状态）在整轮实验中保持完全一致，
      所以 before/after 的差异只可能来自我们改的 prompt 分片。
-  2. **生产同参**：temperature=0.75、max_tokens=120（复刻生产主路径）。
+  2. **参数固定**：temperature=0.75、max_tokens=120（两臂一致，排除采样参数干扰）。
   3. **分布级评分**：fidelity 需要多条样本才有意义，所以每场景 N 次；
      聚合到「角色 × 臂」再算分布，而不是逐条算。
   4. **中性对照场景**：用于识别「靠变冷淡刷分」——若中性场景的 fidelity 也一起掉，
      说明补丁在压长度而不是在塑角色。
 
 产物：
-  bench/report/probe_<label>.jsonl   逐条原始回复
-  bench/report/probe_<label>.md      臂间对比报告
+  report/probe_<label>.jsonl   逐条原始回复
+  report/probe_<label>.md      臂间对比报告
 用法：
   py -X utf8 probe_runner.py --label baseline --runs 6                # 只跑 current 臂
   py -X utf8 probe_runner.py --label v42 --runs 6 --arm-name patched  # 自定义臂名
@@ -20,7 +20,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]
@@ -211,7 +211,7 @@ def main() -> int:
     gold_src = ""
     corpus_cn = CORPUS_DIR / "cn.jsonl"
     if corpus_cn.exists():
-        # 有语料：现场按同一套特征代码算 gold 画像（与原项目历史数字逐位可比）
+        # 有语料：现场按同一套特征代码算 gold 画像（与历史批次数字逐位可比）
         for char, key in CHARKEY.items():
             texts = []
             for line in corpus_cn.read_text(encoding="utf-8").splitlines():

@@ -113,10 +113,10 @@ def _is_late_night_hour(now_jst: Optional[datetime]) -> bool:
 def _get_taki_night_owl_today(ledger: Optional[dict]) -> bool:
     """读 ledger.plans.立希 的 night_owl_today（兼容 baked 和 runtime 两个 tier）。
 
-    SSOT：town_sim.get_night_owl_today（2026-05-16 refactor 后）
+    读取顺序：
       1. plan["night_owl_today"]  ← baked tier（主存储）
       2. plan.runtime.night_owl_today  ← legacy tier
-    2026-05-20: 之前只读 runtime tier、与 SSOT baked tier 不对齐、与 tomori 版本不一致。
+    2026-05-20: 之前只读 runtime tier、与 baked tier 不对齐、与 tomori 版本不一致。
     """
     if not isinstance(ledger, dict):
         return False

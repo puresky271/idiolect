@@ -11,7 +11,7 @@
      · 中位 **6** 字、p90 **12** 字 → 超长回合告警（不截断，只诊断）
      · 破折号 / 波浪号 / ♪ / （ 基本不用 → 出现即告警
      · 自称率仅 **16%** → 一轮内「我」出现 ≥3 次告警（她不以「我」起句）
-  B. **确定性助手腔/越界检测**（v41 报告 §6 建议的「方案 C」）
+  B. **确定性助手腔/越界检测**（结构级方案）
      · 关系承诺/存在宣言、读心式点评、替对方下心理结论、工整收束、视觉声称
      · 乐奈另有「不声称看见聊天对象」「不做心理归因」等 manifest 硬约束
 
@@ -19,7 +19,7 @@
   · **清洗只做能无损替换的**（感叹号降级、重复省略号归一），
     任何会改语义的一律只告警不修改
   · `clean_reply` 返回 (text, info)；info 里 `violations` 供上层日志与审计
-  · 本模块不依赖 mygo / 运行时状态
+  · 本模块不依赖主流程 / 运行时状态
 
 公开 API（外部只依赖这些）：`clean_reply` / `inspect` / 阈值常量。
 """
@@ -30,7 +30,7 @@ from typing import Any
 
 from .opener import strip_redundant_ack
 from .punctuation import downgrade_exclaims, normalize_ellipsis
-from .thresholds import (  # noqa: F401  （re-export，供 test / bench 按旧路径取用）
+from .thresholds import (  # noqa: F401  （re-export，兼容旧导入路径）
     EXCLAIM_MAX_PER_TURN,
     FIRST_PERSON_MAX,
     LEN_HARD,

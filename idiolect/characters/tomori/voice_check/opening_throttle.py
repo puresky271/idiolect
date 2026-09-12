@@ -30,7 +30,7 @@
   · `······！` / `······？` 视为独立类（语义负载和纯 `······` 不同）
 
 历史：
-  · 之前 chat_server.py `_throttle_tomori_hum_opening` 只覆盖「嗯」一种
+  · 初版只覆盖「嗯」一种
   · 2026-05-10 扩展到 6 种、但用 strip 策略
   · 2026-05-11 改 strip → rotate replacement
 """
@@ -136,7 +136,7 @@ def extract_compound_opening(reply: str) -> tuple[Optional[str], str]:
 
     与 throttle_opening 的协作：
       · 必须在 throttle 之前调用、拿到 compound_prefix 后只把 remaining 传给 throttle
-      · 复合 prefix 最终由 chat_server 作为独立气泡 prepend 到 _parts
+      · 复合 prefix 最终由调用方作为独立气泡 prepend 到回复分泡
     """
     text = str(reply or "")
     if not text or not text.strip():

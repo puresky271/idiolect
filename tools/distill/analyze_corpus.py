@@ -1,11 +1,12 @@
 """五人台词集量化分析：打印角色风格画像 + 两两区分度 + 词级签名 + 两语言对照。
 
-输入 bench/raw/hf/{jp,cn}.jsonl（金标准）；如 Bestdori 已爬完则一并纳入。
-产出 bench/report/quant_report.md 与 profile_<lang>.json。
+输入：金标准语料（raw/gold/{jp,cn}.jsonl，可用 IDIOLECT_CORPUS_DIR 覆盖）；
+缺失时回落 tools/corpus/raw/ 下的分源中间层（hf；如 Bestdori 已爬完则一并纳入）。
+产出：report/quant_report.md 与 report/profile_all.json。
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]

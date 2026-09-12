@@ -1,5 +1,5 @@
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]
@@ -12,7 +12,7 @@ from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
 
 动机：长度偏差多是参照物错配（钩子类问题天然更长），
 挑「该补哪个场景」要看**有没有真的出戏**。这里用确定性检测器：
-  · turn_agents.assistant_tone.detect —— 存在宣言 / 元叙述 / 心理归因 / 对仗 / 客服腔 / 视觉声称
+  · idiolect.tone.detect —— 存在宣言 / 元叙述 / 心理归因 / 对仗 / 客服腔 / 视觉声称
   · 结构复读 —— 同一夹具 N 次生成里，起手词/句式高度重复（单轮检测器抓不到的病灶）
 """
 import collections

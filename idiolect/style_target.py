@@ -12,10 +12,6 @@
 `scene` 参数的作用：命中场景时，用**该角色在该场景**的原作分布替换长度与句数两项，
 其余维度仍用全局值。同一个全局上限不可能对所有场景都对——原作里同角色不同场景的
 中位差 1.6~2.6 倍。场景 key 由 `idiolect.scene_classifier.classify` 判定；判不出就传 ""。
-
-原实现位置：mygo_chat 的 `turn_agents/prompt_cards.py`（`STYLE_TARGETS` +
-`_build_style_target_block`）。这里摘出来作为独立模块，函数改名为公开的
-`build_style_target_block`。
 """
 from __future__ import annotations
 

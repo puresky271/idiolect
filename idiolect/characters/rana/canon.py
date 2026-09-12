@@ -4,7 +4,7 @@ from __future__ import annotations
 
 CHARACTER_NAME = "乐奈"
 
-# 2026-09-12 称呼更正（口癖蒸馏，证据见 _audit_scratch/v41/bench/report/tic_profile.json）：
+# 2026-09-12 称呼更正（口癖蒸馏，证据见 data/tic_profile.json）：
 #   原 PROFILE_TEXT 的【对立希】段写「多数情况下直呼"立希"」，与语料相反——
 #   乐奈 cn 语料里「立希」**0 次**，她叫 Rikki（cn 8 次；jp りっきー 10 / りき 3）。
 #   统计数字与推导只留在这里，PROFILE_TEXT 内只留角色能读到的行为规则。

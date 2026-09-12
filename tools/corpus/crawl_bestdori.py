@@ -6,12 +6,12 @@
   - 支持断点续跑：已抓过的 asset 记在 _crawl_done.jsonl，重跑跳过。
   - 并发受限（默认 8），避免把 Bestdori 打挂。
 
-产出：bench/raw/bestdori/{jp,cn}.jsonl
+产出：tools/corpus/raw/bestdori/{jp,cn}.jsonl
   每行 {"character_id","voice_id","text","source","dir","file"}
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]

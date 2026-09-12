@@ -1,9 +1,9 @@
 """turn_logic 的 prompt diff 门禁（含触发场景）——before/after 两臂都由此脚本产出。
 
-为什么不能用 `scripts/dump_live_chat_prompt.py`：
-  那条路径经 `offline_smoke` → `chat_server._build_system_prompt(dev_mode=True)`，
-  而 turn_logic 场景/深模块**按设计**在开发者模式不触发（`is_developer=True` → 返回 ""）。
-  所以全量 dump 看不到 turn_logic 的新块（它能证明的是「其余 prompt 零漂移」）。
+为什么要单独有这个门禁：
+  turn_logic 场景/深模块**按设计**在开发者模式不触发（`is_developer=True` → 返回 ""），
+  所以走开发者模式的全量 dump 路径看不到 turn_logic 的新块
+  （它能证明的只是「其余 prompt 零漂移」）。turn_logic 的 diff 必须显式构造两臂。
 
 两臂怎么取：
   · after  = 当前代码（深模块开启）
@@ -21,7 +21,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]

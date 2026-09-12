@@ -99,26 +99,7 @@
 
 去重与预算：同一场景在同一 session 内只注入一次（`scene_engine._mark_fired`），一轮最多注入 2 个场景（`max_blocks`）。第二轮起不重复注入，是为了避免同一段指引在长会话里反复出现、把语气压成一个方向。
 
-## 8. 角色包里的两份记录
-
-每个角色包目录下有两份从原工程带过来的开发记录：
-
-- `VOICE_CONSTRAINTS.md`：这个角色的语气约束索引，哪条约束由谁拥有、开关是什么。
-- `PROGRESS.md`：这个角色的场景模块建设进度与拍板项。
-
-它们里面的路径写的是**原工程的布局**（`rana/`、`turn_agents/prompt_cards.py`、`mygo.py`、`chat_server.py`），在本仓库里的对应物是：
-
-| 原工程路径 | 本仓库路径 |
-|---|---|
-| `rana/`、`soyo/` 等角色包 | `idiolect/characters/<key>/` |
-| `character_role_packages.render_turn_special_block` | `idiolect/registry.py::render_turn_special_block` |
-| `turn_agents/prompt_cards.py::_build_style_target_block` | `idiolect/style_target.py::build_style_target_block` |
-| `mygo.py` 的 prompt 装配 | `idiolect/assemble.py::build_system_prompt` |
-| `chat_server.py` 的调用点 | 无（本仓库不带聊天服务，调用方自己接 `build_messages`） |
-
-记录里的结论（触发词、开关注解、口癖依据）在本仓库仍然有效，路径需要按上表翻译。
-
-## 9. 改一层要跑什么
+## 7. 改一层要跑什么
 
 | 改动 | 至少跑 |
 |---|---|

@@ -1,8 +1,5 @@
 """角色包注册表：把「角色名」解析成具体角色包，再分发到它的窄入口。
 
-对应原项目 `character_role_packages.py`，去掉项目专属的 `character_profile_runtime`
-依赖（名称归一化改为本地实现）。
-
 调用方只依赖本模块的这几个函数，不要按角色名堆 if/elif，
 也不要直接 import `idiolect.characters.<key>.*`。
 """

@@ -118,8 +118,8 @@ def _is_late_night_hour(now_jst: Optional[datetime]) -> bool:
 def _get_tomori_night_owl_today(ledger: Optional[dict]) -> bool:
     """读 ledger.plans.灯 的 night_owl_today（兼容 baked-in 和 runtime 两个 tier）。
 
-    SSOT：town_sim.get_night_owl_today
-      1. plan["night_owl_today"]  ← baked tier（2026-05-16 refactor 后的主存储）
+    读取顺序：
+      1. plan["night_owl_today"]  ← baked tier（2026-05-16 后的主存储）
       2. plan.runtime.night_owl_today  ← legacy tier
     """
     if not isinstance(ledger, dict):

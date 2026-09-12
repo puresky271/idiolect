@@ -419,10 +419,10 @@ SUBSPECIES_VARIANTS: dict[str, list[str]] = {
 #   · 进程重启自然清零
 #
 # 设计权衡：
-#   · 不持久化到 dev_memory — 大部分对话不会跨进程纠缠同一物种、轻量优先
+#   · 不持久化 — 大部分对话不会跨进程纠缠同一物种、轻量优先
 #   · 不分窗口 / TTL — session 内的对话连续性才是 dedup 的语义边界
-#   · session_id None → fallback 「灯」单一 bucket（chat_server 主路径会传真 session_id；
-#     mygo.py 几个 build_pet_system_prompt_for_api 的调点暂不传、共享一桶）
+#   · session_id None → fallback 「灯」单一 bucket（主路径会传真 session_id；
+#     不传的调点共享一桶）
 _SEEN_LOCK = threading.Lock()
 _SEEN_SUBSPECIES: dict[str, set[str]] = {}  # session_id -> {subspecies_name}
 _SEEN_CATEGORIES: dict[str, set[str]] = {}  # session_id -> {category_name}
@@ -928,7 +928,7 @@ def build_marine_special_block(
 
     Args:
         user_text:   本轮用户输入
-        session_id:  ws 会话 id；None → fallback 单一 bucket（mygo.py 暂不传）
+        session_id:  会话 id；None → fallback 单一 bucket
     """
     if not _enabled() or not user_text:
         return ""

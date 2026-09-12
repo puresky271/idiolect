@@ -17,7 +17,7 @@ from idiolect.characters.rana.turn_logic.scenes import RANA_SCENES
 from idiolect.characters.soyo.turn_logic import build_soyo_special_block
 from idiolect.characters.soyo.turn_logic.scenes import SOYO_SCENES
 
-# 语料实证过的触发词（见 _audit_scratch/v41/bench/verify_triggers.py）
+# 语料实证过的触发词（见 tools/distill/verify_triggers.py）
 ATTESTED = {
     "rana": {"吉他", "弦", "弹", "演出", "演奏", "曲", "抹茶", "芭菲", "冰淇淋", "点心", "荞麦面", "甜", "猫", "雨"},
     "soyo": {"CRYCHIC", "春日影", "记得", "以前", "过去", "那时候", "睦", "茶", "咖啡", "伯爵", "泡"},
@@ -133,7 +133,7 @@ class SoyoRanaVoiceCheckTests(unittest.TestCase):
     def test_assistant_tone_detection(self):
         """助手腔/越界必须被检出——这是 v41 报告 §6 的确定性兜底层。
 
-        2026-09-11 起改用**结构级**检测器 `turn_agents.assistant_tone`：
+        2026-09-11 起改用**结构级**检测器 `idiolect.tone`（经 voice_check 的 `inspect` 暴露）：
         字面黑名单对 v41 人工实例召回仅 33%，漏掉「我在。」这类基本形态与全部变体；
         结构级召回 72%、真台词误报 0.34%。
 
@@ -239,7 +239,7 @@ class SoyoRanaVoiceCheckTests(unittest.TestCase):
 class RanaTicDistillationTests(unittest.TestCase):
     """2026-09-12 口癖蒸馏：乐奈的「不知道」不是她的词，立希一律叫 Rikki。
 
-    依据 `_audit_scratch/v41/bench/report/tic_profile.json`（金标准 cn train n=393）：
+    依据 `data/tic_profile.json`（金标准 cn train n=393）：
       「不知道」乐奈 0 次（jp わかんない / わからない 也 0~1 次）；
       「立希」0 次，她叫立希一律 Rikki（cn 8 次；jp りっきー 10 / りき 3）。
     """
@@ -323,7 +323,7 @@ class GrandmaWordingTests(unittest.TestCase):
     """乐奈的家人用词以 SSOT 为准，不因微弱语料差异改写。
 
     2026-09-12：曾据 cn 语料把「外婆」改成「奶奶」（奶奶 3 / 外婆 2），
-    但 3:2 在 393 条上是噪声，而 canon + character_profiles 用「外婆都筑诗船」50+ 次。
+    但 3:2 在 393 条上是噪声，而 canon 档案与 voice manifest 都用「外婆都筑诗船」50+ 次。
     """
 
     def test_rana_grandma_is_waipo(self):
@@ -340,7 +340,7 @@ class GeneralSceneAffectionTests(unittest.TestCase):
 
     为什么先做它：两条 probe 臂里它都是最差场景，且**同一场景两个方向都能错**
     （立希中位 2 字 vs 参照 12＝过度沉默；灯 40 字 vs 参照 10＝过度铺陈）。
-    真实 LLM 对照见 `_audit_scratch/v41/bench/report/scene_feedback_affection.md`。
+    真实 LLM 对照可用 tools/score/scene_feedback.py 复现（--scene affection）。
     """
 
     CHARS = ("灯", "爱音", "素世", "立希", "乐奈")

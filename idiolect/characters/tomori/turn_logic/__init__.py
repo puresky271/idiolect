@@ -1,9 +1,7 @@
 """tomori.turn_logic — 灯本轮对话特殊逻辑入口。
 
 设计意图：
-  原 mygo.py 的灯歌词逻辑（_match_lyrics_for_context / _detect_tomo_creative_request /
-  _build_tomo_creative_block 等）耦合在 system prompt 构建路径里、4 处复制粘贴、
-  被用户拍板删除。这里是新家：
+  灯的歌词逻辑不该耦合在 system prompt 构建路径里，集中在这里：
 
   - **本轮触发**：每次 chat reply 前根据 user_text 判断是否注入特殊指引
   - **窄入口**：只暴露 build_turn_special_block(user_text, character)
@@ -15,7 +13,7 @@
   · 空 stub、永远返 ""、不破坏现有 prompt 输出
   · 后续按子系统（笔记本 / 歌词流 / 收集癖 / 等）逐个实现
 
-注：本模块产物注入在 pet_prompt_registry 的 `lyrics_context` slot
+注：本模块产物注入在 prompt 的 `lyrics_context` slot
 （保留这个 key 名向后兼容、内部已不止"歌词"用途）。
 """
 from __future__ import annotations

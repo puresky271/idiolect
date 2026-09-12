@@ -168,4 +168,4 @@ py -X utf8 tools/distill/scene_stats.py        --no-exemplars --out data/scene_s
 
 ## 10. 密钥
 
-探针按顺序取 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`：进程环境变量优先，其次仓库根的 `.env`，最后 `.streamlit/secrets.toml`（继承自原项目，见 `tools/secrets_loader.py`）。三者都不入库。
+探针按顺序取 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`：进程环境变量优先，其次仓库根的 `.env`，最后 `.streamlit/secrets.toml`（顺序实现见 `tools/secrets_loader.py`）。三者都不入库。

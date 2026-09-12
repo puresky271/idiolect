@@ -208,10 +208,9 @@ def decide_big_pause_kind(
 ) -> str | None:
     """只决策、不动 reply。返回 fired_kind ∈ {neutral,question,exclaim,None}。
 
-    分离决策的原因：chat_server 的 `_split_reply_to_sentence_bubbles` 会**过滤**
-    纯省略号 bubble（mygo.py L9445 `_is_standalone_ellipsis_bubble`）+ ≤ 50 字
-    不拆、所以不能把 `············` 直接拼到 reply 文本前再 split、必须在 split 完
-    之后由 chat_server 把 pause 行作为独立 bubble prepend 到 _parts。
+    分离决策的原因：分泡器会**过滤**纯省略号 bubble、≤ 50 字不拆，
+    所以不能把 `············` 直接拼到 reply 文本前再 split、必须在 split 完
+    之后由调用方把 pause 行作为独立 bubble prepend 到分泡列表。
     """
     rng = rng or random
     state = _get_state(session_id)
@@ -264,7 +263,7 @@ def decide_and_inject_big_pause(
 ) -> tuple[str, str | None]:
     """便利封装：决策 + 把 pause 拼到 reply 开头（用于 self-test / 简单场景）。
 
-    chat_server 主路径用 `decide_big_pause_kind` + `pause_line_for` 分两步、
+    主路径用 `decide_big_pause_kind` + `pause_line_for` 分两步、
     避免被 sentence-bubble splitter 过滤掉纯省略号 bubble。
     """
     if not reply_text or not isinstance(reply_text, str):

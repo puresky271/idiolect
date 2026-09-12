@@ -1,7 +1,6 @@
 """offline smoke：一条命令回答「这个仓库现在是健康的吗」。
 
-对应原项目的 `offline_smoke.py`（那条会沙箱化世界状态、dump 真实运行时 prompt）。
-本仓库没有运行时状态，于是 smoke 的职责收窄成三件仍然有价值的事：
+本仓库没有运行时状态，smoke 聚焦三件仍然有价值的事：
 
   1. **装配完整性** —— 四层都在、顺序对、字数在预算内、每个角色每个场景都能装配；
   2. **内容红线** —— 不许出现元叙述（语料/实测/中位/频次）、`<think>`、占位符、
@@ -24,7 +23,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[1]
@@ -55,7 +54,7 @@ LAYERS = ("canon", "voice", "style_target", "turn_logic")
 # prompt 预算是硬约束，超预算是要动 prompt 的人必须看见的事。
 BUDGET = {"canon": 18000, "voice": 7500, "style_target": 800, "turn_logic": 1200, "total": 26000}
 
-# 内容红线：出现在**角色可见文本**里就是泄漏（原项目实测踩过的坑）。
+# 内容红线：出现在**角色可见文本**里就是泄漏（实测踩过的坑）。
 # 词表与 `voice_meta_gate.META_HARD` 保持一致——门禁和冒烟不该有两套标准。
 FORBIDDEN = {
     "元叙述": ("语料", "实测", "专指", "金标准", "lift", "蒸馏", "统计", "占比",

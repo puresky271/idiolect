@@ -1,6 +1,6 @@
 """乐奈 voice_check 的阈值与禁词表（全部来自金标准语料实测）。
 
-改任何数字前先重跑 `char_style_spec.py`；`test_scene_turn_logic.py::test_thresholds_match_corpus`
+改任何数字前先重跑 `tools/distill/export_profiles.py` 对照语料；`test_scene_turn_logic.py::test_thresholds_match_corpus`
 锁着这几个值。
 
 语料依据（cn train，n=389 条非沉默台词）：
@@ -23,11 +23,11 @@ RX_EXCLAIM = re.compile(r"[!！]")
 RX_ELLIPSIS_RUN = re.compile(r"[…·]{2,}")
 RX_FIRST_PERSON = re.compile(r"我")
 
-# 口癖禁词（2026-09-12 口癖蒸馏，见 _audit_scratch/v41/bench/report/tic_profile.*）：
+# 口癖禁词（2026-09-12 口癖蒸馏，见 data/tic_profile.json）：
 #   「不知道」在她 cn 语料里 **0 次**（jp わかんない / わからない 也各 0~1 次）。
 #   她答不上来只回「嗯。」或给最短路答案。旧 KNOWLEDGE_QA_POLICY 曾写「不知道就'不知道'」，
 #   是把模型的默认退路当成了她的口癖，已一并修正（rana/voice.py）。
-#   （「立希」不在本表：出站已由 response_contract.sanitization 确定性归一成 Rikki。）
+#   （「立希」不在本表：该称呼由出站侧的确定性归一处理，不属于口癖禁词。）
 TIC_FORBIDDEN: dict[str, str] = {
     "不知道": "cn 语料 0 次——她答不上来只回「嗯。」，不说这三个字",
 }

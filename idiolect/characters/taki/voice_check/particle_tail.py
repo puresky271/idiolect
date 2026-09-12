@@ -7,8 +7,6 @@ SSOT（taki.voice.VOICE_MANIFEST）规定 5 个撒娇词
   · 直接 strip、不补任何字符（不会把「行呀」改成「行」+任何符号）
   · 保留标点（删 "呀" 不删后面的「。」）
   · 不动复合词中的同字（『干啥呢』里的"呢"在『嘛』『啥』『怎』之类后、不删）
-
-镜像 mygo.py:_CHAR_BANNED_PARTICLES["立希"]（保持双源同步）。
 """
 from __future__ import annotations
 
@@ -32,8 +30,6 @@ import re
 #         · 吗呢 (虚假 case but harmless)   ← 吗 保护
 #   (?:呢~?|哦~?|啦~?|嘛~?|呀~?) 5 词 + 可选拖音
 #   (?=[，。！？!?～~\s]|$)        lookahead：句末位置
-#
-# 同步：mygo.py:_CHAR_BANNED_PARTICLES["立希"] 也要同步扩展（双源一致）
 _BANNED_TAIL_RE = re.compile(
     r"(?<![a-zA-Z干什怎啥么嘛吗哪那这里儿边])(?:呢~?|哦~?|啦~?|嘛~?|呀~?)(?=[，。！？!?～~\s]|$)"
 )

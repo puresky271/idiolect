@@ -7,17 +7,17 @@
   模块的作用不是让她变话痨，而是**在正确的场景给出正确的具体物**——
   避免她把极简退化成空泛表态（「嗯。」「不知道。」）。
 
-命名与触发词**全部有语料实证**（见 `_audit_scratch/v41/bench/verify_triggers.py`）：
+命名与触发词**全部有语料实证**（见 `tools/distill/verify_triggers.py`）：
   吉他 16 / 弹 21 / 演出 26 / 弦 4 ｜ 抹茶 20 / 芭菲 4 / 点心 5 ｜ 猫 17
   「排练」「调音」「拨片」「屋檐」「院子」等词在乐奈语料里**不存在**，故不采用。
 
-各场景的 `tics` 来自 `_audit_scratch/v41/bench/tic_by_scene.py`（场景原型检索 k=120 后，
+各场景的 `tics` 来自 `tools/distill/tic_by_scene.py`（场景原型检索 k=120 后，
 口癖频次 ÷ 该角色全局频次 = lift；只填 cell 内 ≥5 次且 lift ≥1.4 的）：
   rana_guitar：吉他 lift 2.48 ／ 哼 2.12
   rana_food  ：抹茶 2.35 ／ 好吃 2.01 ／ 嗯。 1.68
   rana_cat   ：猫 2.24 ／ 哼 1.92 ／ 嗯。 1.76
 
-物品词复核（`_audit_scratch/v41/bench/char_topic_vocab.py`，2026-09-12）：
+物品词复核（`tools/distill/char_topic_vocab.py`，2026-09-12）：
   rana_food 原写「可用品类（语料实证）：…抹茶芭菲…」——但 **抹茶芭菲在乐奈语料里只 1 次**
   （全语料 6 次，其中立希 3 次）。真正有支撑的复合是：
   抹茶冰淇淋 4（全是她）/ 抹茶欧蕾 / 抹茶拿铁 / 抹茶可丽饼 / 抹茶饼干（各 1，但都是**她独有的搭配**）。

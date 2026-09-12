@@ -26,7 +26,7 @@
 """
 from __future__ import annotations
 
-# ── idiolect 路径引导（可移植）：仓库根 + 各 tools 子目录上 sys.path ──
+# ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
 _ROOT = _Path(__file__).resolve().parents[2]
@@ -62,7 +62,7 @@ def global_baseline(char: str) -> dict | None:
     """scene 为空的夹具（生活化 / 个人钩子）用**角色全局基线**评分。
 
     26 场景体系里没有「日常闲聊」「canon 钩子」这类 key；但这两组夹具仍有观测价值，
-    所以退回 `turn_agents.prompt_cards.STYLE_TARGETS` 的角色全局中位/p90/句数。
+    所以退回 `idiolect.style_target.STYLE_TARGETS` 的角色全局中位/p90/句数。
     anchor_density 用全语料实测均值 1.8 占位（诊断列，不进复合分）。
     """
     try:

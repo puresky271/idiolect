@@ -2,7 +2,7 @@
 
 两块：
   A. 角色阈值：感叹号配额、泡长、不用符号、自称率、裸本名 ≥2 次
-  B. 助手腔/越界：走结构级检测器 `turn_agents.assistant_tone`（通用六条），
+  B. 助手腔/越界：走结构级检测器 `idiolect.tone`（通用六条），
      外加**素世专属** `naming_feeling`（不替对方命名感受——比通用 mind_reading 更宽）
 """
 from __future__ import annotations

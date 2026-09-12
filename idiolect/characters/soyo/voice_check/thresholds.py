@@ -1,6 +1,6 @@
 """素世 voice_check 的阈值与正则（全部来自金标准语料实测）。
 
-改任何数字前先重跑 `char_style_spec.py`；`test_scene_turn_logic.py::test_thresholds_match_corpus`
+改任何数字前先重跑 `tools/distill/export_profiles.py` 对照语料；`test_scene_turn_logic.py::test_thresholds_match_corpus`
 锁着这几个值。
 
 语料依据（cn train，n=862 条非沉默台词）：
@@ -31,8 +31,7 @@ RX_BARE_PEER = re.compile(r"(?<![小])(" + "|".join(PEERS) + r")")
 # 语料依据：素世 1085 条里裸名只出现 6 次，其中 4 次是**别的意思**
 #   （「负责关灯」「别的灯光」= 灯具；「高松灯」「要乐奈」= 姓氏全名），
 #   说明她几乎从不用裸名 → 替换规则很安全。
-# 参考实现：response_contract/sanitization.py::_enforce_dialogue_nickname_policy 的
-#   `_tomori_nickname_repl`（用窗口排除「关灯/灯光/灯笼」等假阳性）。
+# 实现要点：用窗口排除「关灯/灯光/灯笼」等假阳性。
 SURNAMES = ("高松", "千早", "椎名", "长崎", "要", "若叶")
 RX_FULL_NAME = re.compile("(" + "|".join(SURNAMES) + r")(" + "|".join(PEERS) + r")")
 
@@ -49,7 +48,7 @@ LAMP_CONTEXTS = (
 # 「乐奈」的「要」是姓但不是所有场合；用全名正则已覆盖「要乐奈」
 RX_MUTSU = re.compile(r"(?<![小])睦")
 
-# 兼容旧的私有别名（外部/历史脚本按 `sv._PEERS` 这类名字取过）
+# 兼容旧的私有别名
 _RX_EXCLAIM = RX_EXCLAIM
 _RX_ELLIPSIS_RUN = RX_ELLIPSIS_RUN
 _RX_FIRST_PERSON = RX_FIRST_PERSON
