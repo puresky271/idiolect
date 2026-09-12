@@ -1144,3 +1144,65 @@ class TakiRanaSceneTests(unittest.TestCase):
         self.assertIn("【本轮·提到了猫】", block)
 
 
+class AliasContractTests(unittest.TestCase):
+    """别名必须与 canonical 名产生**完全相同**的注入。
+
+    2026-09-13 实测的失败形态：registry 能把别名解析到角色包，但包内 gate 拿
+    **原始字符串**去比五张手写名字表（彼此还不一致），于是 `Tomori` / `Soyo` /
+    `Rana` / `要乐奈` / `りき` / `あのん` 这些别名一律被判 False、静默返回空——
+    调用方拿到的是一个没有任何场景指引的裸模型，而且没有任何报错。
+
+    现在的约定：名字表只有 `idiolect/registry.py` 一份，包内 `is_<char>()` 问它；
+    registry 在分发时把名字归一化后再传给包。
+    """
+
+    TEXT = "我一直在哭，快撑不住了"      # 通用场景：五个角色都该命中
+
+    def test_every_alias_injects_the_same_as_its_canonical(self):
+        from idiolect.registry import _ALIASES, canonicalize_name, render_turn_special_block
+
+        for alias, canon in sorted(_ALIASES.items()):
+            with self.subTest(alias=alias, canon=canon):
+                self.assertEqual(canonicalize_name(alias), canon)
+                want = render_turn_special_block(canon, self.TEXT, session_id=f"canon:{alias}")
+                got = render_turn_special_block(alias, self.TEXT, session_id=f"alias:{alias}")
+                self.assertTrue(want, f"{canon} 自己都没命中通用场景，这条用例失效了")
+                self.assertEqual(got, want, f"别名 {alias!r} 的注入与 {canon} 不一致")
+
+    def test_japanese_spellings_resolve(self):
+        from idiolect.registry import canonicalize_name
+
+        for ja, canon in (("愛音", "爱音"), ("燈", "灯"), ("そよ", "素世"),
+                          ("楽奈", "乐奈"), ("長崎そよ", "素世"), ("要楽奈", "乐奈")):
+            with self.subTest(ja=ja):
+                self.assertEqual(canonicalize_name(ja), canon)
+
+    def test_package_gates_agree_with_the_registry(self):
+        from idiolect.characters.anon.api import is_anon
+        from idiolect.characters.rana.api import is_rana
+        from idiolect.characters.soyo.api import is_soyo
+        from idiolect.characters.taki.api import is_taki
+        from idiolect.characters.tomori.api import is_tomori
+        from idiolect.registry import _ALIASES
+
+        gates = {"爱音": is_anon, "灯": is_tomori, "立希": is_taki,
+                 "素世": is_soyo, "乐奈": is_rana}
+        for alias, canon in _ALIASES.items():
+            with self.subTest(alias=alias):
+                self.assertTrue(gates[canon](alias), f"{alias!r} 被 {canon} 的 gate 拒了")
+        # 反向：别把别的角色认领过来，空值/None 也不能炸
+        self.assertFalse(is_rana("灯"))
+        self.assertFalse(is_anon("乐奈"))
+        self.assertFalse(is_taki(""))
+        self.assertFalse(is_soyo(None))
+
+    def test_postprocess_accepts_aliases(self):
+        """后处理同样走归一化：别名不能被静默跳过。"""
+        from idiolect.registry import postprocess_reply
+
+        for alias in ("楽奈", "Rana", "要乐奈"):
+            with self.subTest(alias=alias):
+                out = postprocess_reply(alias, "嗯。\n\n猫。屋檐下面。")
+                self.assertFalse(out.get("skipped"), f"{alias} 的后处理被跳过了")
+
+

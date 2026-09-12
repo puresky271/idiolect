@@ -15,6 +15,7 @@ from datetime import datetime
 
 from .canon import get_canon_facts, get_canon_profile
 from .voice import VOICE_MANIFEST
+from ...registry import canonicalize_name
 
 CHARACTER_NAME = "灯"
 
@@ -22,13 +23,10 @@ CHARACTER_NAME = "灯"
 def is_tomori(character: str) -> bool:
     """判断 character 是不是灯。
 
-    用 helper 而不是各处 `character == "灯"` 字面比较、避免名字写法漂移
-    （高松灯 / 灯 / Tomori / tomorin 等）。
+    名字表只在 `idiolect/registry.py` 维护一份，这里问它——本模块原先自带一张
+    手写表，比 registry 少 `ともり`，于是那个别名会静默返回空。
     """
-    if not character:
-        return False
-    name = str(character).strip().lower()
-    return name in ("灯", "tomori", "tomorin", "高松灯", "高松燈", "takamatsu tomori")
+    return canonicalize_name(character) == "灯"
 
 
 def render_supplemental_blocks(

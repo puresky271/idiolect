@@ -1240,20 +1240,13 @@ GENERAL_SCENES: dict[str, list[SceneModule]] = {
              _play_along(_RANA_PLAY_ALONG), _banter(_RANA_BANTER), _third_party(_RANA_THIRD)],
 }
 
-# 角色名别名 → canonical 中文名
-_ALIASES = {
-    "灯": "灯", "高松灯": "灯", "ともり": "灯", "tomori": "灯", "Tomori": "灯",
-    "爱音": "爱音", "千早爱音": "爱音", "あのん": "爱音", "anon": "爱音", "Anon": "爱音",
-    "素世": "素世", "爽世": "素世", "そよ": "素世", "長崎そよ": "素世", "soyo": "素世", "Soyo": "素世",
-    "立希": "立希", "椎名立希": "立希", "りき": "立希", "taki": "立希", "Taki": "立希",
-    "Rikki": "立希", "rikki": "立希", "りっきー": "立希",
-    "乐奈": "乐奈", "楽奈": "乐奈", "要乐奈": "乐奈", "要楽奈": "乐奈",
-    "らな": "乐奈", "rana": "乐奈", "Rana": "乐奈",
-}
-
-
+# 角色名别名表在 `idiolect/registry.py`（唯一一份），这里只做一次转发。
+# 本模块原先自带一张手写表，与 registry 的集合不一致（少 `愛音`/`燈`，
+# 多 `らな`/`そよ`），同一个别名在两条路径上会解析成不同结果。
 def canon_character(character: str) -> str:
-    return _ALIASES.get(str(character or "").strip(), "")
+    from .registry import canonicalize_name
+
+    return canonicalize_name(character)
 
 
 def build_general_scene_blocks(

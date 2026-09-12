@@ -7,12 +7,17 @@ from typing import Any
 
 from .canon import CHARACTER_NAME, get_canon_facts, get_canon_profile
 from .voice import get_voice_manifest
+from ...registry import canonicalize_name
 
 
 def is_rana(character: str) -> bool:
-    return str(character or "").strip().lower() in {
-        "乐奈", "楽奈", "rana", "要楽奈", "kaname rana",
-    }
+    """判断 character 是不是乐奈。
+
+    名字表只在 `idiolect/registry.py` 维护一份，这里问它——本模块原先自带一张
+    手写表，与 registry 的别名集合不一致（少 `要乐奈`、多 `kaname rana`），
+    结果是别名能解析到角色包、却在包内被判 False，**静默返回空**。
+    """
+    return canonicalize_name(character) == "乐奈"
 
 
 def render_supplemental_blocks(*, character: str, last_user_text: str = "", context: dict | None = None, now: datetime | None = None, session_id: str | None = None) -> str:

@@ -15,6 +15,7 @@ from datetime import datetime
 
 from .canon import get_canon_facts, get_canon_profile
 from .voice import VOICE_MANIFEST
+from ...registry import canonicalize_name
 
 CHARACTER_NAME = "立希"
 
@@ -22,13 +23,10 @@ CHARACTER_NAME = "立希"
 def is_taki(character: str) -> bool:
     """判断 character 是不是立希。
 
-    用 helper 而不是各处 `character == "立希"` 字面比较、避免名字写法漂移
-    （椎名立希 / 立希 / Rikki / Taki 等）。
+    名字表只在 `idiolect/registry.py` 维护一份，这里问它——本模块原先自带一张
+    手写表（少了 `りき` / `りっきー`），与 registry 不一致会造成静默失效。
     """
-    if not character:
-        return False
-    name = str(character).strip().lower()
-    return name in ("立希", "taki", "rikki", "椎名立希", "shiina taki")
+    return canonicalize_name(character) == "立希"
 
 
 def render_supplemental_blocks(

@@ -7,12 +7,12 @@ from typing import Any
 
 from .canon import CHARACTER_NAME, get_canon_facts, get_canon_profile
 from .voice import get_voice_manifest
+from ...registry import canonicalize_name
 
 
 def is_soyo(character: str) -> bool:
-    return str(character or "").strip().lower() in {
-        "素世", "爽世", "soyo", "長崎そよ", "nagasaki soyo",
-    }
+    """判断 character 是不是素世。名字表只在 `idiolect/registry.py` 维护一份。"""
+    return canonicalize_name(character) == "素世"
 
 
 def render_supplemental_blocks(*, character: str, last_user_text: str = "", context: dict | None = None, now: datetime | None = None, session_id: str | None = None) -> str:

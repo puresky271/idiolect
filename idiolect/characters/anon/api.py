@@ -15,6 +15,7 @@ from datetime import datetime
 
 from .canon import get_canon_facts, get_canon_profile
 from .voice import VOICE_MANIFEST
+from ...registry import canonicalize_name
 
 CHARACTER_NAME = "爱音"
 
@@ -22,17 +23,10 @@ CHARACTER_NAME = "爱音"
 def is_anon(character: str) -> bool:
     """判断 character 是不是爱音。
 
-    用 helper 而不是各处 `character == "爱音"` 字面比较、避免名字写法漂移
-    （爱音 / 千早爱音 / 千早愛音 / Anon / アノン 等）。
+    名字表只在 `idiolect/registry.py` 维护一份，这里问它——避免「registry 认得、
+    角色包不认得」的静默失效（别名解析成功却在包内被拒，注入为空且无报错）。
     """
-    if not character:
-        return False
-    name = str(character).strip().lower()
-    return name in (
-        "爱音", "愛音", "anon",
-        "千早爱音", "千早愛音", "ちはや あのん", "chihaya anon",
-        "アノン",
-    )
+    return canonicalize_name(character) == "爱音"
 
 
 def render_supplemental_blocks(
