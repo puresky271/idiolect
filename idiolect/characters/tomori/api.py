@@ -85,7 +85,7 @@ def post_reply_voice_check(
 ) -> dict[str, Any]:
     """灯回复后的语气后处理校验（不修改 reply、只产出诊断）。
 
-    当前 stub 总返 `{"violations": [], "ok": True}`、子系统实现前没人会跑入分支。
+    当前 stub 总返 `{"violations": {}, "ok": True}`、voice_check 子系统接线前没人会跑入分支。
 
     将来检查项（拟）：
       - ellipsis_overuse: 『…』数量 > 段数、或当分隔符滥用
@@ -95,9 +95,9 @@ def post_reply_voice_check(
       - knowing_summary: 「她是…的人」式人物画像归纳
     """
     if not is_tomori(character):
-        return {"violations": [], "ok": True, "skipped": True}
+        return {"violations": {}, "ok": True, "skipped": True}
     # TODO[voice_check]: 真正的语气检查
-    return {"violations": [], "ok": True, "skipped": True}
+    return {"violations": {}, "ok": True, "skipped": True}
 
 
 def postprocess_reply(*, character: str, reply_text: str, history: list | None = None) -> dict[str, Any]:

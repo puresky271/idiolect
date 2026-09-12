@@ -20,9 +20,11 @@ from __future__ import annotations
 
 import os
 
+from idiolect.registry import canonicalize_name
+
 
 def _enabled() -> bool:
-    return os.environ.get("TOMORI_TURN_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "")
+    return os.environ.get("TOMORI_TURN_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "off", "no", "")
 
 
 def build_turn_special_block(
@@ -57,7 +59,7 @@ def build_turn_special_block(
 
     2026-05-20: 加 now_jst/ledger/mode 参数支持 time-driven 子系统、autogreet 可触发。
     """
-    if not _enabled() or character != "灯":
+    if not _enabled() or canonicalize_name(character) != "灯":
         return ""
 
     # autogreet / idle mode 下 user_text 为空、不能直接 return——time-driven 子系统仍要 fire

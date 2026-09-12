@@ -416,7 +416,7 @@ def build_composition_special_block(
     """
     if not user_text:
         return ""
-    if os.environ.get("TAKI_TURN_LOGIC_COMPOSITION_ENABLED", "1").strip() in ("0", "false", "False", ""):
+    if os.environ.get("TAKI_TURN_LOGIC_COMPOSITION_ENABLED", "1").strip() in ("0", "false", "False", "off", "no", ""):
         return ""
 
     blocks: list[str] = []

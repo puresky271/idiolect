@@ -65,7 +65,7 @@ def get_voice_manifest() -> str:
 
 
 def postprocess_reply(*, character: str, reply_text: str, history: list | None = None) -> dict[str, Any]:
-    return {"text": str(reply_text or ""), "violations": [], "ok": True, "skipped": not is_anon(character)}
+    return {"text": str(reply_text or ""), "violations": {}, "ok": True, "skipped": not is_anon(character)}
 
 
 def post_reply_voice_check(
@@ -84,9 +84,9 @@ def post_reply_voice_check(
       - 「灯灯」call sign 频率（canon 但不能每条都喊）
       - 「都市丽人完美姐姐」假设阳光稀释 canon → flag
 
-    当前 stub 总返 `{"violations": [], "ok": True, "skipped": True}`。
+    当前 stub 总返 `{"violations": {}, "ok": True, "skipped": True}`。
     """
     if not is_anon(character):
-        return {"violations": [], "ok": True, "skipped": True}
+        return {"violations": {}, "ok": True, "skipped": True}
     # TODO[voice_check]: 真正的语气检查
-    return {"violations": [], "ok": True, "skipped": True}
+    return {"violations": {}, "ok": True, "skipped": True}

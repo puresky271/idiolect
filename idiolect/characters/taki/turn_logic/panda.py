@@ -201,7 +201,7 @@ def build_panda_special_block(
     """立希·熊猫话题卸防御 + 1 轮情绪余波。"""
     if not user_text:
         return ""
-    if os.environ.get("TAKI_TURN_LOGIC_PANDA_ENABLED", "1").strip() in ("0", "false", "False", ""):
+    if os.environ.get("TAKI_TURN_LOGIC_PANDA_ENABLED", "1").strip() in ("0", "false", "False", "off", "no", ""):
         return ""
 
     sid = _normalize_session(session_id)

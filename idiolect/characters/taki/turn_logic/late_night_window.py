@@ -281,7 +281,7 @@ def build_late_night_window_special_block(
 
       A 命中后写余波、下一轮无 trigger 时输出余波 block。
     """
-    if os.environ.get("TAKI_TURN_LOGIC_LATE_NIGHT_ENABLED", "1").strip() in ("0", "false", "False", ""):
+    if os.environ.get("TAKI_TURN_LOGIC_LATE_NIGHT_ENABLED", "1").strip() in ("0", "false", "False", "off", "no", ""):
         return ""
 
     sid = _normalize_session(session_id)

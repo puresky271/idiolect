@@ -105,7 +105,3 @@ def classify(user_text: str, char: str = "") -> str:
         if rx.search(text):
             return scene
     return ""
-
-
-def matched_scene_label(scene: str) -> str:
-    return str(scene or "")

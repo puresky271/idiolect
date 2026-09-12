@@ -32,6 +32,7 @@ from __future__ import annotations
 import os
 from typing import Callable
 
+from idiolect.registry import canonicalize_name
 from idiolect.scene_engine import NO_LITERAL_COPY, SceneModule, build_scene_blocks
 
 from .home import build_home_special_block
@@ -116,7 +117,9 @@ def build_soyo_special_block(
     Returns:
         prompt 片段字符串；无内容时返 ""
     """
-    if str(character or "").strip() not in {"素世", "爽世", "soyo", "長崎そよ", "长崎素世", "nagasaki soyo"}:
+    # 名字表只有 registry 一份（见 AGENTS.md）：自带名单会与之漂移，
+    # 代价是别名能解析到包、却在包内被判 False 静默返空。
+    if canonicalize_name(character) != "素世":
         return ""
     if is_developer or not _enabled():
         return ""

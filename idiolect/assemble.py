@@ -89,16 +89,17 @@ def build_messages(
 
 def layer_sizes(
     char: str, user_text: str = "", *, session_id: str | None = None,
-    include_turn_logic: bool = True, now: datetime | None = None,
+    include_turn_logic: bool = True, is_developer: bool = False, now: datetime | None = None,
 ) -> dict[str, int]:
-    """各层字符数（诊断用：一眼看出哪一层在撑 prompt）。"""
+    """各层字符数（诊断用：一眼看出哪一层在撑 prompt）。参数面与 `build_system_prompt` 对齐。"""
     out: dict[str, int] = {}
     for key, text in (
         ("canon", get_canon_profile(char) or ""),
         ("voice", get_voice_manifest(char) or ""),
         ("style_target", build_style_target_block(char, classify(user_text, char) if user_text else "")),
         ("turn_logic", render_turn_special_block(
-            char, user_text, session_id=session_id, now_jst=now) if (user_text and include_turn_logic) else ""),
+            char, user_text, session_id=session_id, is_developer=is_developer,
+            mode="chat", now_jst=now) if (user_text and include_turn_logic) else ""),
     ):
         out[key] = len(text.strip())
     return out

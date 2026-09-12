@@ -197,7 +197,7 @@ SONG_ANGLE: dict[str, str] = {
 
 
 def _enabled() -> bool:
-    return os.environ.get("TOMORI_LYRICS_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "")
+    return os.environ.get("TOMORI_LYRICS_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "off", "no", "")
 
 
 def _detect_song(user_text: str) -> Optional[str]:

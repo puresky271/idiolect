@@ -176,7 +176,7 @@ def build_part_time_job_special_block(
     """
     if not user_text:
         return ""
-    if os.environ.get("TAKI_TURN_LOGIC_PART_TIME_JOB_ENABLED", "1").strip() in ("0", "false", "False", ""):
+    if os.environ.get("TAKI_TURN_LOGIC_PART_TIME_JOB_ENABLED", "1").strip() in ("0", "false", "False", "off", "no", ""):
         return ""
 
     has_direct = bool(_PJ_DIRECT_RE.search(user_text))

@@ -289,7 +289,7 @@ def build_scene_mode_adapter_block(
     Returns:
         prompt 片段（Mode B / Mode C / residue block）或 ""（Mode A 默认）
     """
-    if os.environ.get("TAKI_TURN_LOGIC_SCENE_MODE_ADAPTER_ENABLED", "1").strip() in ("0", "false", "False", ""):
+    if os.environ.get("TAKI_TURN_LOGIC_SCENE_MODE_ADAPTER_ENABLED", "1").strip() in ("0", "false", "False", "off", "no", ""):
         return ""
 
     sid = _normalize_session(session_id)

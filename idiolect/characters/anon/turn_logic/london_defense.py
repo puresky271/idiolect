@@ -188,7 +188,7 @@ def reset_session_residue(session_id: Optional[str] = None) -> None:
 # 检测层
 # ═══════════════════════════════════════════════════════════════════════
 def _enabled() -> bool:
-    return os.environ.get("ANON_LONDON_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "")
+    return os.environ.get("ANON_LONDON_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "off", "no", "")
 
 
 def _detect_trigger(user_text: str) -> Optional[str]:

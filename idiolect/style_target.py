@@ -33,7 +33,7 @@ STYLE_TARGETS: dict[str, dict] = {
         "median_chars": 6, "p90_chars": 13, "sent_per_turn": 1.19, "clause_per_turn": 1.21,
         "ellipsis_rate": 0.18, "exclaim_rate": 0.02, "question_rate": 0.16,
         "period_rate": 0.16, "comma_rate": 0.14, "first_person_rate": 0.17,
-        "top_interjections": ["嗯", "啊", "唔", "哦"],
+        "top_interjections": ["嗯", "啊", "唔", "哦", "ん"],
     },
     "素世": {
         "median_chars": 16, "p90_chars": 30, "sent_per_turn": 1.38, "clause_per_turn": 1.60,
@@ -61,7 +61,7 @@ def build_style_target_block(char: str, scene: str = "") -> str:
         try:
             from idiolect.scene_length_targets import get_scene_target
             st = get_scene_target(char, scene)
-        except Exception:  # noqa: BLE001 - 数据模块缺失时退回全局，不影响主流程
+        except ImportError:  # 数据模块缺失时退回全局，不影响主流程；查表本身不会抛（miss 返 None）
             st = None
     if st:
         median_chars, p90_chars = float(st["median"]), float(st["p90"])
@@ -71,6 +71,8 @@ def build_style_target_block(char: str, scene: str = "") -> str:
         median_chars = float(t["median_chars"])
         p90_chars = float(t["p90_chars"])
         sent_per_turn = float(t["sent_per_turn"])
+    # 硬检查的冗余量是人定的、不是语料数字：p90 之上再放 4 字、句数均值之上再放 0.6 句，
+    # 给模型留「正常波动不被误杀」的余量（硬检查管的是异常长，不是贴着分布裁剪）。
     cap = int(p90_chars) + 4
     sent_cap = max(1, int(round(sent_per_turn + 0.6)))
     interjections = "、".join(str(x) for x in t.get("top_interjections", [])[:5])

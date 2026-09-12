@@ -121,10 +121,10 @@ def postprocess_reply(character: str, reply_text: str, history: list | None = No
     package = get_role_package(name)
     processor = getattr(package, "postprocess_reply", None) if package else None
     if processor is None:
-        return {"text": str(reply_text or ""), "violations": [], "ok": True, "skipped": True}
+        return {"text": str(reply_text or ""), "violations": {}, "ok": True, "skipped": True}
     result = processor(character=name, reply_text=reply_text, history=history)
     if not isinstance(result, dict):
-        return {"text": str(reply_text or ""), "violations": [], "ok": True, "skipped": True}
+        return {"text": str(reply_text or ""), "violations": {}, "ok": True, "skipped": True}
     result.setdefault("text", str(reply_text or ""))
     return result
 

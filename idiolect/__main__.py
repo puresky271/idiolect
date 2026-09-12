@@ -99,7 +99,7 @@ def _cmd_chat(args: argparse.Namespace) -> int:
     raw = resp.choices[0].message.content or ""
     cleaned = postprocess_reply(char, raw)
     print(cleaned["text"])
-    violations = cleaned.get("violations") or []
+    violations = cleaned.get("violations") or {}
     if violations:
         print(f"\n# voice_check 修过 {len(violations)} 处：{violations}", file=sys.stderr)
     return 0

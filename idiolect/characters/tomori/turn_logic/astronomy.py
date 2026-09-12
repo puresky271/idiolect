@@ -287,7 +287,7 @@ def reset_session_dedup(session_id: Optional[str] = None) -> None:
 # 检测层
 # ═══════════════════════════════════════════════════════════════════════
 def _enabled() -> bool:
-    return os.environ.get("TOMORI_ASTRO_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "")
+    return os.environ.get("TOMORI_ASTRO_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "off", "no", "")
 
 
 def _build_subspecies_lookup() -> list[tuple[str, str, str]]:

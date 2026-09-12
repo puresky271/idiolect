@@ -302,7 +302,7 @@ def build_afterglow_fan_special_block(
     """立希·Afterglow 狂热粉 + 1 轮情绪余波。"""
     if not user_text:
         return ""
-    if os.environ.get("TAKI_TURN_LOGIC_AFTERGLOW_FAN_ENABLED", "1").strip() in ("0", "false", "False", ""):
+    if os.environ.get("TAKI_TURN_LOGIC_AFTERGLOW_FAN_ENABLED", "1").strip() in ("0", "false", "False", "off", "no", ""):
         return ""
 
     sid = _normalize_session(session_id)

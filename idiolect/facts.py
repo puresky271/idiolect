@@ -14,7 +14,7 @@ _FACTS_PATH = Path(__file__).resolve().parents[1] / "data" / "character_facts.js
 def get_facts(character: str) -> dict:
     try:
         raw = json.loads(_FACTS_PATH.read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001 - 文件缺失即视为无事实
+    except FileNotFoundError:  # 文件缺失即视为无事实；JSON 损坏必须报错，不许静默当空
         return {}
     value = raw.get(character) if isinstance(raw, dict) else None
     return dict(value) if isinstance(value, dict) else {}

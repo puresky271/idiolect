@@ -36,7 +36,7 @@ import os
 
 
 def _enabled() -> bool:
-    return os.environ.get("TAKI_TURN_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "")
+    return os.environ.get("TAKI_TURN_LOGIC_ENABLED", "1").strip() not in ("0", "false", "False", "off", "no", "")
 
 
 def build_taki_special_block(
