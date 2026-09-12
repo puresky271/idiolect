@@ -58,7 +58,7 @@ BUDGET = {"canon": 18000, "voice": 7500, "style_target": 800, "turn_logic": 1200
 # 词表与 `voice_meta_gate.META_HARD` 保持一致——门禁和冒烟不该有两套标准。
 FORBIDDEN = {
     "元叙述": ("语料", "实测", "专指", "金标准", "lift", "蒸馏", "统计", "占比",
-               "出现次数", "基线", "中位", "persona card", "manifest"),
+               "出现次数", "基线", "中位", "persona card", "manifest", "cn train", "子模块"),
     "推理标签": ("<think>", "</think>", "thinking>"),
     "prompt 回声": ("<part ", "</part>", "<scene", "<system>"),
     "占位符": ("TODO", "FIXME", "待补", "XXX", "____"),

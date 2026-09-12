@@ -14,12 +14,12 @@ from __future__ import annotations
 # ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
-_ROOT = _Path(__file__).resolve().parents[2]
+_ROOT = _Path(__file__).resolve().parents[1]
 for _p in (_ROOT, _ROOT / "tools",
            *(_ROOT / "tools" / _d for _d in ("corpus", "distill", "probe", "score", "gates"))):
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
-from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
+from _paths import ROOT  # noqa: E402
 
 import os
 import re

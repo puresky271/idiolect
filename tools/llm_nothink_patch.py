@@ -1,14 +1,9 @@
-"""LLM reasoning-mode controls monkey-patch (shared across entry points).
+"""LLM 思考模式控制补丁（所有入口共用）。
 
 为什么需要：
-  · DeepSeek v4-flash 默认开启 thinking，并把原 max_tokens 叠加 reasoning_budget
-    （默认 +1500）再发给 API。deepseek-v4-pro 默认关闭 thinking；只有日程生成器
-    的私有调用标记可以开启，避免改变 chat/rewrite 等其他结构化任务。
-    （2026-09-10 起 DeepSeek 端点上的调用点已全部改用 deepseek-flash。它们会落进
-    下面「其它 deepseek 型号」分支、默认被开思考，因此识图/续写/朋友圈/摘要等
-    非日程调用点都必须显式传 extra_body={"thinking": {"type": "disabled"}}，
-    才能保住原来的关思考行为。新增调用点请照抄。）
-  · Qwen 系列通常用 enable_thinking=False 关；强制思考型号保留 thinking。
+  · 本仓库的调用走 OpenAI 兼容端点（默认 deepseek-flash）：DeepSeek 系模型默认开启
+    thinking，并把原 max_tokens 叠加 reasoning_budget（默认 +1500）再发给 API；
+    Qwen 系通常用 enable_thinking=False 关思考。
   · 这个 patch 必须在 import openai client 之前应用、对所有 entry point 都生效。
 
 2026-05-20 root cause: 这个 patch 曾经只挂在某一个入口模块的顶层、**只在该入口
@@ -19,26 +14,23 @@
 `import llm_nothink_patch`。patch 是 idempotent 的（setdefault 不覆盖已设值）、
 重复 import 安全。
 
-Usage:
+用法：
   import llm_nothink_patch  # noqa: F401 — side-effect: patches openai client
   from openai import OpenAI
   client = OpenAI(...)
   client.chat.completions.create(model='deepseek-flash', ...)  # 自动注 thinking controls
-
-Idempotency:
-  本模块 import 时执行 patch、用 module-level flag 保证只 patch 一次。
 """
 from __future__ import annotations
 
 # ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
 from pathlib import Path as _Path
-_ROOT = _Path(__file__).resolve().parents[2]
+_ROOT = _Path(__file__).resolve().parents[1]
 for _p in (_ROOT, _ROOT / "tools",
            *(_ROOT / "tools" / _d for _d in ("corpus", "distill", "probe", "score", "gates"))):
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
-from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
+
 import os
 import sys
 
@@ -72,29 +64,17 @@ def _deepseek_reasoning_effort() -> str:
 
 
 def _inject_reasoning_controls(kwargs):
-    """Inject model-specific thinking controls.
+    """按模型家族注入思考开关。
 
-    Qwen remains no-think by default, except models whose API contract requires
-    thinking. DeepSeek v4 Pro stays no-think except for an explicit plan-gen
-    call; other DeepSeek models keep the configurable reasoning policy.
+    Qwen 系默认关思考；DeepSeek 系默认开思考（`DEEPSEEK_THINKING=0` 可关，
+    调用方显式传 `extra_body={"thinking": {"type": "disabled"}}` 也可关），
+    开思考时在原 max_tokens 上叠加 reasoning_budget。
     """
-    plan_reasoning = bool(kwargs.pop('_mygo_plan_reasoning', False))
     model = str(kwargs.get('model', '') or '').lower()
     eb = kwargs.get('extra_body') or {}
     if 'qwen' in model:
-        # qwen3.7-max-preview rejects enable_thinking=False with HTTP 400.
-        # Keep the exception model-specific so existing Qwen cleanser/vision
-        # calls retain their low-latency no-think contract.
-        if 'qwen3.7-max-preview' in model:
-            eb['enable_thinking'] = True
-        else:
-            eb.setdefault('enable_thinking', False)
+        eb.setdefault('enable_thinking', False)
     elif 'deepseek' in model:
-        if 'deepseek-v4-pro' in model:
-            eb['thinking'] = {'type': 'enabled' if plan_reasoning else 'disabled'}
-            eb.pop('reasoning_effort', None)
-            kwargs['extra_body'] = eb
-            return kwargs
         explicit_thinking = eb.get('thinking')
         explicitly_disabled = (
             isinstance(explicit_thinking, dict)

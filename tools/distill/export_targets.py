@@ -29,7 +29,12 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import style_features as S  # noqa: E402
 
-CHARS = {"tomori": "灯", "anon": "爱音", "rana": "乐奈", "soyo": "爽世", "taki": "立希"}
+# 显示名按语言分表：中文用「素世」，日文 canon 写法是「爽世」——
+# 两张表混用会让 data/style_targets.json 的 cn 块出现日文写法（2026-09-12 评审抓到）。
+CHARS = {
+    "cn": {"tomori": "灯", "anon": "爱音", "rana": "乐奈", "soyo": "素世", "taki": "立希"},
+    "jp": {"tomori": "灯", "anon": "爱音", "rana": "乐奈", "soyo": "爽世", "taki": "立希"},
+}
 
 
 def main() -> int:
@@ -48,7 +53,7 @@ def main() -> int:
         out[lang] = {}
         for key, texts in per.items():
             prof = S.profile_from_texts(texts, lang)
-            out[lang][key] = {"name": CHARS.get(key, key), "n": prof.get("n", 0),
+            out[lang][key] = {"name": CHARS[lang].get(key, key), "n": prof.get("n", 0),
                               **S.style_targets(prof, lang)}
     dst = REPORT / "style_targets.json"
     dst.parent.mkdir(parents=True, exist_ok=True)
