@@ -34,11 +34,18 @@ REPORT = REPORT
 
 
 def main() -> int:
-    print("=== 用 96 条/臂输出反推「单条」标准差 ===\n")
+    import argparse
+
+    ap = argparse.ArgumentParser(description="功效验算：从探针输出反推单条标准差，核对所需样本量")
+    ap.add_argument("--labels", default="rana_reg_before,rana_reg_after,rana_reg_v2",
+                    help="要验算的臂 label（逗号分隔；默认是历史上那三臂）")
+    args = ap.parse_args()
+
+    print("=== 用探针输出反推「单条」标准差 ===\n")
     print(f"{'臂':<18}{'n':>5}{'均值':>9}{'单条sd':>9}{'均值SE(理论)':>13}")
     print("-" * 56)
     per_arm: dict[str, list[float]] = {}
-    for lbl in ["rana_reg_before", "rana_reg_after", "rana_reg_v2"]:
+    for lbl in [x for x in args.labels.split(",") if x]:
         p = REPORT / f"probe_{lbl}.jsonl"
         if not p.exists():
             continue
@@ -58,7 +65,10 @@ def main() -> int:
         print(f"{lbl:<18}{len(xs):>5}{m:>9.3f}{sd:>9.3f}{se:>13.4f}")
 
     if not per_arm:
-        return 1
+        print(f"[skip] 找不到可用的探针产物（report/probe_<label>.jsonl，label ∈ {args.labels}）。\n"
+              f"       先跑 tools/probe/probe_runner.py --label <label> …，\n"
+              f"       或用 --labels 指定你自己的臂；只想估算需求样本量用 tools/score/power_calc.py。")
+        return 0
 
     # 整臂均值的跨次 SD（probe_variance.json）应当 ≈ 单条sd / sqrt(每次条数)
     vp = REPORT / "probe_variance.json"

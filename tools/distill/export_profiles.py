@@ -35,8 +35,9 @@ CHARKEY = {"爱音": "anon", "灯": "tomori", "立希": "taki", "素世": "soyo"
 
 
 def load_train(lang: str = "cn") -> dict[str, list[str]]:
-    from _paths import corpus_file
+    from _paths import corpus_file, require_corpus
 
+    require_corpus(lang)  # 空语料一律当场退出（否则会写出空画像）
     out: dict[str, list[str]] = {k: [] for k in CHARKEY.values()}
     for line in corpus_file(lang).read_text(encoding="utf-8").splitlines():
         if not line.strip():

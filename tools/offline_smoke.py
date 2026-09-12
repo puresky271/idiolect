@@ -319,6 +319,36 @@ def check_llm(res: Result) -> None:
         res.add("LLM.异常汇总", False, str(bad))
 
 
+def check_cli_safety(res: Result) -> None:
+    """会写到**外部数据目录**的脚本必须带 argparse，否则 `--help` 也会真的动手。
+
+    2026-09-13 的事故：对全仓库脚本跑 `--help` 做冒烟，`build_gold.py` 没有 argparse，
+    于是 `--help` 被忽略、合并照跑；它的源文件按脚本自身目录解析（新仓库里不存在），
+    结果把 `IDIOLECT_CORPUS_DIR` 指向的外部语料目录覆盖成 0 字节，退出码还是 0。
+    现在三道：读侧 `require_corpus()`、写侧零结果守卫、这里补静态检查。
+
+    判据（两条，宁窄不误报）：
+      1. 把输出根目录直接赋成 `CORPUS_DIR` / `DATA` 的脚本 —— 这就是覆盖外部数据的那类；
+      2. `tools/corpus/` 下所有带 `main()` 的脚本 —— 这个目录整体会碰语料。
+    """
+    import re
+
+    assign_root = re.compile(r"(?m)^\s*(?:OUT|DST|DEST|out_dir|dst)\s*=\s*(?:CORPUS_DIR|DATA)\b")
+    risky: list[str] = []
+    for p in sorted((ROOT / "tools").rglob("*.py")):
+        src = p.read_text(encoding="utf-8")
+        has_args = "argparse" in src
+        rel = str(p.relative_to(ROOT))
+        if has_args:
+            continue
+        if assign_root.search(src):
+            risky.append(f"{rel}（把输出根赋成 CORPUS_DIR/DATA）")
+        elif rel.startswith("tools\\corpus\\") and "def main(" in src:
+            risky.append(f"{rel}（tools/corpus 下带 main 却没有 argparse）")
+    total = len(list((ROOT / "tools").rglob("*.py")))
+    res.add("工具.CLI 安全", not risky, f"{total} 个脚本；风险项={risky or '无'}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="offline smoke：零写、零 LLM 的仓库健康检查")
     ap.add_argument("--fast", action="store_true", help="跳过门禁与单测")
@@ -342,6 +372,7 @@ def main() -> int:
     check_forbidden(res, sizes)
     check_fixtures(res)
     check_data(res)
+    check_cli_safety(res)
     if not args.fast:
         check_gates(res)
         check_tests(res)

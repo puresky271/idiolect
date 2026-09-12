@@ -188,6 +188,90 @@ class SmokeToolTests(unittest.TestCase):
             self.assertNotIn("texts", node)
             self.assertNotIn("examples", node)
 
+    def test_publish_paths_can_strip_exemplars(self):
+        """发布形态必须由工具自己产出：两个带例句的产物都要有 `--no-exemplars`。
+
+        发布的 `data/scene_char_baseline.json` 与 `data/scene_stats.json` 是剥离例句后的
+        形态。剥离动作一度只存在于临时的发布脚本里（人工步骤），于是「data/ 是怎么来的」
+        无法从仓库复现。现在它是脚本的一个 flag。
+        """
+        for tool in ("scene_char_baseline.py", "scene_stats.py"):
+            r = subprocess.run([sys.executable, "-X", "utf8", f"tools/distill/{tool}", "--help"],
+                               cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
+                               errors="replace")
+            self.assertEqual(r.returncode, 0, f"{tool} --help 失败")
+            self.assertIn("--no-exemplars", r.stdout, f"{tool} 缺 --no-exemplars")
+            self.assertIn("--out", r.stdout, f"{tool} 缺 --out")
+
+
+class CorpusGuardTests(unittest.TestCase):
+    """空语料必须**当场退出**，不许写出空产物。
+
+    2026-09-13 踩过：语料路径存在但内容为 0 行时，所有统计脚本都会「成功」跑完并写出
+    空文件（style_targets 空、0 个 cell），退出码还是 0。一次误调用就能把外部语料目录
+    覆盖成空文件。现在两道守卫：读侧 require_corpus()、写侧零行拒绝。
+    """
+
+    def test_require_corpus_rejects_empty_file(self):
+        import sys as _s
+
+        _s.path.insert(0, str(ROOT / "tools"))
+        import tempfile
+        import _paths
+
+        with tempfile.TemporaryDirectory() as tmp:
+            empty = Path(tmp) / "cn.jsonl"
+            empty.write_text("", encoding="utf-8")
+            old = _paths.CORPUS_DIR
+            _paths.CORPUS_DIR = Path(tmp)
+            try:
+                with self.assertRaises(SystemExit) as ctx:
+                    _paths.require_corpus("cn")
+                self.assertIn("0 行", str(ctx.exception))
+            finally:
+                _paths.CORPUS_DIR = old
+
+    def test_build_gold_refuses_empty_output(self):
+        """源文件缺失时 build_gold 必须拒绝写出（否则会清空目标目录）。"""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            r = subprocess.run(
+                [sys.executable, "-X", "utf8", "tools/corpus/build_gold.py",
+                 "--out", tmp, "--langs", "cn"],
+                cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+            self.assertEqual(r.returncode, 2, f"应当拒绝写出：{r.stdout[-400:]}")
+            self.assertIn("拒绝写出", r.stdout)
+            self.assertFalse((Path(tmp) / "cn.jsonl").exists(), "拒绝之后不应留下空文件")
+
+    def test_build_gold_dry_run_needs_no_sources(self):
+        r = subprocess.run(
+            [sys.executable, "-X", "utf8", "tools/corpus/build_gold.py", "--dry-run", "--force-empty"],
+            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        self.assertEqual(r.returncode, 0, f"dry-run 不该失败：{r.stdout[-400:]}")
+        self.assertIn("dry-run", r.stdout)
+
+    def test_logodds_is_deterministic_across_processes(self):
+        """同名次并列的词必须有稳定顺序，否则「发布数据可重建」不成立。
+
+        依据：`logodds_signature` 从 `set` 迭代取词，只按 logodds 排序时，同为 2.48 的
+        两个词谁进 top-N 会随进程的字符串哈希随机化变化。
+        """
+        code = (
+            "import sys; sys.path.insert(0, 'tools/distill'); sys.path.insert(0, 'tools');"
+            "import json, style_features as S;"
+            "t=['雨很大','躲雨','在大厅躲雨','雨','淋湿了','猫在屋檐下','躲','大厅里']*3;"
+            "b=['吉他','练习','演出','谱','弦']*6;"
+            "print(json.dumps(S.logodds_signature(t,b,'cn',top=8),ensure_ascii=False))"
+        )
+        outs = set()
+        for _ in range(3):
+            r = subprocess.run([sys.executable, "-X", "utf8", "-c", code], cwd=ROOT,
+                               capture_output=True, text=True, encoding="utf-8", errors="replace")
+            self.assertEqual(r.returncode, 0, r.stderr[-300:])
+            outs.add(r.stdout.strip())
+        self.assertEqual(len(outs), 1, f"三次独立进程的结果不同：{outs}")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -42,8 +42,20 @@ def is_holdout(text: str) -> bool:
 
 
 def main() -> int:
+    import argparse
+
+    ap = argparse.ArgumentParser(
+        description="合并 raw/bestdori + raw/hf → gold 语料（去重 + 来源标注 + 切分）")
+    ap.add_argument("--langs", default="jp,cn", help="语言（逗号分隔，默认 jp,cn）")
+    ap.add_argument("--out", default="", help=f"输出目录（默认 {CORPUS_DIR}，也可用 IDIOLECT_CORPUS_DIR）")
+    ap.add_argument("--dry-run", action="store_true", help="只统计不写文件")
+    ap.add_argument("--force-empty", action="store_true",
+                    help="允许写出 0 条结果（默认拒绝：源文件缺失时写出空语料会静默毁掉目标目录）")
+    args = ap.parse_args()
+    out_dir = Path(args.out) if args.out else OUT
+
     stats: dict = {}
-    for lang in ("jp", "cn"):
+    for lang in [x.strip() for x in args.langs.split(",") if x.strip()]:
         merged: dict[tuple[str, str], dict] = {}
         # bestdori 优先（覆盖更广、含 area/talkset）
         for src in ("bestdori", "hf"):
@@ -74,9 +86,24 @@ def main() -> int:
                 else:
                     merged[key] = {**r, "also": {src}}
 
-        out = OUT / f"{lang}.jsonl"
+        # ── 空结果守卫（2026-09-13 踩过）──────────────────────────────
+        # 源文件（raw/bestdori、raw/hf）缺失时，合并结果是 0 条。若此时照写，
+        # 目标目录里已有的语料会被**空文件覆盖**，而退出码仍是 0 —— 一次
+        # `--help` 之类的误调用就能把外面辛苦抓来的语料清空。所以默认拒绝。
+        if not merged and not args.force_empty:
+            print(f"[{lang}] 源文件里没有可用台词（0 条）→ 拒绝写出。"
+                  f"\n       期望的源：{HERE / 'raw' / 'bestdori' / f'{lang}.jsonl'}、"
+                  f"{HERE / 'raw' / 'hf' / f'{lang}.jsonl'}"
+                  f"\n       确认要写空文件请加 --force-empty。")
+            return 2
+
+        out = out_dir / f"{lang}.jsonl"
+        if args.dry_run:
+            print(f"[{lang}] dry-run：合并后 {len(merged)} 条（未写 {out}）")
+            continue
         per_char = Counter()
         per_split = Counter()
+        out.parent.mkdir(parents=True, exist_ok=True)
         with out.open("w", encoding="utf-8") as f:
             for (ch, text), r in merged.items():
                 split = "holdout" if is_holdout(text) else "train"
@@ -102,7 +129,11 @@ def main() -> int:
         print(f"[{lang}] unique={len(merged)}  per_char={dict(per_char)}  split={dict(per_split)}")
         print(f"       两来源都有: {stats[lang]['coverage_both_sources']}")
 
-    (OUT / "gold_stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=2), encoding="utf-8")
+    if args.dry_run:
+        print("\n[dry-run] 未写 gold_stats.json")
+        return 0
+    (out_dir / "gold_stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"\n-> {out_dir}")
     return 0
 
 

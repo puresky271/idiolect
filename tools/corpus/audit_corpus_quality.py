@@ -44,10 +44,18 @@ def load_rows(lang: str) -> list[dict]:
 
 
 def main() -> int:
+    import argparse
+
+    ap = argparse.ArgumentParser(description="审计抓取层的原始语料质量（重复率 / 多人行 / 来源重合）")
+    ap.add_argument("--langs", default="jp,cn", help="语言（逗号分隔）")
+    ap.add_argument("--out", default="", help=f"报告路径（默认 {REPORT / 'corpus_audit.md'}）")
+    args = ap.parse_args()
+
     lines: list[str] = []
-    for lang in ("jp", "cn"):
+    for lang in [x.strip() for x in args.langs.split(",") if x.strip()]:
         rows = load_rows(lang)
         if not rows:
+            print(f"[{lang}] 抓取层没有文件（raw/bestdori 或 raw/hf 缺）→ 跳过")
             continue
         by_char: dict[str, list[dict]] = defaultdict(list)
         for r in rows:
@@ -89,10 +97,12 @@ def main() -> int:
         lines.append("")
 
     text = "\n".join(lines)
-    out = REPORT / "corpus_audit.md"
+    out = Path(args.out) if args.out else (REPORT / "corpus_audit.md")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(text, encoding="utf-8")
-    print(text)
+    if text.strip():
+        print(text)
+    print(f"-> {out}")
     return 0
 
 

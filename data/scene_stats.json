@@ -165,17 +165,17 @@
         "count": 4
       },
       {
-        "word": "躲",
-        "logodds": 5.77,
-        "count": 3
-      },
-      {
         "word": "大厅",
         "logodds": 5.77,
         "count": 3
       },
       {
         "word": "淋湿",
+        "logodds": 5.77,
+        "count": 3
+      },
+      {
+        "word": "躲",
         "logodds": 5.77,
         "count": 3
       },
@@ -190,14 +190,14 @@
         "count": 4
       },
       {
-        "word": "待",
-        "logodds": 3.83,
-        "count": 4
-      },
-      {
         "word": "停",
         "logodds": 3.83,
         "count": 5
+      },
+      {
+        "word": "待",
+        "logodds": 3.83,
+        "count": 4
       },
       {
         "word": "哭",
@@ -220,7 +220,7 @@
         "count": 4
       },
       {
-        "word": "大",
+        "word": "乐器",
         "logodds": 2.48,
         "count": 3
       },
@@ -295,22 +295,22 @@
         "count": 3
       },
       {
-        "word": "只要",
-        "logodds": 2.64,
-        "count": 3
-      },
-      {
         "word": "为",
         "logodds": 2.64,
         "count": 3
       },
       {
-        "word": "继续",
+        "word": "只要",
+        "logodds": 2.64,
+        "count": 3
+      },
+      {
+        "word": "紧张",
         "logodds": 2.47,
         "count": 4
       },
       {
-        "word": "紧张",
+        "word": "继续",
         "logodds": 2.47,
         "count": 4
       },
@@ -1129,12 +1129,12 @@
         "count": 10
       },
       {
-        "word": "贴",
+        "word": "点",
         "logodds": 2.4,
         "count": 3
       },
       {
-        "word": "点",
+        "word": "贴",
         "logodds": 2.4,
         "count": 3
       },
@@ -1662,14 +1662,14 @@
     },
     "vocab": [
       {
-        "word": "相册",
-        "logodds": 4.56,
-        "count": 3
-      },
-      {
         "word": "照片",
         "logodds": 4.56,
         "count": 10
+      },
+      {
+        "word": "相册",
+        "logodds": 4.56,
+        "count": 3
       },
       {
         "word": "不太好",
@@ -2250,22 +2250,22 @@
         "count": 4
       },
       {
-        "word": "私",
-        "logodds": 5.46,
-        "count": 4
-      },
-      {
         "word": "接待客人",
         "logodds": 5.46,
         "count": 4
       },
       {
-        "word": "見",
+        "word": "私",
+        "logodds": 5.46,
+        "count": 4
+      },
+      {
+        "word": "キ",
         "logodds": 5.21,
         "count": 3
       },
       {
-        "word": "キ",
+        "word": "見",
         "logodds": 5.21,
         "count": 3
       },
@@ -2285,11 +2285,6 @@
         "count": 11
       },
       {
-        "word": "や",
-        "logodds": 4.36,
-        "count": 4
-      },
-      {
         "word": "こ",
         "logodds": 4.36,
         "count": 7
@@ -2298,6 +2293,11 @@
         "word": "も",
         "logodds": 4.36,
         "count": 13
+      },
+      {
+        "word": "や",
+        "logodds": 4.36,
+        "count": 4
       },
       {
         "word": "り",
@@ -2475,12 +2475,12 @@
         "count": 4
       },
       {
-        "word": "甜甜的",
+        "word": "好喝",
         "logodds": 5.69,
         "count": 3
       },
       {
-        "word": "好喝",
+        "word": "甜甜的",
         "logodds": 5.69,
         "count": 3
       },
@@ -2520,12 +2520,12 @@
         "count": 4
       },
       {
-        "word": "做好",
+        "word": "に",
         "logodds": 2.47,
         "count": 3
       },
       {
-        "word": "に",
+        "word": "做好",
         "logodds": 2.47,
         "count": 3
       },
@@ -2937,17 +2937,17 @@
         "count": 4
       },
       {
-        "word": "躲",
-        "logodds": 5.74,
-        "count": 3
-      },
-      {
         "word": "大厅",
         "logodds": 5.74,
         "count": 3
       },
       {
         "word": "淋湿",
+        "logodds": 5.74,
+        "count": 3
+      },
+      {
+        "word": "躲",
         "logodds": 5.74,
         "count": 3
       },

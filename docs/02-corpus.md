@@ -85,7 +85,7 @@ py -X utf8 tools/corpus/audit_corpus_quality.py
 
 ## 4. 派生统计清单
 
-除 `export_profiles.py`（直接写 `data/style_profiles.json`）与 `export_scene_targets.py`（写仓库根的 `scene_length_targets.py`）之外，下面每个脚本都把结果写进 `REPORT`（默认 `report/`），`data/` 里那份是同名副本。全仓库对 `DATA /` 的写入点只有 `export_profiles.py` 一处，没有「report 拷到 data」的脚本。要复现 `data/`，可以手工拷，也可以把 `IDIOLECT_REPORT_DIR` 指到 `data/` 再跑（代价是各脚本的 `.md` 产物也会落进 `data/`）。
+除 `export_profiles.py`（按 `--out` 或 `DATA/style_profiles.json` 落盘）与 `export_scene_targets.py`（生成 `idiolect/scene_length_targets.py`）之外，下面每个脚本都把结果写进 `REPORT`（默认 `report/`）。要复现 `data/`，用 `--out` 指定目标路径（`scene_char_baseline.py` / `scene_stats.py` 还要加 `--no-exemplars`），或把 `IDIOLECT_REPORT_DIR` 指到 `data/` 再跑（代价是各脚本的 `.md` 产物也会落进 `data/`）。
 
 **`style_targets.json`**：`{"cn": {...}, "jp": {...}}`，每个角色一份全局数值目标。cn 侧 17 个字段：`name`、`n`、`median_chars`、`mean_chars`、`p90_chars`、`sent_per_turn`、`clause_per_turn`、`ellipsis_rate`、`exclaim_rate`、`question_rate`、`period_rate`、`comma_rate`、`dash_rate`、`first_person_rate`、`filler_rate`、`laugh_rate`、`top_interjections`；jp 侧多 `sent_final_per_turn` 与 `long_vowel_rate`（`style_features.style_targets`）。生成者是 `tools/distill/export_targets.py`。本仓库发布的这份**没有嵌套的场景格**（场景级目标在 `idiolect/scene_length_targets.py`），cn 每个角色就是上面那组标量。生成脚本**不过滤 split**，所以这里的 `n` 含留出行，与 `style_profiles.json` 的 train-only `n` 不同（cn.anon 1579 vs 1244），这是刻意的口径差异，理由写在脚本头部。消费方：`tools/probe/prompt_patch.py`（`TARGETS_PATH`）、`tools/probe/probe_runner.py`（经 `PP.load_targets("cn")` 传给补丁臂）、`tools/offline_smoke.py`。生产 prompt 不读这个文件：`idiolect/style_target.py` 里手抄了一份 `STYLE_TARGETS`，与 `data/style_targets.json` 的 cn 全局字段逐项对齐（中位、p90、句数、小句数相同，六个出现率是同一个数保留两位小数）；乐奈的 `top_interjections` 例外，生产版只留 `["嗯", "啊", "唔", "哦"]`，data 版是 6 个，多出 `ん`、`あ`。
 
@@ -98,6 +98,10 @@ py -X utf8 tools/corpus/audit_corpus_quality.py
 **`tic_by_scene.json`**：114 个键，形如 `灯|low_mood`，字段 `char`、`scene`、`k`、`tics`；`tics` 里的每条是 `tic`、`count`、`per_10k`、`base_per_10k`、`lift`。生成者 `tools/distill/tic_by_scene.py`：先按角色过滤 train 语料，再对 26 个原型各取 top-k 近邻（`--k` 默认 120），只报 cell 内出现 ≥ `--min-count`（默认 5）次且 `lift` ≥ `--min-lift`（默认 1.4）的口癖，`lift` 是该场景每万字频次比上该角色全局每万字频次。有 cell 的角色分布：乐奈 25、素世 25、爱音 23、立希 23、灯 18。消费方：`offline_smoke` 只要求文件存在，不解析；生产侧是注释级证据，`idiolect/scene_engine.py` 明确规定场景口癖必须来自这里的 `lift`，`soyo` / `rana` / `taki` 三个 `turn_logic/scenes.py` 引用了具体数值。
 
 **`style_profiles.json`**：`lang`、`note` 加 5 个角色 key。每角色 19 个字段，覆盖长度（`length`、`length_core`、`max_sent_len`）、结构（`n_sent`、`n_clause`）、标点（`punct_density` 8 个标点各自的分布，`punct_rate` 10 个标点的出现率）、自称与他人称呼（`first_person_rate`、`first_person_per_turn`、`second_person_rate`、`address_suffix_rate`）、填充与笑声（`filler_per_turn`、`filler_rate`、`laugh_rate`）、日文相关（`sent_final_jp_per_turn`、`long_vowel_rate`）、语气词（`interjection_top`、`interjection_per_turn`）。生成者 `tools/distill/export_profiles.py`，唯一直接写 `DATA` 的脚本，只统计 `split == "train"` 的行。n 值：爱音 1244、立希 1113、素世 862、灯 757、乐奈 389。消费方：`tools/probe/probe_runner.py`（没有语料时用这份当 gold 画像算 fidelity；两份都没有时 `return 2`）、`tests/test_tooling_contracts.py`。文件头写了它存在的理由：`style_targets.json` 只有中位与 p90，够写 prompt，不够算分布分。
+
+**发布形态怎么来。** `scene_char_baseline.json` 与 `scene_stats.json` 在发布前要剥掉例句字段，两个脚本各自带 `--no-exemplars`（外加 `--out`），所以这一步是可复现的命令，不是人工编辑。剥离后六个文件都能由语料逐字节重建，实测见下文「边界与限制」。
+
+**写文件的守卫。** 语料路径存在但内容为空时，读侧由 `require_corpus()` 当场退出，写侧由零结果守卫拦下（`build_gold.py` 在没有源文件时拒绝写出，除非显式 `--force-empty`；`prep_hf_corpus.py` 与 `export_scene_targets.py` 同理）。加这两道的原因是：一次 `--help` 之类的误调用曾经把外部语料目录覆盖成 0 字节，而退出码是 0。
 
 **`gold_stats.json`** 跟着语料走，由 `build_gold.py` 写在 `CORPUS_DIR` 里，字段是 `unique_total`、`per_character`、`per_split`、`coverage_both_sources`，按语言分。它不在 `data/` 下。
 
@@ -127,11 +131,15 @@ py -X utf8 tools/distill/scene_char_baseline.py
 py -X utf8 tools/distill/export_scene_targets.py
 py -X utf8 tools/distill/export_profiles.py
 
-# 6) 把 report\ 里同名产物拷进 data\（无自动脚本），然后校验
-py -X utf8 tools/distill/export_profiles.py --check     # 只查 style_profiles.json，一致返回 0
-py -X utf8 tools/offline_smoke.py --fast                # 含「数据.」四项形状检查
+# 6) 发布形态：剥掉例句字段再放进 data\（两个脚本自带 --no-exemplars）
+py -X utf8 tools/distill/scene_char_baseline.py --no-exemplars --out data\scene_char_baseline.json
+py -X utf8 tools/distill/scene_stats.py        --no-exemplars --out data\scene_stats.json
 
-# 7) 探针：先 dry-run 验装配，不调模型
+# 7) 校验
+py -X utf8 tools/distill/export_profiles.py --check     # 只查 style_profiles.json，一致返回 0
+py -X utf8 tools/offline_smoke.py --fast                # 含「数据.」五项形状检查
+
+# 8) 探针：先 dry-run 验装配，不调模型
 py -X utf8 tools/probe/probe_runner.py --label smoke --dry-run --assemble --turn-logic --registry --runs 1
 # 实跑要 LLM_API_KEY / LLM_BASE_URL / LLM_MODEL（默认模型名 deepseek-flash）
 py -X utf8 tools/probe/probe_runner.py --label base --runs 6 --assemble --turn-logic --registry
@@ -160,6 +168,10 @@ py -X utf8 tools/distill/export_profiles.py
 **语料版本会改变所有数字。** Bestdori 会持续上新活动与卡面剧情，重抓得到的 `n` 与分布必然和已发布的那份不同；HF 那条路是固定快照，但本仓库没有下载脚本，快照从哪来由使用者决定。派生统计是某个时点的快照，不是可复现的常数。`--check` 只比对五个字段，其余字段漂移时仍会报一致。
 
 **发布文件与生产 prompt 是两套东西。** 角色 prompt 里的长度与句数目标来自 `idiolect/style_target.py` 里手抄的 `STYLE_TARGETS`，命中场景时换成 `idiolect/scene_length_targets.py`（由 `export_scene_targets.py` 生成，`MIN_N = 20`，当前 130 格丢弃 0，文件 940 行）。重跑派生统计不会自动更新这两个文件；要让 prompt 跟着新语料走，得重新跑 `export_scene_targets.py` 并逐项核对 `STYLE_TARGETS`。生成物的目标路径已指向包内模块，重跑会原位更新 `idiolect/scene_length_targets.py`；这次用发布数据重跑，除文件头的三行来源说明外逐字节一致，数字完全可重建。
+
+**发布数据的可重建性（2026-09-13 实测）。** 用金标准 cn 语料跑完上面第 5、6 步的六条命令，`data/` 下六个文件与仓库里的发布版本**逐字节相同**。为此修了两个确定性缺陷：`scene_stats.py` 的词表并列项按词兜底排序，`style_features.logodds_signature` 的 top-N 截断同样加兜底排序（它从 `set` 迭代取词，只按 logodds 排序时，同为 2.48 的两个词谁进榜会随进程的哈希随机化变化，同一份语料两次跑出的词表不同）。诊断类报告（`scene_discover`、`validate_scenes`、`scene_distill` 的排序）只保证内容一致，并列项的先后不保证。
+
+**发布数据的可重建性（2026-09-13 实测）。** 用金标准 cn 语料跑完第 5、6 步的六条命令，`data/` 下六个文件与仓库里的发布版本**逐字节相同**。为此修了两个确定性缺陷：`scene_stats.py` 的词表并列项按词兜底排序，`style_features.logodds_signature` 的 top-N 截断同样加兜底排序（它从 `set` 迭代取词，只按 logodds 排序时，同为 2.48 的两个词谁进榜会随进程的字符串哈希随机化变化，同一份语料两次跑出的词表不同）。诊断类报告（`scene_discover`、`validate_scenes`、`scene_distill` 的排序）只保证内容一致，并列项的先后不保证。
 
 **锚点口径在两处都不完整。** `scene_char_baseline.json` 每格带 `anchor_density`，由 `style_features.anchor_density(lines)` 算出；但 `profile_from_texts` 不产这个字段，`data/style_profiles.json` 里也就没有。`style_features.composite_score` 靠 `gold.get("anchor_density")` 定满分线，取不到就退回 `1.0`，而该函数在本仓库没有调用点（全仓库只有定义那一行）。实际在用的是 `tools/score/scene_distill.py`，它的注释写明 2026-09-12 把 anchor 移出了复合分，只留固定占位值 `1.8` 作诊断列，基线锚点另从 `scene_char_baseline.json` 取。
 

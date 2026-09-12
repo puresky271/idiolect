@@ -13,7 +13,7 @@ for _p in (_ROOT, _ROOT / "tools",
            *(_ROOT / "tools" / _d for _d in ("corpus", "distill", "probe", "score", "gates"))):
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
-from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
+from _paths import CORPUS_DIR, DATA, REPORT, ROOT, require_corpus  # noqa: E402,F401
 
 import json
 import sys
@@ -44,6 +44,7 @@ CANDIDATES = {
 
 def corpus(char_key: str) -> list[str]:
     out = []
+    require_corpus("cn")
     for line in (CORPUS_DIR / "cn.jsonl").read_text(encoding="utf-8").splitlines():
         if line.strip():
             r = json.loads(line)

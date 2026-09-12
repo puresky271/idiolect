@@ -678,5 +678,8 @@ def logodds_signature(
         p_t = a / (n_t + prior * len(vocab))
         p_b = b / (n_b + prior * len(vocab))
         out.append((w, math.log(p_t / p_b), tc[w]))
-    out.sort(key=lambda x: -x[1])
+    # 并列时按词兜底排序（2026-09-13 修）：`vocab` 是 set，迭代顺序受字符串哈希随机化
+    # 影响，只按 logodds 排会让「同为 2.48 的两个词谁进 top-N」随进程变化——
+    # 同一份语料两次跑出的 vocab 不同，发布数据就说不清能不能重建。
+    out.sort(key=lambda x: (-x[1], x[0]))
     return out[:top]

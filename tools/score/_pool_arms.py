@@ -76,12 +76,25 @@ def score(per: dict[tuple[str, str], list[str]]) -> dict[tuple[str, str], dict]:
 
 
 def main() -> int:
-    off_labels = sys.argv[1].split(",")
-    on_labels = sys.argv[2].split(",")
-    only = set(sys.argv[3].split(",")) if len(sys.argv) > 3 else None
+    import argparse
+
+    ap = argparse.ArgumentParser(description="多臂池化：把同一批夹具的多个臂合并成大样本再与基线臂比")
+    ap.add_argument("off_labels", help="基线臂（逗号分隔）")
+    ap.add_argument("on_labels", help="注入臂（逗号分隔，可有多个）")
+    ap.add_argument("scenes", nargs="?", default="", help="只算这些场景 key（逗号分隔，可选）")
+    args = ap.parse_args()
+
+    off_labels = args.off_labels.split(",")
+    on_labels = args.on_labels.split(",")
+    only = set(args.scenes.split(",")) if args.scenes else None
 
     off_rows = [r for lab in off_labels for r in load(lab)]
     on_rows = [r for lab in on_labels for r in load(lab)]
+    if not off_rows or not on_rows:
+        print(f"[skip] 找不到探针产物：report/probe_<label>.jsonl\n"
+              f"       基线 {off_labels} 命中 {len(off_rows)} 条｜注入 {on_labels} 命中 {len(on_rows)} 条\n"
+              f"       先跑 tools/probe/probe_runner.py --label <label> …")
+        return 0
     if only:
         off_rows = [r for r in off_rows if r.get("scene") in only]
         on_rows = [r for r in on_rows if r.get("scene") in only]

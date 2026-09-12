@@ -19,7 +19,7 @@ for _p in (_ROOT, _ROOT / "tools",
            *(_ROOT / "tools" / _d for _d in ("corpus", "distill", "probe", "score", "gates"))):
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
-from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
+from _paths import CORPUS_DIR, DATA, REPORT, ROOT, require_corpus  # noqa: E402,F401
 
 import argparse
 import json
@@ -43,12 +43,16 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--k", type=int, default=60, help="每场景采样的近邻条数")
     ap.add_argument("--min-n", type=int, default=20)
+    ap.add_argument("--no-exemplars", action="store_true",
+                    help="剥掉例句字段（发布用：本仓库不分发原作文本）")
+    ap.add_argument("--out", default="", help=f"输出路径（默认 {REPORT / 'scene_stats.json'}）")
     args = ap.parse_args()
 
     from validate_scenes import PROTOTYPES
 
     texts: list[str] = []
     chars: list[str] = []
+    require_corpus("cn")
     for line in (CORPUS_DIR / "cn.jsonl").read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
@@ -98,11 +102,19 @@ def main() -> int:
             "first_person_rate": prof["first_person_rate"],
             "filler_rate": prof["filler_rate"],
             "char_dist": {CHARS[c]: n for c, n in Counter(chars[j] for j in idx).most_common()},
-            "vocab": [{"word": w, "logodds": round(lo, 2), "count": c} for w, lo, c in sig],
+            # 并列 logodds 的词按 word 兜底排序：否则同一份语料两次跑出来的顺序不同
+            # （2026-09-13 发现：9 个场景的 vocab 只是并列项顺序不同，导致「发布数据
+            #  能否逐字节重建」这件事说不清）。确定性优先于「看起来自然」。
+            "vocab": [{"word": w, "logodds": round(lo, 2), "count": c}
+                      for w, lo, c in sorted(sig, key=lambda x: (-x[1], x[0]))],
             "exemplars": lines[:6],
         }
+        if args.no_exemplars:
+            out[key].pop("exemplars", None)
 
-    (REPORT / "scene_stats.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    dst = Path(args.out) if args.out else (REPORT / "scene_stats.json")
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
 
     lines = ["# 逐场景语料统计（字数预期 / 符号 / 物品话题词表）\n",
              f"- 来源：金标准 cn 语料按原型检索取近邻（每场景 top-{args.k}），模型 `{MODEL}`",
@@ -122,7 +134,7 @@ def main() -> int:
         lines.append(f"\n### `{key}` {v['cn']}")
         lines.append(f"- 角色侧期望：{v['char_side']}")
         lines.append(f"- 评测重点：{', '.join(v['watch'])}")
-        for e in v["exemplars"]:
+        for e in (v.get("exemplars") or []):
             lines.append(f"  - {e}")
     (REPORT / "scene_style_table.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines[:6 + len(out)]))

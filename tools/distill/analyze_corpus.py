@@ -13,7 +13,7 @@ for _p in (_ROOT, _ROOT / "tools",
            *(_ROOT / "tools" / _d for _d in ("corpus", "distill", "probe", "score", "gates"))):
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
-from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
+from _paths import CORPUS_DIR, DATA, REPORT, ROOT, require_corpus  # noqa: E402,F401
 
 import argparse
 import json
@@ -79,6 +79,7 @@ def main() -> int:
     report_dir.mkdir(parents=True, exist_ok=True)
     lines: list[str] = []
     all_profiles: dict = {}
+    empty: list[str] = []
 
     for lang in args.langs.split(","):
         lang = lang.strip()
@@ -86,6 +87,7 @@ def main() -> int:
         total = sum(len(v) for v in corpus.values())
         if total == 0:
             print(f"[{lang}] no data")
+            empty.append(lang)
             continue
         name = JP_NAME if lang == "jp" else CN_NAME
 
@@ -199,6 +201,12 @@ def main() -> int:
     )
     text = "\n".join(lines)
     (report_dir / "quant_report.md").write_text(text, encoding="utf-8")
+    if empty and len(empty) == len([x for x in args.langs.split(",") if x.strip()]):
+        raise SystemExit(
+            f"[stop] 全部语言都没有语料（{empty}）——空语料会算出空画像，所以这里直接退出。\n"
+            f"       先跑 tools/corpus/build_gold.py，或用 IDIOLECT_CORPUS_DIR 指向语料目录"
+            f"（见 docs/02-corpus.md）。"
+        )
     print(text)
     return 0
 

@@ -44,8 +44,27 @@ def corpus_file(lang: str = "cn") -> Path:
     return p
 
 
+def require_corpus(lang: str = "cn", *, min_lines: int = 1) -> Path:
+    """读取派生统计前的强制前置检查：语料必须存在且非空。
+
+    为什么要有这一步（2026-09-13 踩过）：语料路径存在但**内容为空**时，
+    所有统计脚本都会「成功」跑完并写出空产物——`export_targets.py` 写出空的
+    `style_targets.json`、`scene_char_baseline.py` 写出 0 个 cell，退出码还是 0。
+    下游只会看到「数字全空」，很难定位原因。空语料一律当场退出（码 2）。
+    """
+    p = corpus_file(lang)
+    n = sum(1 for line in p.read_text(encoding="utf-8").splitlines() if line.strip())
+    if n < min_lines:
+        raise SystemExit(
+            f"[stop] 语料 {p} 只有 {n} 行（要求 ≥ {min_lines}）。\n"
+            f"       空语料会生成空派生统计，所以这里直接退出，不写任何产物。\n"
+            f"       补齐方式见 docs/02-corpus.md（或用 IDIOLECT_CORPUS_DIR 指向正确的语料目录）。"
+        )
+    return p
+
+
 def ensure_dirs() -> None:
     REPORT.mkdir(parents=True, exist_ok=True)
 
 
-__all__ = ["CORPUS_DIR", "DATA", "REPORT", "ROOT", "corpus_file", "ensure_dirs"]
+__all__ = ["CORPUS_DIR", "DATA", "REPORT", "ROOT", "corpus_file", "ensure_dirs", "require_corpus"]

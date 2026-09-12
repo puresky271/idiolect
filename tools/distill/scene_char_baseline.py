@@ -23,7 +23,7 @@ for _p in (_ROOT, _ROOT / "tools",
            *(_ROOT / "tools" / _d for _d in ("corpus", "distill", "probe", "score", "gates"))):
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
-from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
+from _paths import CORPUS_DIR, DATA, REPORT, ROOT, require_corpus  # noqa: E402,F401
 
 import argparse
 import json
@@ -47,12 +47,16 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--k", type=int, default=40, help="每 (char,scene) 取多少条最近邻")
     ap.add_argument("--min-n", type=int, default=12, help="少于此数则该组合不产出（标为证据不足）")
+    ap.add_argument("--no-exemplars", action="store_true",
+                    help="剥掉例句字段（发布用：本仓库不分发原作文本）")
+    ap.add_argument("--out", default="", help=f"输出路径（默认 {REPORT / 'scene_char_baseline.json'}）")
     args = ap.parse_args()
 
     from validate_scenes import PROTOTYPES
 
     # 按角色分组读语料
     by_char: dict[str, list[str]] = defaultdict(list)
+    require_corpus("cn")
     for line in (CORPUS_DIR / "cn.jsonl").read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
@@ -97,14 +101,17 @@ def main() -> int:
                 "anchor_density": round(S.anchor_density(lines), 3),
                 "exemplars": lines[:8],
             }
+            if args.no_exemplars:
+                out[f"{cname}|{scene}"].pop("exemplars", None)
         print(f"  {cname}: {len(texts)} 条语料 → 产出 {sum(1 for k in out if k.startswith(cname + '|'))} 个场景基线")
 
-    (REPORT / "scene_char_baseline.json").write_text(
-        json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    dst = Path(args.out) if args.out else (REPORT / "scene_char_baseline.json")
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n共 {len(out)} 个 (角色 × 场景) 基线")
     if thin:
         print(f"样本不足未产出 {len(thin)} 个：{thin[:12]}{' …' if len(thin) > 12 else ''}")
-    print("-> report/scene_char_baseline.json")
+    print(f"-> {dst}")
 
     # 打印几个样例供核对
     print("\n=== 样例（乐奈/素世的专属场景）===")
@@ -117,7 +124,7 @@ def main() -> int:
         L = v["length"]
         print(f"  {key}: n={v['n']} 中位={L['p50']:.0f} p90={L['p90']:.0f} "
               f"句数={v['n_sent']['mean']:.2f} 锚点={v['anchor_density']}")
-        for e in v["exemplars"][:2]:
+        for e in (v.get("exemplars") or [])[:2]:
             print(f"      {e[:52]}")
     return 0
 

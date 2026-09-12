@@ -183,6 +183,7 @@ The methodology documents are written in Chinese. Each file stands alone.
 | [`docs/04-evaluation.md`](docs/04-evaluation.md) | Metrics, pooling, gates, fixture design, common misreadings |
 | [`docs/05-tooling.md`](docs/05-tooling.md) | Tool reference, including prompt dump, mock clock, and offline smoke |
 | [`docs/06-lessons.md`](docs/06-lessons.md) | The pitfall list: what taught each constraint |
+| [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | Building turn_logic modules and voice_check post-processing: wiring, gates, acceptance |
 
 ## License
 

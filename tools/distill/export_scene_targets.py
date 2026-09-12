@@ -32,6 +32,16 @@ MIN_N = 20                             # 比 baseline 的 12 更严：要拿去�
 
 
 def main() -> int:
+    import argparse
+
+    ap = argparse.ArgumentParser(description="导出 (角色 × 场景) 长度目标到 idiolect/scene_length_targets.py")
+    ap.add_argument("--dry-run", action="store_true", help="只统计不写文件")
+    ap.add_argument("--out", default="", help=f"输出路径（默认 {DST}）")
+    args = ap.parse_args()
+    dst = Path(args.out) if args.out else DST
+
+    if not SRC.exists():
+        raise SystemExit(f"[stop] 缺 {SRC}——它随仓库发布；没有它就无法导出场景目标。")
     src = json.loads(SRC.read_text(encoding="utf-8"))
     import sys as _sys
     _sys.path.insert(0, str(HERE))
@@ -89,8 +99,16 @@ def main() -> int:
         '    return SCENE_LENGTH_TARGETS.get(str(char or "").strip(), {}).get(str(scene or "").strip())',
         "",
     ]
-    DST.write_text("\n".join(lines), encoding="utf-8")
-    print(f"导出 {sum(len(v) for v in out.values())} 个目标 → {DST}")
+    cells = sum(len(v) for v in out.values())
+    if not cells:
+        # 空表会覆盖掉运行时模块里的 130 个目标 → 拒绝写（--dry-run 也不写）
+        raise SystemExit(
+            f"[stop] 导出结果为 0 个目标（源 {SRC} 里没有 n ≥ {MIN_N} 的组合）——拒绝覆盖 {dst}。")
+    if args.dry_run:
+        print(f"[dry-run] 将导出 {cells} 个目标到 {dst}（未写文件）")
+        return 0
+    dst.write_text("\n".join(lines), encoding="utf-8")
+    print(f"导出 {cells} 个目标 → {dst}")
     print(f"  丢弃 n<{MIN_N} 的 {dropped} 个｜角色数 {len(out)}")
     for c, m in sorted(out.items()):
         meds = ", ".join(f"{s}:{d['median']:.0f}" for s, d in sorted(m.items()))

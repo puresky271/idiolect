@@ -127,23 +127,36 @@ py -X utf8 tools/gates/voice_check_diff_check.py   # 后处理清洗的前后差
 
 ## 8. 语料与蒸馏
 
-需要语料，先设 `IDIOLECT_CORPUS_DIR`。
+需要语料，先设 `IDIOLECT_CORPUS_DIR`。读语料的脚本都有一道前置检查：文件缺失抛 `FileNotFoundError`，文件**存在但为空**直接退出（空语料会算出空产物，宁可当场停）。
 
 ```bash
 py -X utf8 tools/corpus/crawl_bestdori.py     # 抓取（网络）
-py -X utf8 tools/corpus/build_gold.py         # 合成 raw/gold/<lang>.jsonl
+py -X utf8 tools/corpus/prep_hf_corpus.py     # HF parquet → 中间层（--dry-run 可先看）
+py -X utf8 tools/corpus/build_gold.py         # 合并 + 切分 → raw/gold/<lang>.jsonl
+py -X utf8 tools/corpus/build_gold.py --dry-run   # 只看会合并出多少条
 py -X utf8 tools/corpus/audit_corpus_quality.py
 
 py -X utf8 tools/distill/analyze_corpus.py         # 全局画像
-py -X utf8 tools/distill/export_targets.py         # -> data/style_targets.json
-py -X utf8 tools/distill/export_scene_targets.py   # -> 场景化长度目标
-py -X utf8 tools/distill/scene_char_baseline.py    # -> data/scene_char_baseline.json
-py -X utf8 tools/distill/tic_profile.py            # -> data/tic_profile.json
+py -X utf8 tools/distill/export_targets.py         # -> report/style_targets.json（发布副本在 data/）
+py -X utf8 tools/distill/export_scene_targets.py   # -> idiolect/scene_length_targets.py
+py -X utf8 tools/distill/scene_char_baseline.py    # -> report/scene_char_baseline.json
+py -X utf8 tools/distill/scene_stats.py            # -> report/scene_stats.json
+py -X utf8 tools/distill/tic_profile.py            # -> report/tic_profile.json
+py -X utf8 tools/distill/tic_by_scene.py           # -> report/tic_by_scene.json
 py -X utf8 tools/distill/export_profiles.py        # -> data/style_profiles.json（评分用画像）
 py -X utf8 tools/distill/export_profiles.py --check # 校验已发布画像与语料是否一致
 ```
 
+写成 `report/` 的产物要进 `data/` 时用发布形态（剥掉例句）：
+
+```bash
+py -X utf8 tools/distill/scene_char_baseline.py --no-exemplars --out data/scene_char_baseline.json
+py -X utf8 tools/distill/scene_stats.py        --no-exemplars --out data/scene_stats.json
+```
+
 `export_profiles.py` 的产物是探针评分用的 gold 画像。语料不在时，探针自动退回读这份发布画像，`[probe] gold 画像来源 = ...` 那行会写清用的是哪条路径。
+
+三个写文件的脚本带零结果守卫，防止误调用把已有的好数据覆盖成空：`build_gold.py`（没有源文件时拒绝写，除非 `--force-empty`）、`prep_hf_corpus.py`、`export_scene_targets.py`。
 
 ## 9. 加一个角色或一个场景
 

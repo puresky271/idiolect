@@ -25,7 +25,7 @@ py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic \
 
 ## 它解决什么
 
-通用模型扮演角色时稳定地滑向同一个方向：回复变长、套用共情模板（「你的感受我完全能理解」）、结尾补一句意义升华、偶尔谈论自己的设定。这四种偏差不需要模型出错，它们是训练目标的正常产物。角色区分度就死在这里——如果乐奈和素世都输出同一段安慰，这两个角色没有区别。
+通用模型扮演角色时稳定地滑向同一个方向：回复变长、套用共情模板（「你的感受我完全能理解」）、结尾补一句意义升华、偶尔谈论自己的设定。这四种偏差不需要模型出错，它们是训练目标的正常产物。角色区分度就死在这里：如果乐奈和素世都输出同一段安慰，这两个角色没有区别。
 
 这套方法的做法是：把「像不像」变成可检验的量，然后在这个量上迭代。
 
@@ -181,6 +181,7 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 | [`docs/04-evaluation.md`](docs/04-evaluation.md) | 三件套指标、池化、门禁、夹具设计、常见误读 |
 | [`docs/05-tooling.md`](docs/05-tooling.md) | 工具手册（含 prompt dump、mock 时钟、offline smoke） |
 | [`docs/06-lessons.md`](docs/06-lessons.md) | 踩坑清单：每条约束是被什么教出来的 |
+| [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | turn_logic 模块与 voice_check 后处理的搭建流程、接线与验收 |
 
 ## 许可
 
