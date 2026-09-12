@@ -53,8 +53,9 @@ from __future__ import annotations
 
 import os
 import re
-import threading
+
 from typing import Optional
+from idiolect.scene_engine import SessionValues
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -147,11 +148,10 @@ _MOTIVE_DEEP_MARKERS: list[str] = [
 # ═══════════════════════════════════════════════════════════════════════
 # 一轮情绪余波 session state
 # ═══════════════════════════════════════════════════════════════════════
-# 设计：这一轮防御 → 写入 _RESIDUE_STATE[sid]；下一轮如未再次触发、读出
+# 设计：这一轮防御 → put 进 _RESIDUE_STATE；下一轮如未再次触发、读出
 #   并立即 pop（一轮即清）；下下轮无残留。
 # 如下一轮**再次触发**、新触发覆盖旧 residue（不延续累加）。
-_RESIDUE_LOCK = threading.Lock()
-_RESIDUE_STATE: dict[str, dict] = {}
+_RESIDUE_STATE = SessionValues()   # 有上限的 per-session 余波状态（见 scene_engine.SessionValues）
 
 
 def _normalize_session(session_id: Optional[str]) -> str:
@@ -161,27 +161,20 @@ def _normalize_session(session_id: Optional[str]) -> str:
 
 
 def _peek_residue(sid: str) -> Optional[dict]:
-    with _RESIDUE_LOCK:
-        return _RESIDUE_STATE.get(sid)
+    return _RESIDUE_STATE.peek(sid)
 
 
 def _consume_residue(sid: str) -> Optional[dict]:
-    with _RESIDUE_LOCK:
-        return _RESIDUE_STATE.pop(sid, None)
+    return _RESIDUE_STATE.pop(sid)
 
 
 def _set_residue(sid: str, 意图: str, trigger_preview: str) -> None:
-    with _RESIDUE_LOCK:
-        _RESIDUE_STATE[sid] = {"意图": 意图, "trigger_preview": trigger_preview[:60]}
+    _RESIDUE_STATE.put(sid, {"意图": 意图, "trigger_preview": trigger_preview[:60]})
 
 
 def reset_session_residue(session_id: Optional[str] = None) -> None:
     """清 session 的余波状态。session_id=None → 清全部。"""
-    with _RESIDUE_LOCK:
-        if session_id is None:
-            _RESIDUE_STATE.clear()
-        else:
-            _RESIDUE_STATE.pop(session_id, None)
+    _RESIDUE_STATE.reset(session_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════

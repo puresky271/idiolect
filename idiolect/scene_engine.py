@@ -28,7 +28,7 @@ import re
 import threading
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Callable, Optional
 
 _log = logging.getLogger(__name__)
 
@@ -117,6 +117,65 @@ class SessionStore:
 
     def reset(self, session_id: Optional[str] = None) -> None:
         """清空去重状态（测试与诊断用）；None = 全清。"""
+        with self._lock:
+            if session_id is None:
+                self._buckets.clear()
+            else:
+                self._buckets.pop(session_id, None)
+
+    def __len__(self) -> int:
+        return len(self._buckets)
+
+
+class SessionValues:
+    """session → 值字典 的 LRU 表（SessionStore 的值版兄弟）。
+
+    SessionStore 管「这个 session 注入过哪些块」的集合状态；另一些深模块要
+    跨轮的**计数器 / 余波标记**（上一轮触发了什么、这轮是第几轮），那是
+    session → 小 dict 的值状态。裸 dict 同样只增不减——与 2026-09-12 抓到的
+    _SESSION_FIRED 泄漏是同一类，所以沿用同一套 LRU + 锁 + reset 形状。
+
+    值以**本体**返回（get_or_create / peek / pop），调用方就地改可见——与旧裸
+    dict 行为一致；进程内的锁只护表结构，跨线程并发改值由调用方自理。
+    """
+
+    def __init__(self, max_sessions: int = 4096) -> None:
+        self._max_sessions = max(1, int(max_sessions))
+        self._buckets: OrderedDict[str, dict] = OrderedDict()
+        self._lock = threading.Lock()
+
+    def get_or_create(self, session_id: str, factory: Callable[[], dict]) -> dict:
+        """取 session 的值字典；没有就用 factory 建一个。访问即触及（LRU）。"""
+        with self._lock:
+            bucket = self._buckets.get(session_id)
+            if bucket is None:
+                bucket = factory()
+            self._buckets[session_id] = bucket
+            self._buckets.move_to_end(session_id)
+            while len(self._buckets) > self._max_sessions:
+                self._buckets.popitem(last=False)
+            return bucket
+
+    def put(self, session_id: str, value: dict) -> None:
+        """写入 / 覆盖 session 的值字典（余波标记的落点）。"""
+        with self._lock:
+            self._buckets[session_id] = value
+            self._buckets.move_to_end(session_id)
+            while len(self._buckets) > self._max_sessions:
+                self._buckets.popitem(last=False)
+
+    def peek(self, session_id: str) -> Optional[dict]:
+        """只读窥视：不消费、不触及 LRU 顺序、不建桶。"""
+        with self._lock:
+            return self._buckets.get(session_id)
+
+    def pop(self, session_id: str) -> Optional[dict]:
+        """消费：取出并删除；没有返回 None。"""
+        with self._lock:
+            return self._buckets.pop(session_id, None)
+
+    def reset(self, session_id: Optional[str] = None) -> None:
+        """清状态；None = 全清。"""
         with self._lock:
             if session_id is None:
                 self._buckets.clear()

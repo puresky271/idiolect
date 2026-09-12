@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import random
 import re
-import threading
+from idiolect.scene_engine import SessionValues
 
 # ── 三类形式 ─────────────────────────────────────────────
 # 12 中点 + ?/! 是 server 主动决策的"大停顿+语义"组合、是 canon、保留。
@@ -131,26 +131,20 @@ _THINKING_RE = re.compile(
 )
 
 # ── 状态 ─────────────────────────────────────────────
-_STATE_LOCK = threading.Lock()
-_STATE: dict[str, dict] = {}  # session_id -> {turn:int, last_fire_turn:int}
+_STATE = SessionValues()   # 有上限的 per-session 状态表（见 scene_engine.SessionValues）
+
+
+def _new_state() -> dict:
+    return {"turn": 0, "last_fire_turn": -10_000}
 
 
 def _get_state(session_id: str) -> dict:
-    with _STATE_LOCK:
-        s = _STATE.get(session_id)
-        if s is None:
-            s = {"turn": 0, "last_fire_turn": -10_000}
-            _STATE[session_id] = s
-        return s
+    return _STATE.get_or_create(session_id, _new_state)
 
 
 def reset_state(session_id: str | None = None) -> None:
     """清状态（测试用）。session_id=None → 清全部。"""
-    with _STATE_LOCK:
-        if session_id is None:
-            _STATE.clear()
-        else:
-            _STATE.pop(session_id, None)
+    _STATE.reset(session_id)
 
 
 # ── 意图分类 ─────────────────────────────────────────────

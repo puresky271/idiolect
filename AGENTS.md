@@ -38,7 +38,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 idiolect/            # 运行时包：把特征写成 prompt 约束
   assemble.py        #   四层装配器（核心入口，build_messages / build_system_prompt）
   registry.py        #   角色名 → 角色包的唯一分发点（含别名归一化）
-  scene_classifier.py / scene_engine.py / general_scenes.py   # 场景分类与动态注入；scene_engine 另托管 turn_logic 共享脚手架（SessionStore 去重表 / env 假值表 / 深模块执行器）
+  scene_classifier.py / scene_engine.py / general_scenes.py   # 场景分类与动态注入；scene_engine 另托管 turn_logic 共享脚手架（SessionStore 去重表 / SessionValues 值状态表 / env 假值表 / 深模块执行器）
   style_target.py / scene_length_targets.py                   # 长度/句数目标块
   workspace.py       #   上下文工作区（12 层装配 + 事实选择器），四层之外的骨架
   facts.py / tone.py / _text_rng.py   # 事实选择器 / 语气分类 / 文本定种 RNG（后处理随机步骤的确定性）
@@ -131,7 +131,7 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
   - `test_tooling_contracts.py`：mock 时钟、装配完整性、`--assemble` 不被覆盖、元叙述门禁覆盖面；
   - `test_scene_turn_logic.py` / `test_soyo_rana_deep_turn_logic.py`：触发器命中正确且不过宽、per-session 去重、角色隔离与 env 回退开关、触发词有语料实证；
   - `test_workspace.py`：上下文层序固定、pinned 层不被预算裁掉、执行包贴最后一条 user、事实选择器的阈值与双预算；
-  - `test_scene_engine_scaffold.py`：turn_logic 共享脚手架（SessionStore 的 mark/has/reset 与 LRU 淘汰、env 假值表、深模块执行器）；
+  - `test_scene_engine_scaffold.py`：turn_logic 共享脚手架（SessionStore 的 mark/has/reset 与 LRU 淘汰、SessionValues 值状态表、env 假值表、深模块执行器）；
   - `test_voice_check_wiring.py`：tomori/taki/anon 后处理真的接线（不再是 stub）、清洗确定性（按输入定种）、`<CHAR>_VOICE_CHECK_ENABLED` 总开关与非本角色透传；
   - `test_score_golden.py`：评分链 golden 文件（scene_distill / _pool_arms 全量输出、probe_report 编排契约；golden 由测试内的合成输入离线复现，失配先确认是预期改动再重新生成，不要手改）。
 - 新增约束时**先写契约测试再改实现**；触发词必须能拿出语料实证（`tools/distill/verify_triggers.py`）。

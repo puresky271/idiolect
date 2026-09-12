@@ -82,6 +82,73 @@ class RunModulesTests(unittest.TestCase):
         self.assertEqual(blocks, [])
         self.assertEqual(fired, [])
 
+
+class SessionValuesTests(unittest.TestCase):
+    """SessionValues：session → 值字典 的 LRU 表（余波标记 / 跨轮计数器用）。
+
+    与 SessionStore 同一套不变量：LRU 有上限、访问即触及、reset(None) 全清。
+    另钉三个值语义：同 session 拿到**同一个值对象**（调用方就地改可见）、
+    pop 消费即删、peek 只读不触及。
+    """
+
+    def test_get_or_create_same_dict_per_session(self):
+        st = se.SessionValues()
+        a = st.get_or_create("s", dict)
+        a["k"] = 1
+        self.assertIs(st.get_or_create("s", dict), a,
+                      "同 session 再次取必须拿到同一个值对象（就地改要看得见）")
+
+    def test_sessions_are_independent(self):
+        st = se.SessionValues()
+        a = st.get_or_create("s1", lambda: {"n": 0})
+        b = st.get_or_create("s2", lambda: {"n": 0})
+        self.assertIsNot(a, b)
+        a["n"] += 1
+        self.assertEqual(b["n"], 0)
+
+    def test_factory_only_called_on_miss(self):
+        st = se.SessionValues()
+        calls = []
+
+        def fac():
+            calls.append(1)
+            return {"n": len(calls)}
+
+        st.get_or_create("s", fac)
+        st.get_or_create("s", fac)
+        self.assertEqual(calls, [1], "工厂只在 miss 时调用")
+        self.assertEqual(st.get_or_create("s", fac)["n"], 1)
+
+    def test_put_pop_peek(self):
+        st = se.SessionValues()
+        self.assertIsNone(st.peek("s"))
+        self.assertIsNone(st.pop("s"))
+        st.put("s", {"mode": "C"})
+        self.assertEqual(st.peek("s"), {"mode": "C"}, "peek 只读不消费")
+        self.assertEqual(st.pop("s"), {"mode": "C"}, "pop 消费并返回")
+        self.assertIsNone(st.pop("s"), "pop 过即空")
+        self.assertEqual(len(st), 0, "pop 后桶应消失")
+
+    def test_lru_eviction(self):
+        st = se.SessionValues(max_sessions=2)
+        st.put("a", {"v": 1})
+        st.put("b", {"v": 2})
+        st.get_or_create("a", dict)          # 触及 a → b 变最旧
+        st.put("c", {"v": 3})
+        self.assertEqual(len(st), 2)
+        self.assertIsNone(st.peek("b"), "最久未用的 session 应被淘汰")
+        self.assertIsNotNone(st.peek("a"))
+        self.assertIsNotNone(st.peek("c"))
+
+    def test_reset(self):
+        st = se.SessionValues()
+        st.put("a", {"v": 1})
+        st.put("b", {"v": 2})
+        st.reset("a")
+        self.assertEqual(len(st), 1)
+        st.reset()
+        self.assertEqual(len(st), 0)
+
     def test_literal_copy_note_appended(self):
         def ok(text, **kw): return "B\n"
         blocks, _ = se.run_modules(
