@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero.png" width="100%" alt="idiolect: make an AI character speak in character, and prove it got closer. Example cast: the five members of MyGO!!!!!. On the right, their five different real replies to the same message.">
+  <img src="./assets/readme/hero.png" width="100%" alt="idiolect: make an AI character speak in character, and prove it got closer. Example cast: the five members of MyGO!!!!!.">
 </p>
 
 **Make an AI character speak in character, and prove it got closer — with numbers.**
@@ -34,7 +34,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")   # ready to 
 
 ## The example cast: how differently five people talk
 
-The MyGO!!!!! five were not a convenience pick — their replies to the same message diverge wildly (the five replies in the hero image are real outputs, not invented; they come from the `repo_standalone` batch, one of three runs per character). A method that keeps these five from blending into each other survives being moved to other characters. Measured from the original script:
+The MyGO!!!!! five were not a convenience pick — their replies to the same message diverge wildly. A method that keeps these five from blending into each other survives being moved to other characters. Measured from the original script:
 
 | Character | Typical line length (median) | Sentences per turn | Signature habits |
 |---|---|---|---|
