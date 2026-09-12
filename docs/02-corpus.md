@@ -113,12 +113,16 @@ py -X utf8 tools/corpus/audit_corpus_quality.py
 
 ## 4. 派生统计清单
 
-除 `export_profiles.py`（按 `--out` 或 `DATA/style_profiles.json` 落盘）与 `export_scene_targets.py`（生成 `idiolect/scene_length_targets.py`）之外，下面每个脚本都把结果写进 `REPORT`（默认 `report/`）。
+参数支持不统一，照抄命令时注意（2026-09-13 逐个 `--help` 核过）：
 
-要复现 `data/`，两条路选一条：
+| 脚本 | 目标路径怎么给 |
+|---|---|
+| `export_targets.py` / `tic_profile.py` / `tic_by_scene.py` | **没有 `--out`**，只写 `REPORT`；要落进 `data/` 得把 `IDIOLECT_REPORT_DIR` 指过去 |
+| `export_profiles.py` | 也没有 `--out`，但它直接写 `DATA`（可用 `IDIOLECT_DATA_DIR` 改），只统计 `split == "train"` |
+| `scene_char_baseline.py` / `scene_stats.py` | 有 `--out`；发布形态还要加 `--no-exemplars` |
+| `export_scene_targets.py` | 有 `--out`，默认写包内的 `idiolect/scene_length_targets.py`（原位更新） |
 
-- 给每个脚本加 `--out` 指定目标路径（`scene_char_baseline.py` / `scene_stats.py` 还要加 `--no-exemplars`）；
-- 或把 `IDIOLECT_REPORT_DIR` 指到 `data/` 再跑——代价是各脚本的 `.md` 产物也会落进 `data/`。
+所以「复现 `data/`」的完整跑法见 [`data/README.md`](../data/README.md)：把 `IDIOLECT_REPORT_DIR` 指到 `data/` 跑前三者，两个带 `--no-exemplars` 的用 `--out` 直接指到 `data/`（这样它们的 `.md` 产物才不会被一起写进 `data/`），`export_profiles.py` 自己就写 `data/`。
 
 **`style_targets.json`** —— 每个角色一份全局数值目标，`{"cn": {...}, "jp": {...}}`。
 
@@ -217,7 +221,7 @@ py -X utf8 tools/distill/export_profiles.py
 
 **验证状态（2026-09-13）。** 本仓库的所有脚本都做过两级冒烟：58 个脚本逐个跑 `--help`（查 import 与语法），其中 15 个需要语料或派生产物的脚本用真实金标准语料**实跑**过一遍，全部退出码 0。
 
-实跑通过：`analyze_corpus`、`verbal_tics`、`tic_profile`、`char_topic_vocab`、`export_targets`、`verify_triggers`、`export_scene_targets`、`export_profiles`、`scene_char_baseline`、`scene_stats`、`tic_by_scene`、`validate_scenes`、`audit_corpus_quality`、`probe_registry --list`、`power_calc`。另外在**新克隆的仓库**里跑通了 `pytest tests`（129 项）、`offline_smoke`（1 skipped）与探针 dry-run（35 条记录，system 段 12368~24501 字符，无需语料）。
+实跑通过：`analyze_corpus`、`verbal_tics`、`tic_profile`、`char_topic_vocab`、`export_targets`、`verify_triggers`、`export_scene_targets`、`export_profiles`、`scene_char_baseline`、`scene_stats`、`tic_by_scene`、`validate_scenes`、`audit_corpus_quality`、`probe_registry --list`、`power_calc`。另外在**新克隆的仓库**里跑通了 `pytest tests`（137 项）、`offline_smoke`（1 skipped）与探针 dry-run（35 条记录，system 段 12368~24501 字符，无需语料）。
 
 仍未验证的两项，都因为需要外部资源：
 

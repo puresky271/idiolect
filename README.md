@@ -35,13 +35,34 @@
 
 ## 快速跑起来
 
-需要 Python 3.11+。克隆本仓库后：
+**先拿到手——四条路，选一条：**
+
+| 方式 | 一条命令 | 说明 |
+|---|---|---|
+| **让 agent 来做** | 把下面那段提示词贴给你的 coding agent | 最省事：它自己 clone、装依赖、跑自检 |
+| **uv（一行、零残留）** | `uvx --from git+https://github.com/puresky271/idiolect idiolect prompt Rana "你今天又想去哪找猫"` | 立刻看 prompt；不 clone、不建环境 |
+| **pip 装成库** | `pip install git+https://github.com/puresky271/idiolect` | 当依赖用；运行时零第三方依赖 |
+| **只要文件** | `npx degit puresky271/idiolect idiolect` 或 `git clone --depth 1 https://github.com/puresky271/idiolect` | 要跑工具链、要读源码 |
+
+给 agent 的提示词（Claude Code / Codex 之类都行）：
+
+> 帮我跑通 https://github.com/puresky271/idiolect ：克隆下来、读 `AGENTS.md`、执行 `python bootstrap.py`，然后把自检结果和五个角色的完整 prompt 贴给我（`py -X utf8 tools/gates/dump_prompt.py --all --matrix`）。之后我要换成我自己的角色，按 `.claude/skills/idiolect-pipeline/` 的流程走。
+
+**拿到之后**，在仓库根跑：
+
+需要 Python 3.11+。
 
 ```bash
 pip install .                                           # 运行时零第三方依赖
 python -m idiolect list                                 # 看看有哪几个角色
 python -m idiolect prompt 乐奈 "你今天又想去哪找猫"      # 这句话此刻的完整 system prompt
 python -m idiolect chat 乐奈 "你今天又想去哪找猫"        # 真聊一轮（见下方环境变量）
+```
+
+想把工具链也准备好，一条命令就够（建 `.venv`、装依赖、跑 `offline_smoke` 自检、打印一个角色的四层字数）：
+
+```bash
+python bootstrap.py
 ```
 
 Windows 上建议把 `python` 换成 `py -X utf8`（裸 `python` 可能解析到别的解释器）。`chat` 命令走任何 OpenAI 兼容端点，先设三个环境变量：`LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`，并 `pip install "idiolect[llm]"`。
@@ -148,6 +169,32 @@ messages = build_workspace_messages(
 )
 ```
 
+## 五个角色的 prompt 是完整可查的
+
+这不是「给你一套方法，角色自己配」。**五名成员的四层 prompt 全部随仓库发布**：canon 长档案、语气 manifest、说话尺度、场景指引，一个字都不少，没有截断、没有省略、也不需要密钥或语料就能看。
+
+```bash
+# 装好包就能看（不需要克隆、不需要 key、不需要语料）
+python -m idiolect prompt Rana "你今天又想去哪找猫"        # 这句话此刻的完整 system prompt
+python -m idiolect prompt 乐奈 "你今天又想去哪找猫" --layers canon,voice   # 只看某一层
+
+# 克隆后可以拿到分层审计版 + 发给模型的 messages 数组 + 各层字数
+py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --msg "你今天又想去哪找猫"
+py -X utf8 tools/gates/dump_prompt.py --all --matrix      # 5 角色 × 4 句话 = 20 份
+```
+
+产物三件：`prompt_<角色>_<phase>_<label>.txt`（人读的分层版）、`.json`（原样发给模型的 messages）、`.layers.json`（各层字数）。下面这张表就是 `--all --matrix` 里那个 comfort 格的实测值（输入「我一直在哭，快撑不住了」）：
+
+| 角色 | canon | voice | style_target | turn_logic | 四层合计 |
+|---|---|---|---|---|---|
+| 爱音 | 16285 | 6688 | 533 | 539 | 24045 |
+| 灯 | 8068 | 7040 | 530 | 616 | 16254 |
+| 立希 | 12618 | 5611 | 533 | 491 | 19253 |
+| 素世 | 9087 | 2311 | 532 | 479 | 12409 |
+| 乐奈 | 12223 | 1972 | 529 | 509 | 15233 |
+
+四层的正文都在仓库里可以逐字读到：`canon` 与 `voice` 在 `idiolect/characters/*/`（canon.py / voice.py），说话尺度的数字来自 [`data/style_profiles.json`](data/style_profiles.json) 与 `idiolect/scene_length_targets.py` 的 130 个「角色 × 场景」格，场景指引来自 `idiolect/general_scenes.py` 与各角色包的 `turn_logic/scenes.py`。改 prompt 想看差在哪，用 `--phase before/after` 各存一份直接 diff。
+
 ## 把整套工具跑一遍
 
 上面快速启动部分用的是装好的包；这一节是仓库自带的工具链（需要克隆仓库）：
@@ -197,6 +244,20 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 ```
 
 没有语料也能跑探针：评分用的画像随仓库发布（`data/style_profiles.json`），启动日志会打印画像来源。
+
+## 换成别的角色：skill 串起全流程
+
+上面那套数字是五个人的。**方法本身不绑作品**——你要拿它跑自己的角色，仓库里带了五个 skill 把「找语料 → 蒸馏 → 建角色包 → 评测」串成一条管道（Claude Code / 兼容 skill 的 agent 会自己加载；人也可以当操作手册读）：
+
+| skill | 干什么 | 产物 |
+|---|---|---|
+| [`.claude/skills/idiolect-corpus`](.claude/skills/idiolect-corpus/SKILL.md) | 把你自己的台词集整理成规定的语料格式与切分；决定角色 key 并列出**所有**要跟着改的表 | `raw/gold/{lang}.jsonl` + `gold_stats.json` |
+| [`.claude/skills/idiolect-distill`](.claude/skills/idiolect-distill/SKILL.md) | 从语料算出五类特征的派生统计 | `data/` 六个 JSON + `idiolect/scene_length_targets.py` |
+| [`.claude/skills/idiolect-cast`](.claude/skills/idiolect-cast/SKILL.md) | 建角色包（canon / voice / turn_logic / voice_check）并注册进四层 | `idiolect/characters/<key>/` |
+| [`.claude/skills/idiolect-evaluate`](.claude/skills/idiolect-evaluate/SKILL.md) | 跑探针与四件套评分，留 before/after 证据 | `report/probe_*.jsonl` + 报告 |
+| [`.claude/skills/idiolect-pipeline`](.claude/skills/idiolect-pipeline/SKILL.md) | 编排上面四个：交接物、每步的门禁、哪些必须人写 | 一条可复现的完整链路 |
+
+一句话区分：**能从语料算出来的都是自动的**（场景体系、长度目标、风格画像、口癖、词表），**canon 长档案、语气 manifest 和场景正文必须你自己写**——语料是活动剧情的快照，日常道具天然缺席，凭统计写不出「这个人是谁」。`idiolect-pipeline` 里有一张自动／人写的对照表。
 
 ## 关于边界与提醒
 

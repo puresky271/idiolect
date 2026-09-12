@@ -18,16 +18,24 @@
 
 ## 怎么重建这些文件
 
-发布形态就是下面两条命令的产物。用 `IDIOLECT_CORPUS_DIR` 指向你的语料目录，`--out` 指到 `data/`：
+六个文件加起来就是下面这几条命令的产物。参数支持不统一，所以先说清路径怎么给（2026-09-13 逐个 `--help` 核过）：`export_targets` / `tic_profile` / `tic_by_scene` **没有 `--out`**，只能靠 `IDIOLECT_REPORT_DIR` 决定落到哪；`export_profiles` 直接写 `DATA`；只有 `scene_char_baseline` / `scene_stats` / `export_scene_targets` 带 `--out`。
 
 ```bash
-py -X utf8 tools/distill/export_targets.py
-py -X utf8 tools/distill/tic_profile.py
-py -X utf8 tools/distill/tic_by_scene.py
-py -X utf8 tools/distill/export_profiles.py                       # 写 DATA
+# 语料目录（本仓库不分发语料）
+export IDIOLECT_CORPUS_DIR=/path/to/gold           # PowerShell: $env:IDIOLECT_CORPUS_DIR = "D:\corpus\mygo-gold"
+# 让「默认写 report/」的三个脚本落到 data/
+export IDIOLECT_REPORT_DIR=data                    # PowerShell: $env:IDIOLECT_REPORT_DIR = "data"
+
+py -X utf8 tools/distill/export_targets.py                 # → data/style_targets.json
+py -X utf8 tools/distill/tic_profile.py                    # → data/tic_profile.json
+py -X utf8 tools/distill/tic_by_scene.py                   # → data/tic_by_scene.json
+py -X utf8 tools/distill/export_profiles.py                # → data/style_profiles.json（写 DATA，不受 REPORT_DIR 影响）
 py -X utf8 tools/distill/scene_char_baseline.py --no-exemplars --out data/scene_char_baseline.json
 py -X utf8 tools/distill/scene_stats.py        --no-exemplars --out data/scene_stats.json
+py -X utf8 tools/distill/export_scene_targets.py           # → idiolect/scene_length_targets.py（包内文件，原位更新）
 ```
+
+后两条用 `--out` 而不是靠 `IDIOLECT_REPORT_DIR`，是为了不让它们的 `.md` 伴随产物一起写进 `data/`。
 
 2026-09-13 的实测：金标准 cn 语料（5548 条）跑完上面六条，六个文件的 **JSON 值与键序**与仓库里发布的版本逐字段一致（含 `scene_stats.json` 的 26 场景词表）——数字完全可重建。这是**内容级**结论：生成物与发布版可能在行尾与结尾换行上差一两个字节（Windows 上 Python 文本模式写 CRLF），所以别用 `git diff` 是否为空来判断，逐字段比较才算。
 

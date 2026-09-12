@@ -35,13 +35,34 @@ The running example is the five members of **BanG Dream! It's MyGO!!!!!**. Note 
 
 ## Quick start
 
-Python 3.11+. After cloning:
+**First, get it — pick one of four routes:**
+
+| Route | One command | Notes |
+|---|---|---|
+| **Let an agent do it** | paste the prompt below into your coding agent | least work: it clones, installs and runs the self-check itself |
+| **uv (one line, nothing left behind)** | `uvx --from git+https://github.com/puresky271/idiolect idiolect prompt Rana "你今天又想去哪找猫"` | see a prompt immediately; no clone, no environment to set up |
+| **pip as a library** | `pip install git+https://github.com/puresky271/idiolect` | use it as a dependency; zero third-party runtime deps |
+| **Files only** | `npx degit puresky271/idiolect idiolect` or `git clone --depth 1 https://github.com/puresky271/idiolect` | you want the toolchain or the source |
+
+Prompt for your agent (Claude Code, Codex, anything similar):
+
+> Set up https://github.com/puresky271/idiolect for me: clone it, read `AGENTS.md`, run `python bootstrap.py`, then show me the self-check result and the five characters' complete prompts (`py -X utf8 tools/gates/dump_prompt.py --all --matrix`). After that I want to switch to my own characters, following `.claude/skills/idiolect-pipeline/`.
+
+**Then, from the repository root:**
+
+Python 3.11+.
 
 ```bash
 pip install .                                           # zero runtime dependencies
 python -m idiolect list                                 # the five built-in characters
 python -m idiolect prompt 乐奈 "你今天又想去哪找猫"      # the full system prompt for this message
 python -m idiolect chat 乐奈 "你今天又想去哪找猫"        # one real chat turn (see env vars below)
+```
+
+To set up the toolchain too, one command is enough (creates `.venv`, installs the requirements, runs the `offline_smoke` self-check, prints one character's per-layer sizes):
+
+```bash
+python bootstrap.py
 ```
 
 On Windows, prefer `py -X utf8` over a bare `python` (which may resolve to an interpreter without the dependencies). `chat` works with any OpenAI-compatible endpoint: set `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` and `pip install "idiolect[llm]"`.
@@ -148,6 +169,32 @@ messages = build_workspace_messages(
 )
 ```
 
+## The five characters' prompts are complete and readable
+
+This is not "here is a method, go configure your own cast". **All four layers for all five members ship with the repository**: the long canon profile, the voice manifest, the speech-scale numbers and the scene guidance. Nothing is truncated, nothing is elided, and you need neither an API key nor a corpus to read them.
+
+```bash
+# With the package installed (no clone, no key, no corpus needed)
+python -m idiolect prompt Rana "你今天又想去哪找猫"        # the complete system prompt for this message
+python -m idiolect prompt 乐奈 "你今天又想去哪找猫" --layers canon,voice   # one layer only
+
+# From a clone: the layered audit copy, the exact messages array, and per-layer sizes
+py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --msg "你今天又想去哪找猫"
+py -X utf8 tools/gates/dump_prompt.py --all --matrix      # 5 characters x 4 messages = 20 dumps
+```
+
+Three artifacts per dump: `prompt_<char>_<phase>_<label>.txt` (layered, for reading), `.json` (the messages array as sent to the model), `.layers.json` (per-layer character counts). The table below is the measured comfort cell of `--all --matrix` (input: 我一直在哭，快撑不住了):
+
+| Character | canon | voice | style_target | turn_logic | Total |
+|---|---|---|---|---|---|
+| Anon | 16285 | 6688 | 533 | 539 | 24045 |
+| Tomori | 8068 | 7040 | 530 | 616 | 16254 |
+| Taki | 12618 | 5611 | 533 | 491 | 19253 |
+| Soyo | 9087 | 2311 | 532 | 479 | 12409 |
+| Rana | 12223 | 1972 | 529 | 509 | 15233 |
+
+The text of every layer is in the repository and readable verbatim: `canon` and `voice` live in `idiolect/characters/*/` (`canon.py` / `voice.py`), the speech-scale numbers come from [`data/style_profiles.json`](data/style_profiles.json) and the 130 character × scene cells in `idiolect/scene_length_targets.py`, and the scene guidance comes from `idiolect/general_scenes.py` plus each package's `turn_logic/scenes.py`. To see what a prompt edit changed, dump `--phase before` and `--phase after` and diff them.
+
 ## Run the tooling
 
 The quick-start section above used the installed package; the repository also ships the full toolchain (requires a clone):
@@ -197,6 +244,20 @@ py -X utf8 tools/distill/export_profiles.py --check  # verify shipped profiles a
 ```
 
 Probes also run without a corpus: the scoring profile ships with the repository (`data/style_profiles.json`), and the startup log prints which source it used.
+
+## Another cast: the skills that chain the pipeline
+
+The numbers above are for these five. **The method itself is not tied to one work** — to run it on your own characters, the repository ships five skills that chain corpus acquisition → distillation → role packages → evaluation (an agent that understands Claude Code skills loads them automatically; a human can read them as an operations manual):
+
+| Skill | What it does | What you get |
+|---|---|---|
+| [`.claude/skills/idiolect-corpus`](.claude/skills/idiolect-corpus/SKILL.md) | Normalise your own line collection into the required corpus format and split; choose character keys and list **every** table that must change with them | `raw/gold/{lang}.jsonl` + `gold_stats.json` |
+| [`.claude/skills/idiolect-distill`](.claude/skills/idiolect-distill/SKILL.md) | Derive the five feature classes from the corpus | six `data/` JSON files + `idiolect/scene_length_targets.py` |
+| [`.claude/skills/idiolect-cast`](.claude/skills/idiolect-cast/SKILL.md) | Build the role packages (canon / voice / turn_logic / voice_check) and register them | `idiolect/characters/<key>/` |
+| [`.claude/skills/idiolect-evaluate`](.claude/skills/idiolect-evaluate/SKILL.md) | Run the probe and the four-step scoring, leave before/after evidence | `report/probe_*.jsonl` + reports |
+| [`.claude/skills/idiolect-pipeline`](.claude/skills/idiolect-pipeline/SKILL.md) | Orchestrates the four: hand-off artifacts, the gate after each stage, and what has to be written by hand | one reproducible end-to-end run |
+
+The short version: **everything the corpus can tell you is automatic** (scene system, length targets, style profiles, tics, vocabularies); **the canon profile, the voice manifest and the scene copy you have to write yourself** — the corpus is a snapshot of event stories, everyday props are simply absent from it, and no amount of statistics will tell you who the character is. `idiolect-pipeline` carries the automatic-versus-authored table.
 
 ## On limits and caveats
 

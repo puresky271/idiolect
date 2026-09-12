@@ -35,13 +35,34 @@
 
 ## クイックスタート
 
-Python 3.11 以上。クローンしたら：
+**まず入手——四つの道から一つ：**
+
+| 方法 | 一行 | 補足 |
+|---|---|---|
+| **エージェントに任せる** | 下のプロンプトを coding agent に貼る | 一番楽。clone・依存導入・自己診断まで自分でやります |
+| **uv（一行・後始末不要）** | `uvx --from git+https://github.com/puresky271/idiolect idiolect prompt Rana "你今天又想去哪找猫"` | すぐ prompt を見たいとき。clone も環境構築も不要 |
+| **pip でライブラリとして** | `pip install git+https://github.com/puresky271/idiolect` | 依存として使う。実行時のサードパーティ依存はゼロ |
+| **ファイルだけ** | `npx degit puresky271/idiolect idiolect` または `git clone --depth 1 https://github.com/puresky271/idiolect` | ツール群を動かす／ソースを読む |
+
+エージェントに渡すプロンプト（Claude Code / Codex など）：
+
+> https://github.com/puresky271/idiolect を動く状態にしてください：clone して `AGENTS.md` を読み、`python bootstrap.py` を実行し、自己診断の結果と五人分の完全な prompt（`py -X utf8 tools/gates/dump_prompt.py --all --matrix`）を見せてください。その後、自分のキャラクターに差し替えたいので `.claude/skills/idiolect-pipeline/` の手順に従ってください。
+
+**入手したら、リポジトリのルートで：**
+
+Python 3.11 以上。
 
 ```bash
 pip install .                                           # 実行時依存ゼロ
 python -m idiolect list                                 # 組み込みキャラの一覧
 python -m idiolect prompt Rana "你今天又想去哪找猫"      # この発話での system prompt 全文
 python -m idiolect chat Rana "你今天又想去哪找猫"        # 実際に一往復（環境変数は下記）
+```
+
+ツール群まで用意するなら一行で足ります（`.venv` 作成、依存導入、`offline_smoke` 自己診断、一人分の層別字数まで）：
+
+```bash
+python bootstrap.py
 ```
 
 Windows では `python` を `py -X utf8` に読み替えてください（素の `python` が別のインタプリタを指すことがあります）。`chat` は任意の OpenAI 互換エンドポイントに投げます。`LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` の三つを設定し、`pip install "idiolect[llm]"` を入れておいてください。
@@ -150,6 +171,32 @@ messages = build_workspace_messages(
 )
 ```
 
+## 五人分の prompt は完全な状態で読めます
+
+「方法だけ置いておくので、キャラクターは自分で設定してください」ではありません。**五人の四層 prompt はすべてリポジトリに同梱**されています：canon の長いプロファイル、voice manifest、話す尺度、場面の指針。省略も切り詰めもなく、鍵もコーパスも無しで読めます。
+
+```bash
+# パッケージを入れてあれば（clone 不要・鍵不要・コーパス不要）
+python -m idiolect prompt Rana "你今天又想去哪找猫"        # この発話での system prompt 全文
+python -m idiolect prompt 乐奈 "你今天又想去哪找猫" --layers canon,voice   # 層を指定して見る
+
+# clone してあれば、層別の監査版・モデルに渡す messages 配列・層別字数も取れます
+py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --msg "你今天又想去哪找猫"
+py -X utf8 tools/gates/dump_prompt.py --all --matrix      # 5 キャラ × 4 発話 = 20 本
+```
+
+産物は三点：`prompt_<キャラ>_<phase>_<label>.txt`（人が読む層別版）、`.json`（そのままモデルに渡す messages）、`.layers.json`（層別字数）。下の表は `--all --matrix` の comfort セルの実測値です（入力「我一直在哭，快撑不住了」）：
+
+| キャラ | canon | voice | style_target | turn_logic | 四層合計 |
+|---|---|---|---|---|---|
+| 愛音 | 16285 | 6688 | 533 | 539 | 24045 |
+| 燈 | 8068 | 7040 | 530 | 616 | 16254 |
+| 立希 | 12618 | 5611 | 533 | 491 | 19253 |
+| そよ | 9087 | 2311 | 532 | 479 | 12409 |
+| 楽奈 | 12223 | 1972 | 529 | 509 | 15233 |
+
+四層の本文はどれもリポジトリ内で一字ずつ読めます：`canon` と `voice` は `idiolect/characters/*/`（`canon.py` / `voice.py`）、話す尺度の数字は [`data/style_profiles.json`](data/style_profiles.json) と `idiolect/scene_length_targets.py` の 130 個の「キャラ × 場面」セル、場面の指針は `idiolect/general_scenes.py` と各パッケージの `turn_logic/scenes.py` にあります。prompt を変えた差分を見たいときは `--phase before/after` で二本取って diff してください。
+
 ## ツール一式を走らせる
 
 上のクイックスタートはインストール済みのパッケージを使いました。この節はリポジトリ同梱のツール群です（クローンが必要）：
@@ -199,6 +246,20 @@ py -X utf8 tools/distill/export_profiles.py --check  # 公開済みプロファ�
 ```
 
 コーパスが無くても probe は回せます。採点用のプロファイルはリポジトリに同梱されており（`data/style_profiles.json`）、起動ログがその出どころを表示します。
+
+## 別のキャスト：skill で全工程を繋ぐ
+
+上の数字はこの五人分です。**方法そのものは作品に縛られません**——自分のキャラクターで回したいときのために、「コーパス入手 → 蒸留 → キャラクターパッケージ → 評価」を繋ぐ五つの skill を同梱しています（Claude Code 系の skill を解釈できるエージェントは自動で読み込みます。人間が操作マニュアルとして読んでも構いません）：
+
+| skill | やること | 産物 |
+|---|---|---|
+| [`.claude/skills/idiolect-corpus`](.claude/skills/idiolect-corpus/SKILL.md) | 手持ちの台詞集を規定のコーパス形式と分割に整える。キャラ key を決め、**一緒に直す必要のある表を全部**列挙 | `raw/gold/{lang}.jsonl` + `gold_stats.json` |
+| [`.claude/skills/idiolect-distill`](.claude/skills/idiolect-distill/SKILL.md) | コーパスから五種類の特徴の派生統計を算出 | `data/` の六つの JSON + `idiolect/scene_length_targets.py` |
+| [`.claude/skills/idiolect-cast`](.claude/skills/idiolect-cast/SKILL.md) | キャラクターパッケージ（canon / voice / turn_logic / voice_check）を作り四層に登録 | `idiolect/characters/<key>/` |
+| [`.claude/skills/idiolect-evaluate`](.claude/skills/idiolect-evaluate/SKILL.md) | probe と四段階の採点を回し、before/after の証拠を残す | `report/probe_*.jsonl` + レポート |
+| [`.claude/skills/idiolect-pipeline`](.claude/skills/idiolect-pipeline/SKILL.md) | 上の四つを編成：受け渡し物、各段のゲート、人が書くべき部分 | 再現可能な一連の流れ |
+
+一行で言うと：**コーパスから計算できるものは自動**（場面体系、長さ目標、スタイルプロファイル、口癖、語彙）、**canon の長いプロファイル・voice manifest・場面本文は自分で書く**——コーパスはイベントストーリーのスナップショットで、日常の小道具はそもそも入っていません。統計からは「この人が誰か」は出てきません。自動／手書きの対照表は `idiolect-pipeline` にあります。
 
 ## 境界と注意点
 
