@@ -100,5 +100,14 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 | `tools/probe/` | 探针 |
 | `tools/score/` | 评分与审计 |
 | `tools/gates/` | 机械门禁与 prompt diff |
-| `docs/` | 方法论文档集 |
+| `docs/` | 方法论文档集（00 总纲 → 07 turn_logic 与后处理） |
 | `report/` | 所有产物（gitignored） |
+
+## 验证过什么
+
+- `pytest tests`：107 项通过，1 项跳过（需要语料）。
+- `tools/offline_smoke.py`：装配、场景覆盖、触发矩阵、内容红线、派生统计、四道门禁、零写校验全部通过。
+- 57 个脚本逐个 `--help`：无 import 或语法失败；其中 15 个需要语料的脚本用真实语料实跑过一遍。
+- 一次真实探针：5 角色 × 7 场景 × 3 次 = 105 条回复（数字见 README）。
+- 把仓库克隆到空目录后重跑：`pytest`、`offline_smoke`、探针 dry-run 均通过，不需要任何环境变量。
+- 发布数据可重建：用金标准 cn 语料重跑六条生成命令，`data/` 六个文件与发布版本逐字节相同。

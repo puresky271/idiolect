@@ -169,20 +169,17 @@ py -X utf8 tools/distill/export_profiles.py
 
 **发布文件与生产 prompt 是两套东西。** 角色 prompt 里的长度与句数目标来自 `idiolect/style_target.py` 里手抄的 `STYLE_TARGETS`，命中场景时换成 `idiolect/scene_length_targets.py`（由 `export_scene_targets.py` 生成，`MIN_N = 20`，当前 130 格丢弃 0，文件 940 行）。重跑派生统计不会自动更新这两个文件；要让 prompt 跟着新语料走，得重新跑 `export_scene_targets.py` 并逐项核对 `STYLE_TARGETS`。生成物的目标路径已指向包内模块，重跑会原位更新 `idiolect/scene_length_targets.py`；这次用发布数据重跑，除文件头的三行来源说明外逐字节一致，数字完全可重建。
 
-**发布数据的可重建性（2026-09-13 实测）。** 用金标准 cn 语料跑完上面第 5、6 步的六条命令，`data/` 下六个文件与仓库里的发布版本**逐字节相同**。为此修了两个确定性缺陷：`scene_stats.py` 的词表并列项按词兜底排序，`style_features.logodds_signature` 的 top-N 截断同样加兜底排序（它从 `set` 迭代取词，只按 logodds 排序时，同为 2.48 的两个词谁进榜会随进程的哈希随机化变化，同一份语料两次跑出的词表不同）。诊断类报告（`scene_discover`、`validate_scenes`、`scene_distill` 的排序）只保证内容一致，并列项的先后不保证。
-
 **发布数据的可重建性（2026-09-13 实测）。** 用金标准 cn 语料跑完第 5、6 步的六条命令，`data/` 下六个文件与仓库里的发布版本**逐字节相同**。为此修了两个确定性缺陷：`scene_stats.py` 的词表并列项按词兜底排序，`style_features.logodds_signature` 的 top-N 截断同样加兜底排序（它从 `set` 迭代取词，只按 logodds 排序时，同为 2.48 的两个词谁进榜会随进程的字符串哈希随机化变化，同一份语料两次跑出的词表不同）。诊断类报告（`scene_discover`、`validate_scenes`、`scene_distill` 的排序）只保证内容一致，并列项的先后不保证。
 
 **锚点口径在两处都不完整。** `scene_char_baseline.json` 每格带 `anchor_density`，由 `style_features.anchor_density(lines)` 算出；但 `profile_from_texts` 不产这个字段，`data/style_profiles.json` 里也就没有。`style_features.composite_score` 靠 `gold.get("anchor_density")` 定满分线，取不到就退回 `1.0`，而该函数在本仓库没有调用点（全仓库只有定义那一行）。实际在用的是 `tools/score/scene_distill.py`，它的注释写明 2026-09-12 把 anchor 移出了复合分，只留固定占位值 `1.8` 作诊断列，基线锚点另从 `scene_char_baseline.json` 取。
 
-**以下脚本本次只读代码，没有在独立仓库里跑过，标注未验证：**
+**验证状态（2026-09-13）。** 本仓库的所有脚本都做过两级冒烟：57 个脚本逐个跑 `--help`（查 import 与语法），其中 15 个需要语料或派生产物的脚本用真实金标准语料**实跑**过一遍，全部退出码 0。
 
-- `tools/corpus/crawl_bestdori.py`：需要访问 bestdori.com，未跑。它的文件头声称产出行含 `source`，与 `bd_api.extract_lines` 的实际字段不符。
-- `tools/corpus/prep_hf_corpus.py`：需要 `tools/raw/{lang}.parquet`，仓库内无下载脚本，未跑。
-- `tools/corpus/build_gold.py`、`tools/corpus/audit_corpus_quality.py`：本机没有 `raw/bestdori` 与 `raw/hf`，未跑，链路按代码读出。
-- `tools/distill/scene_stats.py`、`scene_char_baseline.py`、`tic_by_scene.py`、`validate_scenes.py`：需要 `sentence_transformers`，首次还要下载 `BAAI/bge-small-zh-v1.5`，未跑。
-- `tools/distill/export_targets.py`、`tic_profile.py`：需要语料，未跑。
-- `tools/probe/prompt_patch.py` 的 `targets_scene` 臂：原先 `from scene_targets import ...` 引用了一个只存在于原项目的模块，在本仓库必然 ImportError，这条臂是死的。已改为读 `idiolect.scene_length_targets.get_scene_target`，并用 `build_scene_block` 渲染同一组字段；dry-run 实测该臂能给每格加上约 402 字符的场景块。臂的措辞是按元叙述门禁重写的，因此与历史批次**不可逐字节比较**。
-- 探针实跑（真实调模型）未执行。本次只跑了 `py -X utf8 tools/offline_smoke.py --fast`，结果 PASS，其中「数据.长度目标覆盖」「数据.场景基线」「数据.场景统计」「数据.无原作文本」四项通过，场景基线报 130 键（5 角色 × 26 场景），`scene_stats` 26 场景、`tic_profile` 5 角色。
+实跑通过：`analyze_corpus`、`verbal_tics`、`tic_profile`、`char_topic_vocab`、`export_targets`、`verify_triggers`、`export_scene_targets`、`export_profiles`、`scene_char_baseline`、`scene_stats`、`tic_by_scene`、`validate_scenes`、`audit_corpus_quality`、`probe_registry --list`、`power_calc`。另外在**新克隆的仓库**里跑通了 `pytest tests`（107 项）、`offline_smoke`（1 skipped）与探针 dry-run（35 条记录，system 段 12368~24501 字符，无需语料）。
 
-已验证的部分包括：`data/` 六个文件的字段与条数逐项读出（含 `scene_char_baseline.json` 无 `exemplars`、`tic_by_scene.json` 114 个 cell、`style_profiles.json` 19 个字段与各角色 n）；`export_profiles.py --check` 在缺语料时的实际行为；`idiolect/style_target.py` 与 `idiolect/scene_length_targets.py` 这两个生产消费点，以及与发布文件的数值比对。
+仍未验证的两项，都因为需要外部资源：
+
+- `tools/corpus/crawl_bestdori.py`：要访问 bestdori.com。它的文件头声称产出行含 `source`，与 `bd_api.extract_lines` 的实际字段不符（`source` 是 `build_gold.py` 事后打的标签）。
+- `tools/corpus/prep_hf_corpus.py`：要自己准备 `raw/{lang}.parquet`（本仓库不含下载脚本，也没有数据集的再分发许可）。它整理出来的中间层，正是 `raw/hf/{lang}.jsonl`。
+
+`tools/corpus/build_gold.py` 在宿主环境里实跑过一次（产出 cn 5548 / jp 5729 条，切分 4392/1156 与 4633/1096）；在本仓库里它只跑了「没有源文件时拒绝写出」与 `--dry-run` 两条路径，因为它的源文件不由本仓库分发。
