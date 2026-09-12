@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="idiolect：让 AI 说话像角色，并且能证明它变像了。以 MyGO!!!!! 五人为示例角色；右侧是同一句话下五个角色的五种真实回复。">
+  <img src="./assets/readme/hero.png" width="100%" alt="idiolect：让 AI 说话像角色，并且能证明它变像了。以 MyGO!!!!! 五人为示例角色；右侧是同一句话下五个角色的五种真实回复。">
 </p>
 
 **让 AI 扮演角色时说话像本人，并且能用数字证明确实更像了。**
@@ -34,7 +34,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")   # 直接发
 
 ## 示例角色：五个人说话差多远
 
-选 MyGO!!!!! 这五个人不是顺手——她们对同一句话的反应天差地别（顶部图里那五条就是真实输出，不是编的）。能让这五个角色不串味的方法，才经得起换到别的角色身上。差异有多大，数字说话（全部来自对原作台词的统计）：
+选 MyGO!!!!! 这五个人不是顺手——她们对同一句话的反应天差地别（顶部图里那五条就是真实输出，不是编的；出处是 `repo_standalone` 批次，每角色 3 条取 1）。能让这五个角色不串味的方法，才经得起换到别的角色身上。差异有多大，数字说话（全部来自对原作台词的统计）：
 
 | 角色 | 一句话通常多长（中位数） | 平均说几句 | 标志性习惯 |
 |---|---|---|---|
@@ -47,10 +47,6 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")   # 直接发
 表中位数、句数与感叹/省略号占比都能在 [`data/style_profiles.json`](data/style_profiles.json) 里逐条查到；立希那行的「名词起手」是语料口径统计，用 `tools/score/_noun_initial.py <批次名>` 能连原作基线一起打出。
 
 同一场景下差异还会放大：乐奈在「被表白」场景说 7 个字，素世在同一场景说 17 个字。这就是为什么约束必须是「这个角色 × 这个场合」的，不能是「所有人共用一个平均数」。
-
-<p align="center">
-  <img src="./assets/readme/section-01-what.svg" width="100%" alt="01 为什么需要它">
-</p>
 
 ## 为什么需要它
 
@@ -69,10 +65,6 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")   # 直接发
 - **角色能看到的文字里，不许出现「语料」「中位数」「基线」这类词**。模型看到了，有概率顺着聊自己的设定。
 
 完整方法见 [`docs/00-methodology.md`](docs/00-methodology.md)。
-
-<p align="center">
-  <img src="./assets/readme/section-02-proof.svg" width="100%" alt="02 真实输出">
-</p>
 
 ## 真实输出
 
@@ -108,10 +100,6 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 
 这一格样本量小、不构成证据，但它说明一件重要的事：**探针必须自己装配 prompt**——仓库自带的夹具 system 是空的，不加 `--assemble` 参数，测到的是「没有任何角色 prompt 的裸模型」。
 
-<p align="center">
-  <img src="./assets/readme/section-03-layers.svg" width="100%" alt="03 四层装配">
-</p>
-
 ## 四层装配：prompt 是怎么拼的
 
 量出来的东西落在四层里，顺序固定。稳定的放前面（方便缓存命中），每轮变化的放后面：
@@ -138,10 +126,6 @@ messages = build_workspace_messages(
     execution_packet="【本轮执行】回复 ≤19 字",   # 贴在本轮 user 末尾
 )
 ```
-
-<p align="center">
-  <img src="./assets/readme/section-04-start.svg" width="100%" alt="04 把整套工具跑一遍">
-</p>
 
 ## 把整套工具跑一遍
 
@@ -192,10 +176,6 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 ```
 
 没有语料也能跑探针：评分用的画像随仓库发布（`data/style_profiles.json`），启动日志会打印画像来源。
-
-<p align="center">
-  <img src="./assets/readme/section-05-limits.svg" width="100%" alt="05 边界与你该知道的事">
-</p>
 
 ## 边界与你该知道的事
 

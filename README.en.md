@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="idiolect: make an AI character speak in character, and prove it got closer. Example cast: the five members of MyGO!!!!!. On the right, their five different real replies to the same message.">
+  <img src="./assets/readme/hero.png" width="100%" alt="idiolect: make an AI character speak in character, and prove it got closer. Example cast: the five members of MyGO!!!!!. On the right, their five different real replies to the same message.">
 </p>
 
 **Make an AI character speak in character, and prove it got closer — with numbers.**
@@ -34,7 +34,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")   # ready to 
 
 ## The example cast: how differently five people talk
 
-The MyGO!!!!! five were not a convenience pick — their replies to the same message diverge wildly (the five replies in the hero image are real outputs, not invented). A method that keeps these five from blending into each other survives being moved to other characters. Measured from the original script:
+The MyGO!!!!! five were not a convenience pick — their replies to the same message diverge wildly (the five replies in the hero image are real outputs, not invented; they come from the `repo_standalone` batch, one of three runs per character). A method that keeps these five from blending into each other survives being moved to other characters. Measured from the original script:
 
 | Character | Typical line length (median) | Sentences per turn | Signature habits |
 |---|---|---|---|
@@ -47,10 +47,6 @@ The MyGO!!!!! five were not a convenience pick — their replies to the same mes
 Every median, sentence count and punctuation share in this table can be looked up in [`data/style_profiles.json`](data/style_profiles.json); Taki's noun-opening rate comes from the corpus-level counter, and `tools/score/_noun_initial.py <run-label>` prints the original baseline alongside the arm.
 
 The gap widens per scene: in a confession scene Rana says 7 characters, Soyo 17. That is why the constraints have to be "this character in this situation", not one shared average.
-
-<p align="center">
-  <img src="./assets/readme/section-01-what.svg" width="100%" alt="01 Why it exists">
-</p>
 
 ## Why it exists
 
@@ -69,10 +65,6 @@ If Rana and Soyo return the same paragraph of comfort, the two characters are th
 - **No meta vocabulary in character-visible text.** Words like "corpus", "median", or "baseline" inside a prompt invite the model to discuss its own construction.
 
 Full method: [`docs/00-methodology.md`](docs/00-methodology.md) (Chinese).
-
-<p align="center">
-  <img src="./assets/readme/section-02-proof.svg" width="100%" alt="02 Real output">
-</p>
 
 ## Real output
 
@@ -108,10 +100,6 @@ This single cell is not evidence — both samples are tiny. Note that the two co
 
 What it shows is that **a probe must assemble its own prompt**: the shipped fixtures have an empty system field, so without `--assemble` you are measuring a bare model with no character prompt at all.
 
-<p align="center">
-  <img src="./assets/readme/section-03-layers.svg" width="100%" alt="03 Four prompt layers">
-</p>
-
 ## Four layers: how the prompt is assembled
 
 Everything measured lands in four layers, in a fixed order — stable parts first (cache-friendly), per-turn parts last:
@@ -126,10 +114,6 @@ Everything measured lands in four layers, in a fixed order — stable parts firs
 These four layers are this repository's complete answer to "how do measured features reach the prompt". A real system can put memory, world state, and schedules in front of them; those layers are unrelated to the method.
 
 `tools/gates/dump_prompt.py` prints each layer for inspection; `--phase before/after` writes a pair produced by the same script, the same input, and the same clock, so the diff is clean.
-
-<p align="center">
-  <img src="./assets/readme/section-04-start.svg" width="100%" alt="04 Run the tooling">
-</p>
 
 ## Run the tooling
 
@@ -180,10 +164,6 @@ py -X utf8 tools/distill/export_profiles.py --check  # verify shipped profiles a
 ```
 
 Probes also run without a corpus: the scoring profile ships with the repository (`data/style_profiles.json`), and the startup log prints which source it used.
-
-<p align="center">
-  <img src="./assets/readme/section-05-limits.svg" width="100%" alt="05 Limits and things you should know">
-</p>
 
 ## Limits and things you should know
 
