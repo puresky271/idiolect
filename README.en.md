@@ -18,6 +18,17 @@ The running example is the five members of **BanG Dream! It's MyGO!!!!!**: Anon,
 > **The repository contains no original script text** (no game script, dialogue or lyrics) and no audio; `data/` holds aggregate statistics only, and the sample illustration is fan usage, not official artwork.
 > Details in [`NOTICE.md`](NOTICE.md) and the [Copyright, licence and disclaimer](#copyright-licence-and-disclaimer) section below.
 
+## What you actually get
+
+| You get | Concretely |
+|---|---|
+| **A drop-in assembly library** | `pip install .` then `from idiolect.assemble import build_messages` returns the four-layer prompt. **Zero third-party runtime dependencies** (openai / numpy / jieba are only needed for probing and distillation) |
+| **An evaluation loop that proves "closer"** | Probe → (distribution fit / within-cell repetition / verbatim-copy audit) → multi-arm pooling → power estimate. The table below is one real run of 105 replies |
+| **Four mechanical gates plus a prompt-diff gate** | Prompt edits should not rest on vibes: one `offline_smoke.py` run covers assembly, scene coverage, trigger matrix, content red lines, data shape, the gates and a zero-write check |
+| **Tooling that transfers to another work** | 58 scripts: acquisition and cleaning, corpus splitting, scene discovery, tic distillation, length-target export, probing and scoring. The method is not tied to one show — point it at another cast and re-run |
+| **Ready-made character data (aggregates only)** | 26 scenes (13 general + 13 character-specific), 130 character × scene length targets, 114 per-scene tic cells, style profiles for five characters |
+| **Ten methodology documents** | Where the corpus comes from, how each feature class is computed and landed, how to evaluate, and the pitfalls already paid for |
+
 ## Up and running in three minutes
 
 Python 3.11+. After cloning:
