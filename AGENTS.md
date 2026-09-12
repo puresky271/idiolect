@@ -60,13 +60,31 @@ fixtures/            # 探针夹具（messages_<角色>.json；占位夹具 syst
 raw/gold/            # 语料默认位置（仓库不带语料）
 report/              # 所有工具产物的默认输出目录
 tests/               # pytest 单测
+bootstrap.py         # 一条命令装成可跑状态（建 .venv → 装依赖 → 自检 → 打印一份 prompt）
+.claude/skills/      # 给 agent 的流水线 skill（见下）
 ```
 
-**访问角色包只走 `idiolect/registry.py`**（`get_canon_profile` / `get_voice_manifest` / `render_turn_special_block`），不要按角色名堆 if/elif，也不要直接 `import idiolect.characters.<key>.*`。
+**访问角色包只走 `idiolect/registry.py`**（`get_canon_profile` / `get_voice_manifest` / `render_turn_special_block`），不要按角色名堆 if/elif，也不要直接 `import idiolect.characters.<key>.*`。名字表（含日文写法、简繁差异、常见误写）也只有 `registry._ALIASES` 一份，角色包里的 `is_<char>()` 问它，别自带名单。
+
+## 流水线 skill（`.claude/skills/`）
+
+五个 skill 把「换成别的角色」这件事拆成阶段，每个都带命令与验收条件；agent 会自动加载，人也可以当操作手册读：
+
+| skill | 阶段 |
+|---|---|
+| `idiolect-corpus` | 语料：格式、切分、角色 key 决策、要跟着改的表清单 |
+| `idiolect-distill` | 蒸馏：`data/` 六个 JSON + `scene_length_targets.py` |
+| `idiolect-cast` | 角色包：canon/voice/turn_logic/voice_check + 注册 + 门禁 |
+| `idiolect-evaluate` | 评测：probe、四件套、池化、功效、两臂 dump |
+| `idiolect-pipeline` | 编排：交接物、每段门禁、自动／人写对照表 |
 
 ## 构建与测试命令
 
 ```bash
+python bootstrap.py                        # 一条命令：建 .venv + 装依赖 + 自检 + 打印 prompt
+python bootstrap.py --no-tools             # 只要装配库（运行时零第三方依赖）
+python bootstrap.py --skip-smoke           # 跳过自检
+
 py -X utf8 -m pip install -r requirements.txt
 
 # 健康检查（最常用，零 LLM、零写仓库文件）
@@ -90,6 +108,8 @@ $env:IDIOLECT_CORPUS_DIR = "D:\corpus\mygo-gold"
 py -X utf8 tools/distill/export_targets.py
 py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与语料一致
 ```
+
+装了包之后还有一个 `idiolect` 命令（`[project.scripts]`），等于 `python -m idiolect`；`uvx --from git+https://github.com/puresky271/idiolect idiolect prompt Rana "…"` 可以不 clone 直接跑。
 
 改动后至少跑 `py -X utf8 tools/offline_smoke.py --fast`；改 prompt 相关代码跑全套 smoke。
 
