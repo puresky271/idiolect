@@ -1,0 +1,5 @@
+# 重算语料派生统计时才需要（tools/corpus/ 与部分 tools/distill/）。
+# 这些脚本用句向量做场景原型检索与聚类，模型权重会在首次运行时下载。
+-r requirements.txt
+sentence-transformers>=2.2
+scikit-learn>=1.3

@@ -1,0 +1,3006 @@
+{
+  "crisis": {
+    "cn": "危机/消失话题",
+    "char_side": "先否掉这件事本身，再给一个具体理由或动作；不上升为关系承诺",
+    "watch": [
+      "presence_declaration",
+      "aphorism",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 14.2,
+      "sd": 8.342,
+      "p10": 5.0,
+      "p25": 8.75,
+      "p50": 13.0,
+      "p75": 17.0,
+      "p90": 24.2,
+      "p99": 38.41
+    },
+    "sent_per_turn": 1.35,
+    "clause_per_turn": 1.47,
+    "punct_rate": {
+      "…": 0.25,
+      "！": 0.0833,
+      "？": 0.3333,
+      "、": 0.0,
+      "，": 0.4167,
+      "—": 0.0667,
+      "～": 0.0,
+      "。": 0.2,
+      "♪": 0.0,
+      "（": 0.05
+    },
+    "first_person_rate": 0.1833,
+    "filler_rate": 0.2,
+    "char_dist": {
+      "立希": 27,
+      "爱音": 15,
+      "素世": 11,
+      "乐奈": 5,
+      "灯": 2
+    },
+    "vocab": [
+      {
+        "word": "别说",
+        "logodds": 3.87,
+        "count": 3
+      },
+      {
+        "word": "为",
+        "logodds": 2.93,
+        "count": 3
+      },
+      {
+        "word": "没事",
+        "logodds": 2.37,
+        "count": 6
+      },
+      {
+        "word": "现在",
+        "logodds": 2.31,
+        "count": 11
+      },
+      {
+        "word": "话",
+        "logodds": 2.03,
+        "count": 6
+      },
+      {
+        "word": "事",
+        "logodds": 1.85,
+        "count": 5
+      },
+      {
+        "word": "再",
+        "logodds": 1.81,
+        "count": 4
+      },
+      {
+        "word": "事情",
+        "logodds": 1.73,
+        "count": 3
+      },
+      {
+        "word": "的话",
+        "logodds": 1.49,
+        "count": 5
+      },
+      {
+        "word": "一下",
+        "logodds": 1.41,
+        "count": 5
+      },
+      {
+        "word": "这种",
+        "logodds": 1.39,
+        "count": 4
+      },
+      {
+        "word": "怎么",
+        "logodds": 1.09,
+        "count": 4
+      },
+      {
+        "word": "没有",
+        "logodds": 1.05,
+        "count": 5
+      },
+      {
+        "word": "已经",
+        "logodds": 1.01,
+        "count": 3
+      }
+    ]
+  },
+  "comfort": {
+    "cn": "安慰/情绪崩溃",
+    "char_side": "接住情绪但不替对方下结论；挑一个眼前具体的东西或动作落地",
+    "watch": [
+      "grounding",
+      "mind_reading",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 19.1,
+      "sd": 8.38,
+      "p10": 8.0,
+      "p25": 13.0,
+      "p50": 18.5,
+      "p75": 24.0,
+      "p90": 33.1,
+      "p99": 36.82
+    },
+    "sent_per_turn": 1.57,
+    "clause_per_turn": 1.95,
+    "punct_rate": {
+      "…": 0.3167,
+      "！": 0.1667,
+      "？": 0.25,
+      "、": 0.0167,
+      "，": 0.6833,
+      "—": 0.0,
+      "～": 0.0,
+      "。": 0.3,
+      "♪": 0.0,
+      "（": 0.0833
+    },
+    "first_person_rate": 0.6333,
+    "filler_rate": 0.2,
+    "char_dist": {
+      "素世": 20,
+      "爱音": 18,
+      "立希": 13,
+      "灯": 8,
+      "乐奈": 1
+    },
+    "vocab": [
+      {
+        "word": "躲雨",
+        "logodds": 6.02,
+        "count": 4
+      },
+      {
+        "word": "躲",
+        "logodds": 5.77,
+        "count": 3
+      },
+      {
+        "word": "大厅",
+        "logodds": 5.77,
+        "count": 3
+      },
+      {
+        "word": "淋湿",
+        "logodds": 5.77,
+        "count": 3
+      },
+      {
+        "word": "雨",
+        "logodds": 4.86,
+        "count": 15
+      },
+      {
+        "word": "家里",
+        "logodds": 4.08,
+        "count": 4
+      },
+      {
+        "word": "待",
+        "logodds": 3.83,
+        "count": 4
+      },
+      {
+        "word": "停",
+        "logodds": 3.83,
+        "count": 5
+      },
+      {
+        "word": "哭",
+        "logodds": 3.66,
+        "count": 5
+      },
+      {
+        "word": "我家",
+        "logodds": 3.62,
+        "count": 4
+      },
+      {
+        "word": "彩",
+        "logodds": 2.83,
+        "count": 3
+      },
+      {
+        "word": "有人",
+        "logodds": 2.59,
+        "count": 4
+      },
+      {
+        "word": "大",
+        "logodds": 2.48,
+        "count": 3
+      },
+      {
+        "word": "声音",
+        "logodds": 2.48,
+        "count": 3
+      }
+    ]
+  },
+  "low_mood": {
+    "cn": "低落陪伴",
+    "char_side": "承认事实、不追问细节、给一个低成本的下一步；不写成建议书",
+    "watch": [
+      "grounding",
+      "n_clause",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 18.5,
+      "sd": 8.859,
+      "p10": 9.0,
+      "p25": 11.75,
+      "p50": 16.0,
+      "p75": 24.25,
+      "p90": 33.1,
+      "p99": 38.41
+    },
+    "sent_per_turn": 1.47,
+    "clause_per_turn": 1.85,
+    "punct_rate": {
+      "…": 0.25,
+      "！": 0.1667,
+      "？": 0.25,
+      "、": 0.0333,
+      "，": 0.6667,
+      "—": 0.0333,
+      "～": 0.0,
+      "。": 0.3167,
+      "♪": 0.0,
+      "（": 0.0
+    },
+    "first_person_rate": 0.3167,
+    "filler_rate": 0.3167,
+    "char_dist": {
+      "爱音": 24,
+      "立希": 22,
+      "素世": 11,
+      "乐奈": 3
+    },
+    "vocab": [
+      {
+        "word": "不够",
+        "logodds": 3.63,
+        "count": 4
+      },
+      {
+        "word": "难道说",
+        "logodds": 3.58,
+        "count": 3
+      },
+      {
+        "word": "就行了",
+        "logodds": 3.21,
+        "count": 3
+      },
+      {
+        "word": "更好",
+        "logodds": 2.83,
+        "count": 3
+      },
+      {
+        "word": "只要",
+        "logodds": 2.64,
+        "count": 3
+      },
+      {
+        "word": "为",
+        "logodds": 2.64,
+        "count": 3
+      },
+      {
+        "word": "继续",
+        "logodds": 2.47,
+        "count": 4
+      },
+      {
+        "word": "紧张",
+        "logodds": 2.47,
+        "count": 4
+      },
+      {
+        "word": "那种",
+        "logodds": 2.11,
+        "count": 3
+      },
+      {
+        "word": "别",
+        "logodds": 2.06,
+        "count": 3
+      },
+      {
+        "word": "下次",
+        "logodds": 2.02,
+        "count": 4
+      },
+      {
+        "word": "对不起",
+        "logodds": 1.8,
+        "count": 3
+      },
+      {
+        "word": "话",
+        "logodds": 1.55,
+        "count": 5
+      },
+      {
+        "word": "时间",
+        "logodds": 1.51,
+        "count": 3
+      }
+    ]
+  },
+  "affection": {
+    "cn": "示爱/亲密",
+    "char_side": "用角色的方式接住——可能是笨拙、可能是嘴硬、可能只回一个动作；不写漂亮话",
+    "watch": [
+      "assistant_tone",
+      "in_character",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 19.6,
+      "sd": 9.464,
+      "p10": 8.0,
+      "p25": 13.0,
+      "p50": 18.5,
+      "p75": 23.25,
+      "p90": 34.0,
+      "p99": 42.23
+    },
+    "sent_per_turn": 1.55,
+    "clause_per_turn": 1.85,
+    "punct_rate": {
+      "…": 0.3167,
+      "！": 0.2167,
+      "？": 0.3,
+      "、": 0.05,
+      "，": 0.5833,
+      "—": 0.05,
+      "～": 0.0,
+      "。": 0.2667,
+      "♪": 0.0,
+      "（": 0.0667
+    },
+    "first_person_rate": 0.6333,
+    "filler_rate": 0.2833,
+    "char_dist": {
+      "立希": 24,
+      "爱音": 21,
+      "素世": 10,
+      "灯": 3,
+      "乐奈": 2
+    },
+    "vocab": [
+      {
+        "word": "打工",
+        "logodds": 3.04,
+        "count": 3
+      },
+      {
+        "word": "初中",
+        "logodds": 2.64,
+        "count": 4
+      },
+      {
+        "word": "学校",
+        "logodds": 2.54,
+        "count": 5
+      },
+      {
+        "word": "奇怪",
+        "logodds": 2.53,
+        "count": 3
+      },
+      {
+        "word": "那种",
+        "logodds": 2.39,
+        "count": 4
+      },
+      {
+        "word": "时间",
+        "logodds": 2.2,
+        "count": 6
+      },
+      {
+        "word": "突然",
+        "logodds": 2.15,
+        "count": 4
+      },
+      {
+        "word": "问",
+        "logodds": 2.09,
+        "count": 3
+      },
+      {
+        "word": "学姐",
+        "logodds": 2.02,
+        "count": 8
+      },
+      {
+        "word": "上",
+        "logodds": 1.96,
+        "count": 10
+      },
+      {
+        "word": "请",
+        "logodds": 1.9,
+        "count": 3
+      },
+      {
+        "word": "有点",
+        "logodds": 1.83,
+        "count": 5
+      },
+      {
+        "word": "虽然",
+        "logodds": 1.71,
+        "count": 4
+      },
+      {
+        "word": "还是",
+        "logodds": 1.68,
+        "count": 6
+      }
+    ]
+  },
+  "wellwish": {
+    "cn": "祝福/自我贬置",
+    "char_side": "点出对方把自己漏掉了；不接住这句祝福本身",
+    "watch": [
+      "mind_reading",
+      "grounding",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 15.183,
+      "sd": 7.068,
+      "p10": 6.9,
+      "p25": 9.75,
+      "p50": 14.0,
+      "p75": 20.0,
+      "p90": 26.0,
+      "p99": 30.41
+    },
+    "sent_per_turn": 1.25,
+    "clause_per_turn": 1.52,
+    "punct_rate": {
+      "…": 0.4,
+      "！": 0.0833,
+      "？": 0.2667,
+      "、": 0.0,
+      "，": 0.4667,
+      "—": 0.0333,
+      "～": 0.0,
+      "。": 0.1833,
+      "♪": 0.0,
+      "（": 0.05
+    },
+    "first_person_rate": 0.4667,
+    "filler_rate": 0.2333,
+    "char_dist": {
+      "立希": 28,
+      "素世": 19,
+      "爱音": 10,
+      "灯": 2,
+      "乐奈": 1
+    },
+    "vocab": [
+      {
+        "word": "意思",
+        "logodds": 2.35,
+        "count": 3
+      },
+      {
+        "word": "自己",
+        "logodds": 2.1,
+        "count": 10
+      },
+      {
+        "word": "没有",
+        "logodds": 1.94,
+        "count": 14
+      },
+      {
+        "word": "办法",
+        "logodds": 1.8,
+        "count": 3
+      },
+      {
+        "word": "你",
+        "logodds": 1.47,
+        "count": 53
+      },
+      {
+        "word": "给",
+        "logodds": 1.26,
+        "count": 5
+      },
+      {
+        "word": "话",
+        "logodds": 1.2,
+        "count": 3
+      },
+      {
+        "word": "过",
+        "logodds": 1.14,
+        "count": 4
+      },
+      {
+        "word": "不是",
+        "logodds": 1.13,
+        "count": 8
+      },
+      {
+        "word": "没",
+        "logodds": 1.09,
+        "count": 7
+      },
+      {
+        "word": "谢谢",
+        "logodds": 1.05,
+        "count": 3
+      },
+      {
+        "word": "这么",
+        "logodds": 1.03,
+        "count": 4
+      },
+      {
+        "word": "说",
+        "logodds": 0.87,
+        "count": 16
+      },
+      {
+        "word": "什么",
+        "logodds": 0.82,
+        "count": 10
+      }
+    ]
+  },
+  "probe_stance": {
+    "cn": "关系试探",
+    "char_side": "澄清事实、不被带节奏；不借机表白也不过度否认",
+    "watch": [
+      "assistant_tone",
+      "repeat_struct",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 16.6,
+      "sd": 7.708,
+      "p10": 7.0,
+      "p25": 11.0,
+      "p50": 15.5,
+      "p75": 20.25,
+      "p90": 29.1,
+      "p99": 32.64
+    },
+    "sent_per_turn": 1.45,
+    "clause_per_turn": 1.6,
+    "punct_rate": {
+      "…": 0.4833,
+      "！": 0.15,
+      "？": 0.2667,
+      "、": 0.0,
+      "，": 0.5167,
+      "—": 0.0,
+      "～": 0.0,
+      "。": 0.2833,
+      "♪": 0.0,
+      "（": 0.0667
+    },
+    "first_person_rate": 0.7167,
+    "filler_rate": 0.15,
+    "char_dist": {
+      "立希": 33,
+      "素世": 16,
+      "爱音": 11
+    },
+    "vocab": [
+      {
+        "word": "意思",
+        "logodds": 3.54,
+        "count": 8
+      },
+      {
+        "word": "问",
+        "logodds": 3.39,
+        "count": 8
+      },
+      {
+        "word": "过去",
+        "logodds": 3.16,
+        "count": 3
+      },
+      {
+        "word": "回去",
+        "logodds": 2.32,
+        "count": 5
+      },
+      {
+        "word": "回来",
+        "logodds": 2.26,
+        "count": 3
+      },
+      {
+        "word": "啦",
+        "logodds": 1.78,
+        "count": 4
+      },
+      {
+        "word": "那么",
+        "logodds": 1.49,
+        "count": 5
+      },
+      {
+        "word": "不是",
+        "logodds": 1.41,
+        "count": 11
+      },
+      {
+        "word": "自己",
+        "logodds": 1.35,
+        "count": 5
+      },
+      {
+        "word": "没",
+        "logodds": 1.3,
+        "count": 9
+      },
+      {
+        "word": "还是",
+        "logodds": 1.13,
+        "count": 3
+      },
+      {
+        "word": "什么",
+        "logodds": 1.12,
+        "count": 14
+      },
+      {
+        "word": "还",
+        "logodds": 1.08,
+        "count": 7
+      },
+      {
+        "word": "这个",
+        "logodds": 1.06,
+        "count": 5
+      }
+    ]
+  },
+  "schedule": {
+    "cn": "日程行程",
+    "char_side": "给准确答案，可带一句自己的安排；不展开感想",
+    "watch": [
+      "grounding",
+      "length",
+      "n_sent"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 19.933,
+      "sd": 7.663,
+      "p10": 10.0,
+      "p25": 15.0,
+      "p50": 19.5,
+      "p75": 24.0,
+      "p90": 31.0,
+      "p99": 38.87
+    },
+    "sent_per_turn": 1.5,
+    "clause_per_turn": 1.72,
+    "punct_rate": {
+      "…": 0.2667,
+      "！": 0.1,
+      "？": 0.1833,
+      "、": 0.0,
+      "，": 0.5833,
+      "—": 0.1167,
+      "～": 0.0,
+      "。": 0.3167,
+      "♪": 0.0,
+      "（": 0.0
+    },
+    "first_person_rate": 0.2667,
+    "filler_rate": 0.1833,
+    "char_dist": {
+      "立希": 29,
+      "爱音": 19,
+      "素世": 8,
+      "乐奈": 3,
+      "灯": 1
+    },
+    "vocab": [
+      {
+        "word": "排练",
+        "logodds": 4.14,
+        "count": 3
+      },
+      {
+        "word": "练",
+        "logodds": 4.11,
+        "count": 7
+      },
+      {
+        "word": "好不容易",
+        "logodds": 3.6,
+        "count": 4
+      },
+      {
+        "word": "就要",
+        "logodds": 3.18,
+        "count": 3
+      },
+      {
+        "word": "约",
+        "logodds": 2.91,
+        "count": 3
+      },
+      {
+        "word": "练习",
+        "logodds": 2.88,
+        "count": 34
+      },
+      {
+        "word": "快点",
+        "logodds": 2.39,
+        "count": 4
+      },
+      {
+        "word": "时间",
+        "logodds": 2.36,
+        "count": 7
+      },
+      {
+        "word": "开始",
+        "logodds": 2.33,
+        "count": 12
+      },
+      {
+        "word": "怎么办",
+        "logodds": 2.23,
+        "count": 5
+      },
+      {
+        "word": "准备",
+        "logodds": 2.19,
+        "count": 5
+      },
+      {
+        "word": "继续",
+        "logodds": 2.13,
+        "count": 3
+      },
+      {
+        "word": "可能",
+        "logodds": 1.82,
+        "count": 4
+      },
+      {
+        "word": "下次",
+        "logodds": 1.7,
+        "count": 3
+      }
+    ]
+  },
+  "fact_qa": {
+    "cn": "事实问答",
+    "char_side": "知道就给最短答案，不知道就说不知道；不编理由",
+    "watch": [
+      "grounding",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 10.95,
+      "sd": 4.863,
+      "p10": 5.0,
+      "p25": 7.0,
+      "p50": 10.0,
+      "p75": 14.25,
+      "p90": 18.0,
+      "p99": 22.82
+    },
+    "sent_per_turn": 1.35,
+    "clause_per_turn": 1.37,
+    "punct_rate": {
+      "…": 0.65,
+      "！": 0.1667,
+      "？": 0.15,
+      "、": 0.0333,
+      "，": 0.3333,
+      "—": 0.05,
+      "～": 0.0,
+      "。": 0.25,
+      "♪": 0.0,
+      "（": 0.05
+    },
+    "first_person_rate": 0.75,
+    "filler_rate": 0.2833,
+    "char_dist": {
+      "立希": 22,
+      "爱音": 15,
+      "素世": 9,
+      "灯": 8,
+      "乐奈": 6
+    },
+    "vocab": [
+      {
+        "word": "懂",
+        "logodds": 3.14,
+        "count": 3
+      },
+      {
+        "word": "知道",
+        "logodds": 3.07,
+        "count": 21
+      },
+      {
+        "word": "意思",
+        "logodds": 2.88,
+        "count": 3
+      },
+      {
+        "word": "谁",
+        "logodds": 2.39,
+        "count": 3
+      },
+      {
+        "word": "过",
+        "logodds": 2.06,
+        "count": 6
+      },
+      {
+        "word": "不是",
+        "logodds": 1.65,
+        "count": 8
+      },
+      {
+        "word": "这个",
+        "logodds": 1.62,
+        "count": 5
+      },
+      {
+        "word": "好像",
+        "logodds": 1.57,
+        "count": 3
+      },
+      {
+        "word": "没有",
+        "logodds": 1.42,
+        "count": 5
+      },
+      {
+        "word": "那个",
+        "logodds": 1.28,
+        "count": 5
+      },
+      {
+        "word": "我",
+        "logodds": 1.19,
+        "count": 44
+      },
+      {
+        "word": "说",
+        "logodds": 0.92,
+        "count": 10
+      },
+      {
+        "word": "对",
+        "logodds": 0.89,
+        "count": 3
+      },
+      {
+        "word": "没",
+        "logodds": 0.82,
+        "count": 3
+      }
+    ]
+  },
+  "request": {
+    "cn": "请求协作/征询",
+    "char_side": "给一个明确立场或一件能做的事；不给泛泛建议",
+    "watch": [
+      "grounding",
+      "length",
+      "n_sent"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 16.333,
+      "sd": 7.447,
+      "p10": 8.8,
+      "p25": 12.0,
+      "p50": 15.0,
+      "p75": 19.25,
+      "p90": 29.0,
+      "p99": 35.0
+    },
+    "sent_per_turn": 1.58,
+    "clause_per_turn": 1.72,
+    "punct_rate": {
+      "…": 0.25,
+      "！": 0.2333,
+      "？": 0.2333,
+      "、": 0.0167,
+      "，": 0.5167,
+      "—": 0.05,
+      "～": 0.0,
+      "。": 0.3167,
+      "♪": 0.0,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.2833,
+    "filler_rate": 0.25,
+    "char_dist": {
+      "素世": 21,
+      "立希": 19,
+      "爱音": 16,
+      "灯": 2,
+      "乐奈": 2
+    },
+    "vocab": [
+      {
+        "word": "算了",
+        "logodds": 3.45,
+        "count": 3
+      },
+      {
+        "word": "考虑",
+        "logodds": 3.39,
+        "count": 4
+      },
+      {
+        "word": "下次",
+        "logodds": 2.53,
+        "count": 6
+      },
+      {
+        "word": "告诉",
+        "logodds": 2.41,
+        "count": 3
+      },
+      {
+        "word": "决定",
+        "logodds": 2.34,
+        "count": 4
+      },
+      {
+        "word": "而已",
+        "logodds": 2.24,
+        "count": 3
+      },
+      {
+        "word": "再",
+        "logodds": 2.0,
+        "count": 6
+      },
+      {
+        "word": "对不起",
+        "logodds": 1.88,
+        "count": 3
+      },
+      {
+        "word": "只是",
+        "logodds": 1.73,
+        "count": 4
+      },
+      {
+        "word": "出来",
+        "logodds": 1.7,
+        "count": 3
+      },
+      {
+        "word": "那么",
+        "logodds": 1.65,
+        "count": 6
+      },
+      {
+        "word": "从",
+        "logodds": 1.64,
+        "count": 3
+      },
+      {
+        "word": "不要",
+        "logodds": 1.48,
+        "count": 4
+      },
+      {
+        "word": "话",
+        "logodds": 1.41,
+        "count": 4
+      }
+    ]
+  },
+  "banter": {
+    "cn": "日常吐槽/闲聊",
+    "char_side": "顺着话题给一个具体反应或自己的事；不升华",
+    "watch": [
+      "in_character",
+      "length",
+      "n_sent"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 19.833,
+      "sd": 9.306,
+      "p10": 6.9,
+      "p25": 12.75,
+      "p50": 18.5,
+      "p75": 25.0,
+      "p90": 33.1,
+      "p99": 39.41
+    },
+    "sent_per_turn": 1.65,
+    "clause_per_turn": 1.92,
+    "punct_rate": {
+      "…": 0.3,
+      "！": 0.2333,
+      "？": 0.15,
+      "、": 0.0333,
+      "，": 0.6167,
+      "—": 0.0333,
+      "～": 0.0,
+      "。": 0.35,
+      "♪": 0.0333,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.35,
+    "filler_rate": 0.3333,
+    "char_dist": {
+      "爱音": 24,
+      "立希": 14,
+      "乐奈": 9,
+      "素世": 9,
+      "灯": 4
+    },
+    "vocab": [
+      {
+        "word": "好吃",
+        "logodds": 5.05,
+        "count": 8
+      },
+      {
+        "word": "咖啡店",
+        "logodds": 4.07,
+        "count": 4
+      },
+      {
+        "word": "饮料",
+        "logodds": 3.93,
+        "count": 9
+      },
+      {
+        "word": "休息",
+        "logodds": 3.57,
+        "count": 3
+      },
+      {
+        "word": "喝",
+        "logodds": 3.37,
+        "count": 3
+      },
+      {
+        "word": "过来",
+        "logodds": 2.59,
+        "count": 4
+      },
+      {
+        "word": "做好",
+        "logodds": 2.55,
+        "count": 3
+      },
+      {
+        "word": "附近",
+        "logodds": 2.52,
+        "count": 4
+      },
+      {
+        "word": "吃",
+        "logodds": 2.5,
+        "count": 10
+      },
+      {
+        "word": "贴",
+        "logodds": 2.4,
+        "count": 3
+      },
+      {
+        "word": "点",
+        "logodds": 2.4,
+        "count": 3
+      },
+      {
+        "word": "买",
+        "logodds": 2.37,
+        "count": 9
+      },
+      {
+        "word": "更",
+        "logodds": 2.17,
+        "count": 4
+      },
+      {
+        "word": "一点",
+        "logodds": 2.14,
+        "count": 5
+      }
+    ]
+  },
+  "meta_language": {
+    "cn": "语言元提问",
+    "char_side": "直接指认或重说；不解释自己的表达意图",
+    "watch": [
+      "mind_reading",
+      "length",
+      "grounding"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 13.633,
+      "sd": 7.53,
+      "p10": 6.0,
+      "p25": 8.0,
+      "p50": 11.5,
+      "p75": 16.25,
+      "p90": 27.1,
+      "p99": 30.41
+    },
+    "sent_per_turn": 1.3,
+    "clause_per_turn": 1.45,
+    "punct_rate": {
+      "…": 0.45,
+      "！": 0.15,
+      "？": 0.4667,
+      "、": 0.0,
+      "，": 0.35,
+      "—": 0.0333,
+      "～": 0.0,
+      "。": 0.1667,
+      "♪": 0.0,
+      "（": 0.0
+    },
+    "first_person_rate": 0.6,
+    "filler_rate": 0.2333,
+    "char_dist": {
+      "立希": 25,
+      "爱音": 17,
+      "素世": 13,
+      "灯": 5
+    },
+    "vocab": [
+      {
+        "word": "要说",
+        "logodds": 4.97,
+        "count": 5
+      },
+      {
+        "word": "刚才",
+        "logodds": 2.84,
+        "count": 13
+      },
+      {
+        "word": "意思",
+        "logodds": 2.57,
+        "count": 3
+      },
+      {
+        "word": "问",
+        "logodds": 2.46,
+        "count": 3
+      },
+      {
+        "word": "突然",
+        "logodds": 2.24,
+        "count": 3
+      },
+      {
+        "word": "说",
+        "logodds": 1.97,
+        "count": 37
+      },
+      {
+        "word": "听",
+        "logodds": 1.92,
+        "count": 3
+      },
+      {
+        "word": "过",
+        "logodds": 1.91,
+        "count": 7
+      },
+      {
+        "word": "话",
+        "logodds": 1.91,
+        "count": 5
+      },
+      {
+        "word": "用",
+        "logodds": 1.78,
+        "count": 3
+      },
+      {
+        "word": "啦",
+        "logodds": 1.76,
+        "count": 3
+      },
+      {
+        "word": "什么",
+        "logodds": 1.64,
+        "count": 18
+      },
+      {
+        "word": "这么",
+        "logodds": 1.64,
+        "count": 6
+      },
+      {
+        "word": "好像",
+        "logodds": 1.27,
+        "count": 3
+      }
+    ]
+  },
+  "third_party": {
+    "cn": "第三方话题",
+    "char_side": "给具体评价或事实；不替第三方下心理结论",
+    "watch": [
+      "grounding",
+      "in_character",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 13.567,
+      "sd": 6.672,
+      "p10": 6.9,
+      "p25": 9.0,
+      "p50": 11.0,
+      "p75": 16.25,
+      "p90": 24.0,
+      "p99": 31.41
+    },
+    "sent_per_turn": 1.3,
+    "clause_per_turn": 1.55,
+    "punct_rate": {
+      "…": 0.4167,
+      "！": 0.15,
+      "？": 0.1833,
+      "、": 0.0333,
+      "，": 0.45,
+      "—": 0.0167,
+      "～": 0.0,
+      "。": 0.1333,
+      "♪": 0.0,
+      "（": 0.0333
+    },
+    "first_person_rate": 0.2,
+    "filler_rate": 0.2167,
+    "char_dist": {
+      "立希": 25,
+      "爱音": 17,
+      "灯": 8,
+      "素世": 8,
+      "乐奈": 2
+    },
+    "vocab": [
+      {
+        "word": "没来",
+        "logodds": 6.29,
+        "count": 4
+      },
+      {
+        "word": "没事",
+        "logodds": 2.81,
+        "count": 9
+      },
+      {
+        "word": "她",
+        "logodds": 2.07,
+        "count": 32
+      },
+      {
+        "word": "不用",
+        "logodds": 2.0,
+        "count": 3
+      },
+      {
+        "word": "她们",
+        "logodds": 1.95,
+        "count": 4
+      },
+      {
+        "word": "办法",
+        "logodds": 1.93,
+        "count": 3
+      },
+      {
+        "word": "没",
+        "logodds": 1.86,
+        "count": 13
+      },
+      {
+        "word": "还",
+        "logodds": 1.71,
+        "count": 11
+      },
+      {
+        "word": "不会",
+        "logodds": 1.66,
+        "count": 4
+      },
+      {
+        "word": "没有",
+        "logodds": 1.61,
+        "count": 9
+      },
+      {
+        "word": "话",
+        "logodds": 1.6,
+        "count": 4
+      },
+      {
+        "word": "等",
+        "logodds": 1.49,
+        "count": 5
+      },
+      {
+        "word": "来",
+        "logodds": 1.45,
+        "count": 10
+      },
+      {
+        "word": "一下",
+        "logodds": 1.39,
+        "count": 5
+      }
+    ]
+  },
+  "play_along": {
+    "cn": "附和/同感",
+    "char_side": "短确认或补一个细节；不重复对方的话",
+    "watch": [
+      "length",
+      "n_sent",
+      "grounding"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 10.75,
+      "sd": 4.867,
+      "p10": 5.0,
+      "p25": 6.0,
+      "p50": 10.5,
+      "p75": 15.0,
+      "p90": 18.1,
+      "p99": 21.0
+    },
+    "sent_per_turn": 1.32,
+    "clause_per_turn": 1.53,
+    "punct_rate": {
+      "…": 0.4,
+      "！": 0.15,
+      "？": 0.1333,
+      "、": 0.0333,
+      "，": 0.45,
+      "—": 0.0333,
+      "～": 0.0,
+      "。": 0.1833,
+      "♪": 0.0,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.6667,
+    "filler_rate": 0.4333,
+    "char_dist": {
+      "素世": 16,
+      "立希": 14,
+      "爱音": 12,
+      "灯": 11,
+      "乐奈": 7
+    },
+    "vocab": [
+      {
+        "word": "考虑",
+        "logodds": 3.55,
+        "count": 3
+      },
+      {
+        "word": "呵呵",
+        "logodds": 2.57,
+        "count": 3
+      },
+      {
+        "word": "这样",
+        "logodds": 2.13,
+        "count": 15
+      },
+      {
+        "word": "嗯",
+        "logodds": 1.97,
+        "count": 13
+      },
+      {
+        "word": "一样",
+        "logodds": 1.79,
+        "count": 3
+      },
+      {
+        "word": "但是",
+        "logodds": 1.62,
+        "count": 3
+      },
+      {
+        "word": "想",
+        "logodds": 1.55,
+        "count": 9
+      },
+      {
+        "word": "好像",
+        "logodds": 1.52,
+        "count": 3
+      },
+      {
+        "word": "让",
+        "logodds": 1.35,
+        "count": 3
+      },
+      {
+        "word": "这么",
+        "logodds": 1.24,
+        "count": 3
+      },
+      {
+        "word": "做",
+        "logodds": 1.21,
+        "count": 4
+      },
+      {
+        "word": "觉得",
+        "logodds": 1.17,
+        "count": 3
+      },
+      {
+        "word": "我",
+        "logodds": 1.16,
+        "count": 45
+      },
+      {
+        "word": "这",
+        "logodds": 0.82,
+        "count": 3
+      }
+    ]
+  },
+  "anon_beauty": {
+    "cn": "美妆/穿搭",
+    "char_side": "进入熟练的分享模式，给具体品牌/步骤/心得；不装专家也不谦虚推辞",
+    "watch": [
+      "in_character",
+      "grounding",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 23.283,
+      "sd": 9.422,
+      "p10": 11.0,
+      "p25": 18.0,
+      "p50": 23.0,
+      "p75": 30.0,
+      "p90": 36.1,
+      "p99": 44.51
+    },
+    "sent_per_turn": 1.8,
+    "clause_per_turn": 1.83,
+    "punct_rate": {
+      "…": 0.25,
+      "！": 0.2333,
+      "？": 0.25,
+      "、": 0.0167,
+      "，": 0.6,
+      "—": 0.05,
+      "～": 0.0,
+      "。": 0.4167,
+      "♪": 0.05,
+      "（": 0.0
+    },
+    "first_person_rate": 0.4667,
+    "filler_rate": 0.3667,
+    "char_dist": {
+      "爱音": 24,
+      "素世": 20,
+      "立希": 10,
+      "灯": 4,
+      "乐奈": 2
+    },
+    "vocab": [
+      {
+        "word": "抽牌",
+        "logodds": 5.8,
+        "count": 4
+      },
+      {
+        "word": "抽",
+        "logodds": 5.55,
+        "count": 3
+      },
+      {
+        "word": "粉色",
+        "logodds": 5.55,
+        "count": 3
+      },
+      {
+        "word": "牌",
+        "logodds": 4.45,
+        "count": 3
+      },
+      {
+        "word": "选",
+        "logodds": 3.35,
+        "count": 3
+      },
+      {
+        "word": "店",
+        "logodds": 3.24,
+        "count": 4
+      },
+      {
+        "word": "一些",
+        "logodds": 2.51,
+        "count": 3
+      },
+      {
+        "word": "买",
+        "logodds": 2.51,
+        "count": 12
+      },
+      {
+        "word": "里面",
+        "logodds": 2.41,
+        "count": 3
+      },
+      {
+        "word": "用",
+        "logodds": 2.23,
+        "count": 8
+      },
+      {
+        "word": "告诉",
+        "logodds": 2.12,
+        "count": 3
+      },
+      {
+        "word": "不错",
+        "logodds": 1.99,
+        "count": 3
+      },
+      {
+        "word": "企鹅",
+        "logodds": 1.94,
+        "count": 3
+      },
+      {
+        "word": "肯定",
+        "logodds": 1.94,
+        "count": 3
+      }
+    ]
+  },
+  "anon_sns": {
+    "cn": "社交媒体/自拍",
+    "char_side": "具体讲自己的运营习惯或成片效果",
+    "watch": [
+      "grounding",
+      "in_character"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 20.683,
+      "sd": 9.43,
+      "p10": 9.9,
+      "p25": 13.75,
+      "p50": 19.0,
+      "p75": 28.0,
+      "p90": 33.0,
+      "p99": 41.82
+    },
+    "sent_per_turn": 1.73,
+    "clause_per_turn": 1.98,
+    "punct_rate": {
+      "…": 0.3,
+      "！": 0.25,
+      "？": 0.1667,
+      "、": 0.0333,
+      "，": 0.6833,
+      "—": 0.0167,
+      "～": 0.0,
+      "。": 0.3667,
+      "♪": 0.0333,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.55,
+    "filler_rate": 0.3833,
+    "char_dist": {
+      "爱音": 28,
+      "立希": 13,
+      "素世": 13,
+      "乐奈": 4,
+      "灯": 2
+    },
+    "vocab": [
+      {
+        "word": "相册",
+        "logodds": 4.56,
+        "count": 3
+      },
+      {
+        "word": "照片",
+        "logodds": 4.56,
+        "count": 10
+      },
+      {
+        "word": "不太好",
+        "logodds": 4.05,
+        "count": 3
+      },
+      {
+        "word": "拍照",
+        "logodds": 3.52,
+        "count": 4
+      },
+      {
+        "word": "感谢",
+        "logodds": 3.26,
+        "count": 3
+      },
+      {
+        "word": "手机",
+        "logodds": 2.97,
+        "count": 4
+      },
+      {
+        "word": "差不多",
+        "logodds": 2.75,
+        "count": 5
+      },
+      {
+        "word": "拍",
+        "logodds": 2.66,
+        "count": 7
+      },
+      {
+        "word": "社交",
+        "logodds": 2.53,
+        "count": 3
+      },
+      {
+        "word": "努力",
+        "logodds": 1.71,
+        "count": 4
+      },
+      {
+        "word": "抱歉",
+        "logodds": 1.58,
+        "count": 3
+      },
+      {
+        "word": "这是",
+        "logodds": 1.54,
+        "count": 4
+      },
+      {
+        "word": "该",
+        "logodds": 1.49,
+        "count": 3
+      },
+      {
+        "word": "很多",
+        "logodds": 1.34,
+        "count": 3
+      }
+    ]
+  },
+  "tomori_nature": {
+    "cn": "自然物/收藏",
+    "char_side": "给出准确的名称或形态描述，语气专注；不比喻化",
+    "watch": [
+      "grounding",
+      "in_character",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 20.85,
+      "sd": 8.884,
+      "p10": 9.9,
+      "p25": 13.0,
+      "p50": 21.0,
+      "p75": 26.0,
+      "p90": 34.1,
+      "p99": 40.41
+    },
+    "sent_per_turn": 1.48,
+    "clause_per_turn": 1.7,
+    "punct_rate": {
+      "…": 0.5,
+      "！": 0.1167,
+      "？": 0.05,
+      "、": 0.1,
+      "，": 0.5167,
+      "—": 0.0333,
+      "～": 0.0,
+      "。": 0.4167,
+      "♪": 0.0167,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.2833,
+    "filler_rate": 0.2333,
+    "char_dist": {
+      "灯": 20,
+      "素世": 15,
+      "立希": 12,
+      "爱音": 10,
+      "乐奈": 3
+    },
+    "vocab": [
+      {
+        "word": "躲雨",
+        "logodds": 4.66,
+        "count": 3
+      },
+      {
+        "word": "漂亮",
+        "logodds": 3.81,
+        "count": 4
+      },
+      {
+        "word": "初中",
+        "logodds": 3.38,
+        "count": 7
+      },
+      {
+        "word": "羽丘",
+        "logodds": 3.3,
+        "count": 4
+      },
+      {
+        "word": "更好",
+        "logodds": 2.81,
+        "count": 3
+      },
+      {
+        "word": "很多",
+        "logodds": 2.74,
+        "count": 10
+      },
+      {
+        "word": "之类",
+        "logodds": 2.51,
+        "count": 4
+      },
+      {
+        "word": "大",
+        "logodds": 2.46,
+        "count": 3
+      },
+      {
+        "word": "那种",
+        "logodds": 2.4,
+        "count": 4
+      },
+      {
+        "word": "地方",
+        "logodds": 2.38,
+        "count": 8
+      },
+      {
+        "word": "雨",
+        "logodds": 2.2,
+        "count": 3
+      },
+      {
+        "word": "找到",
+        "logodds": 2.16,
+        "count": 4
+      },
+      {
+        "word": "原来",
+        "logodds": 1.91,
+        "count": 3
+      },
+      {
+        "word": "还有",
+        "logodds": 1.68,
+        "count": 6
+      }
+    ]
+  },
+  "tomori_lyrics": {
+    "cn": "歌词/写作",
+    "char_side": "承认写不出来；用写作动作本身回应",
+    "watch": [
+      "aphorism",
+      "length",
+      "grounding"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 14.483,
+      "sd": 8.93,
+      "p10": 5.0,
+      "p25": 8.0,
+      "p50": 12.5,
+      "p75": 18.5,
+      "p90": 26.1,
+      "p99": 41.97
+    },
+    "sent_per_turn": 1.42,
+    "clause_per_turn": 1.47,
+    "punct_rate": {
+      "…": 0.4333,
+      "！": 0.05,
+      "？": 0.0833,
+      "、": 0.0333,
+      "，": 0.35,
+      "—": 0.0167,
+      "～": 0.0,
+      "。": 0.3333,
+      "♪": 0.0,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.2833,
+    "filler_rate": 0.1,
+    "char_dist": {
+      "立希": 25,
+      "爱音": 11,
+      "灯": 9,
+      "乐奈": 8,
+      "素世": 7
+    },
+    "vocab": [
+      {
+        "word": "重新",
+        "logodds": 4.09,
+        "count": 3
+      },
+      {
+        "word": "不够",
+        "logodds": 3.89,
+        "count": 4
+      },
+      {
+        "word": "下来",
+        "logodds": 3.64,
+        "count": 3
+      },
+      {
+        "word": "歌词",
+        "logodds": 3.27,
+        "count": 5
+      },
+      {
+        "word": "写",
+        "logodds": 3.24,
+        "count": 13
+      },
+      {
+        "word": "失败",
+        "logodds": 2.99,
+        "count": 3
+      },
+      {
+        "word": "完成",
+        "logodds": 2.99,
+        "count": 3
+      },
+      {
+        "word": "出来",
+        "logodds": 2.41,
+        "count": 5
+      },
+      {
+        "word": "对不起",
+        "logodds": 2.07,
+        "count": 3
+      },
+      {
+        "word": "结束",
+        "logodds": 1.95,
+        "count": 4
+      },
+      {
+        "word": "不能",
+        "logodds": 1.93,
+        "count": 3
+      },
+      {
+        "word": "好好",
+        "logodds": 1.93,
+        "count": 3
+      },
+      {
+        "word": "太",
+        "logodds": 1.89,
+        "count": 5
+      },
+      {
+        "word": "就算",
+        "logodds": 1.86,
+        "count": 3
+      }
+    ]
+  },
+  "taki_music_pro": {
+    "cn": "编曲/练鼓/乐队运营",
+    "char_side": "进专业模式，给可执行细节；会挑毛病但不长篇",
+    "watch": [
+      "grounding",
+      "length",
+      "n_sent"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 19.317,
+      "sd": 8.348,
+      "p10": 10.9,
+      "p25": 13.0,
+      "p50": 18.0,
+      "p75": 24.0,
+      "p90": 32.0,
+      "p99": 40.82
+    },
+    "sent_per_turn": 1.5,
+    "clause_per_turn": 1.72,
+    "punct_rate": {
+      "…": 0.4667,
+      "！": 0.25,
+      "？": 0.1333,
+      "、": 0.0167,
+      "，": 0.5167,
+      "—": 0.05,
+      "～": 0.0,
+      "。": 0.2333,
+      "♪": 0.0,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.25,
+    "filler_rate": 0.2167,
+    "char_dist": {
+      "立希": 20,
+      "素世": 15,
+      "爱音": 13,
+      "灯": 8,
+      "乐奈": 4
+    },
+    "vocab": [
+      {
+        "word": "贝斯",
+        "logodds": 4.28,
+        "count": 5
+      },
+      {
+        "word": "敲",
+        "logodds": 4.08,
+        "count": 4
+      },
+      {
+        "word": "才行",
+        "logodds": 3.4,
+        "count": 5
+      },
+      {
+        "word": "乐器",
+        "logodds": 2.48,
+        "count": 3
+      },
+      {
+        "word": "紧张",
+        "logodds": 2.47,
+        "count": 4
+      },
+      {
+        "word": "下次",
+        "logodds": 2.02,
+        "count": 4
+      },
+      {
+        "word": "然后",
+        "logodds": 2.02,
+        "count": 3
+      },
+      {
+        "word": "抱歉",
+        "logodds": 1.99,
+        "count": 4
+      },
+      {
+        "word": "要是",
+        "logodds": 1.97,
+        "count": 3
+      },
+      {
+        "word": "事情",
+        "logodds": 1.71,
+        "count": 4
+      },
+      {
+        "word": "小灯",
+        "logodds": 1.71,
+        "count": 11
+      },
+      {
+        "word": "准备",
+        "logodds": 1.7,
+        "count": 3
+      },
+      {
+        "word": "好好",
+        "logodds": 1.67,
+        "count": 3
+      },
+      {
+        "word": "努力",
+        "logodds": 1.54,
+        "count": 3
+      }
+    ]
+  },
+  "taki_soft_spot": {
+    "cn": "软肋（熊猫/Afterglow/灯）",
+    "char_side": "语气变软或失态，随后嘴硬回弹",
+    "watch": [
+      "in_character",
+      "assistant_tone"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 11.383,
+      "sd": 5.984,
+      "p10": 5.0,
+      "p25": 6.75,
+      "p50": 10.0,
+      "p75": 14.25,
+      "p90": 21.1,
+      "p99": 26.82
+    },
+    "sent_per_turn": 1.35,
+    "clause_per_turn": 1.45,
+    "punct_rate": {
+      "…": 0.8167,
+      "！": 0.2333,
+      "？": 0.1167,
+      "、": 0.0667,
+      "，": 0.3167,
+      "—": 0.05,
+      "～": 0.0,
+      "。": 0.2167,
+      "♪": 0.0,
+      "（": 0.05
+    },
+    "first_person_rate": 0.4333,
+    "filler_rate": 0.1667,
+    "char_dist": {
+      "立希": 30,
+      "灯": 13,
+      "爱音": 8,
+      "乐奈": 5,
+      "素世": 4
+    },
+    "vocab": [
+      {
+        "word": "熊猫",
+        "logodds": 6.68,
+        "count": 4
+      },
+      {
+        "word": "毛猫",
+        "logodds": 6.43,
+        "count": 3
+      },
+      {
+        "word": "短",
+        "logodds": 5.33,
+        "count": 3
+      },
+      {
+        "word": "手机",
+        "logodds": 3.39,
+        "count": 3
+      },
+      {
+        "word": "野猫",
+        "logodds": 3.11,
+        "count": 9
+      },
+      {
+        "word": "不用",
+        "logodds": 2.91,
+        "count": 5
+      },
+      {
+        "word": "知道",
+        "logodds": 2.24,
+        "count": 10
+      },
+      {
+        "word": "等等",
+        "logodds": 2.17,
+        "count": 3
+      },
+      {
+        "word": "那个",
+        "logodds": 1.85,
+        "count": 9
+      },
+      {
+        "word": "那",
+        "logodds": 1.22,
+        "count": 6
+      },
+      {
+        "word": "说",
+        "logodds": 1.02,
+        "count": 11
+      },
+      {
+        "word": "不是",
+        "logodds": 0.99,
+        "count": 4
+      },
+      {
+        "word": "我",
+        "logodds": 0.73,
+        "count": 28
+      },
+      {
+        "word": "啊",
+        "logodds": 0.18,
+        "count": 7
+      }
+    ]
+  },
+  "taki_shift": {
+    "cn": "打工/接客",
+    "char_side": "用职业口吻讲流程；带对乐奈的吐槽",
+    "watch": [
+      "grounding",
+      "in_character"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 26.533,
+      "sd": 11.766,
+      "p10": 13.0,
+      "p25": 16.5,
+      "p50": 23.5,
+      "p75": 35.25,
+      "p90": 41.5,
+      "p99": 49.41
+    },
+    "sent_per_turn": 1.52,
+    "clause_per_turn": 1.98,
+    "punct_rate": {
+      "…": 0.3167,
+      "！": 0.2167,
+      "？": 0.2,
+      "、": 0.3333,
+      "，": 0.4167,
+      "—": 0.1,
+      "～": 0.1,
+      "。": 0.3,
+      "♪": 0.0167,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.35,
+    "filler_rate": 0.5333,
+    "char_dist": {
+      "爱音": 25,
+      "立希": 16,
+      "素世": 12,
+      "灯": 5,
+      "乐奈": 2
+    },
+    "vocab": [
+      {
+        "word": "を",
+        "logodds": 5.83,
+        "count": 6
+      },
+      {
+        "word": "思",
+        "logodds": 5.46,
+        "count": 4
+      },
+      {
+        "word": "私",
+        "logodds": 5.46,
+        "count": 4
+      },
+      {
+        "word": "接待客人",
+        "logodds": 5.46,
+        "count": 4
+      },
+      {
+        "word": "見",
+        "logodds": 5.21,
+        "count": 3
+      },
+      {
+        "word": "キ",
+        "logodds": 5.21,
+        "count": 3
+      },
+      {
+        "word": "客人",
+        "logodds": 4.73,
+        "count": 6
+      },
+      {
+        "word": "凛凛",
+        "logodds": 4.6,
+        "count": 9
+      },
+      {
+        "word": "か",
+        "logodds": 4.45,
+        "count": 11
+      },
+      {
+        "word": "や",
+        "logodds": 4.36,
+        "count": 4
+      },
+      {
+        "word": "こ",
+        "logodds": 4.36,
+        "count": 7
+      },
+      {
+        "word": "も",
+        "logodds": 4.36,
+        "count": 13
+      },
+      {
+        "word": "り",
+        "logodds": 4.22,
+        "count": 6
+      },
+      {
+        "word": "に",
+        "logodds": 4.2,
+        "count": 11
+      }
+    ]
+  },
+  "soyo_observe": {
+    "cn": "观察/点破",
+    "char_side": "指出具体矛盾；轻刺但不越界；不命名对方感受",
+    "watch": [
+      "mind_reading",
+      "grounding",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 17.483,
+      "sd": 8.721,
+      "p10": 7.0,
+      "p25": 10.75,
+      "p50": 16.0,
+      "p75": 22.25,
+      "p90": 30.3,
+      "p99": 38.41
+    },
+    "sent_per_turn": 1.63,
+    "clause_per_turn": 1.8,
+    "punct_rate": {
+      "…": 0.2,
+      "！": 0.2167,
+      "？": 0.15,
+      "、": 0.0167,
+      "，": 0.6,
+      "—": 0.0167,
+      "～": 0.0,
+      "。": 0.3333,
+      "♪": 0.0,
+      "（": 0.0
+    },
+    "first_person_rate": 0.3,
+    "filler_rate": 0.35,
+    "char_dist": {
+      "素世": 21,
+      "爱音": 20,
+      "立希": 18,
+      "乐奈": 1
+    },
+    "vocab": [
+      {
+        "word": "耽误",
+        "logodds": 5.8,
+        "count": 3
+      },
+      {
+        "word": "赶快",
+        "logodds": 3.66,
+        "count": 4
+      },
+      {
+        "word": "就行了",
+        "logodds": 3.24,
+        "count": 3
+      },
+      {
+        "word": "拜托",
+        "logodds": 3.24,
+        "count": 3
+      },
+      {
+        "word": "为",
+        "logodds": 2.67,
+        "count": 3
+      },
+      {
+        "word": "联系",
+        "logodds": 2.43,
+        "count": 3
+      },
+      {
+        "word": "有人",
+        "logodds": 2.31,
+        "count": 3
+      },
+      {
+        "word": "下次",
+        "logodds": 2.28,
+        "count": 5
+      },
+      {
+        "word": "先",
+        "logodds": 2.19,
+        "count": 3
+      },
+      {
+        "word": "紧张",
+        "logodds": 2.19,
+        "count": 3
+      },
+      {
+        "word": "对不起",
+        "logodds": 2.12,
+        "count": 4
+      },
+      {
+        "word": "地",
+        "logodds": 2.09,
+        "count": 3
+      },
+      {
+        "word": "一下",
+        "logodds": 1.86,
+        "count": 10
+      },
+      {
+        "word": "时间",
+        "logodds": 1.54,
+        "count": 3
+      }
+    ]
+  },
+  "soyo_tea": {
+    "cn": "红茶/待客",
+    "char_side": "具体讲种类/泡法/场合；语速放慢",
+    "watch": [
+      "grounding",
+      "in_character"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 19.05,
+      "sd": 11.408,
+      "p10": 6.0,
+      "p25": 10.75,
+      "p50": 17.0,
+      "p75": 25.5,
+      "p90": 36.1,
+      "p99": 47.82
+    },
+    "sent_per_turn": 1.5,
+    "clause_per_turn": 1.83,
+    "punct_rate": {
+      "…": 0.2667,
+      "！": 0.1667,
+      "？": 0.1333,
+      "、": 0.0833,
+      "，": 0.4667,
+      "—": 0.0,
+      "～": 0.0167,
+      "。": 0.3,
+      "♪": 0.0333,
+      "（": 0.0
+    },
+    "first_person_rate": 0.3833,
+    "filler_rate": 0.25,
+    "char_dist": {
+      "爱音": 18,
+      "素世": 14,
+      "乐奈": 14,
+      "灯": 11,
+      "立希": 3
+    },
+    "vocab": [
+      {
+        "word": "茶味",
+        "logodds": 5.94,
+        "count": 4
+      },
+      {
+        "word": "甜甜的",
+        "logodds": 5.69,
+        "count": 3
+      },
+      {
+        "word": "好喝",
+        "logodds": 5.69,
+        "count": 3
+      },
+      {
+        "word": "点心",
+        "logodds": 4.19,
+        "count": 5
+      },
+      {
+        "word": "饮料",
+        "logodds": 4.08,
+        "count": 10
+      },
+      {
+        "word": "咖啡",
+        "logodds": 3.94,
+        "count": 5
+      },
+      {
+        "word": "抹",
+        "logodds": 3.52,
+        "count": 16
+      },
+      {
+        "word": "茶",
+        "logodds": 3.28,
+        "count": 13
+      },
+      {
+        "word": "一边",
+        "logodds": 3.11,
+        "count": 4
+      },
+      {
+        "word": "点",
+        "logodds": 2.64,
+        "count": 4
+      },
+      {
+        "word": "做好",
+        "logodds": 2.47,
+        "count": 3
+      },
+      {
+        "word": "に",
+        "logodds": 2.47,
+        "count": 3
+      },
+      {
+        "word": "咖啡厅",
+        "logodds": 2.47,
+        "count": 3
+      },
+      {
+        "word": "买",
+        "logodds": 2.42,
+        "count": 10
+      }
+    ]
+  },
+  "soyo_past": {
+    "cn": "过去/CRYCHIC 相关",
+    "char_side": "避重就轻或转移话题；不主动展开",
+    "watch": [
+      "in_character",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 14.133,
+      "sd": 6.953,
+      "p10": 6.0,
+      "p25": 9.75,
+      "p50": 13.5,
+      "p75": 18.0,
+      "p90": 22.2,
+      "p99": 33.41
+    },
+    "sent_per_turn": 1.43,
+    "clause_per_turn": 1.6,
+    "punct_rate": {
+      "…": 0.4167,
+      "！": 0.1833,
+      "？": 0.0833,
+      "、": 0.05,
+      "，": 0.4333,
+      "—": 0.05,
+      "～": 0.0,
+      "。": 0.2833,
+      "♪": 0.0167,
+      "（": 0.05
+    },
+    "first_person_rate": 0.7333,
+    "filler_rate": 0.1833,
+    "char_dist": {
+      "立希": 20,
+      "爱音": 15,
+      "灯": 9,
+      "素世": 9,
+      "乐奈": 7
+    },
+    "vocab": [
+      {
+        "word": "记得",
+        "logodds": 3.58,
+        "count": 10
+      },
+      {
+        "word": "过去",
+        "logodds": 3.38,
+        "count": 3
+      },
+      {
+        "word": "昨天",
+        "logodds": 3.26,
+        "count": 3
+      },
+      {
+        "word": "明白",
+        "logodds": 2.6,
+        "count": 3
+      },
+      {
+        "word": "事",
+        "logodds": 2.49,
+        "count": 9
+      },
+      {
+        "word": "以前",
+        "logodds": 2.33,
+        "count": 3
+      },
+      {
+        "word": "事情",
+        "logodds": 2.25,
+        "count": 5
+      },
+      {
+        "word": "努力",
+        "logodds": 2.14,
+        "count": 4
+      },
+      {
+        "word": "还是",
+        "logodds": 2.02,
+        "count": 6
+      },
+      {
+        "word": "那么",
+        "logodds": 1.72,
+        "count": 5
+      },
+      {
+        "word": "没事",
+        "logodds": 1.7,
+        "count": 3
+      },
+      {
+        "word": "已经",
+        "logodds": 1.69,
+        "count": 6
+      },
+      {
+        "word": "今天",
+        "logodds": 1.6,
+        "count": 4
+      },
+      {
+        "word": "现在",
+        "logodds": 1.51,
+        "count": 5
+      }
+    ]
+  },
+  "rana_guitar": {
+    "cn": "吉他/演出",
+    "char_side": "给具体到设备或手感的短答；可突然转向自己的兴趣",
+    "watch": [
+      "grounding",
+      "length",
+      "n_sent"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 15.817,
+      "sd": 8.484,
+      "p10": 6.9,
+      "p25": 9.75,
+      "p50": 14.0,
+      "p75": 20.25,
+      "p90": 29.1,
+      "p99": 37.87
+    },
+    "sent_per_turn": 1.48,
+    "clause_per_turn": 1.48,
+    "punct_rate": {
+      "…": 0.4,
+      "！": 0.1667,
+      "？": 0.25,
+      "、": 0.0,
+      "，": 0.3833,
+      "—": 0.0,
+      "～": 0.0,
+      "。": 0.2667,
+      "♪": 0.0,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.15,
+    "filler_rate": 0.2167,
+    "char_dist": {
+      "爱音": 17,
+      "立希": 16,
+      "乐奈": 15,
+      "素世": 9,
+      "灯": 3
+    },
+    "vocab": [
+      {
+        "word": "琴弦",
+        "logodds": 5.88,
+        "count": 3
+      },
+      {
+        "word": "稍微",
+        "logodds": 3.19,
+        "count": 4
+      },
+      {
+        "word": "吉他",
+        "logodds": 2.9,
+        "count": 15
+      },
+      {
+        "word": "一些",
+        "logodds": 2.84,
+        "count": 3
+      },
+      {
+        "word": "才行",
+        "logodds": 2.84,
+        "count": 3
+      },
+      {
+        "word": "曲子",
+        "logodds": 2.7,
+        "count": 4
+      },
+      {
+        "word": "不错",
+        "logodds": 2.64,
+        "count": 4
+      },
+      {
+        "word": "乐器",
+        "logodds": 2.59,
+        "count": 3
+      },
+      {
+        "word": "弹",
+        "logodds": 2.45,
+        "count": 3
+      },
+      {
+        "word": "演奏",
+        "logodds": 2.18,
+        "count": 6
+      },
+      {
+        "word": "要是",
+        "logodds": 2.08,
+        "count": 3
+      },
+      {
+        "word": "一点",
+        "logodds": 1.74,
+        "count": 3
+      },
+      {
+        "word": "得",
+        "logodds": 1.67,
+        "count": 6
+      },
+      {
+        "word": "刚才",
+        "logodds": 1.56,
+        "count": 5
+      }
+    ]
+  },
+  "rana_food": {
+    "cn": "抹茶/食物",
+    "char_side": "允许句子略长；主动提出要或不要",
+    "watch": [
+      "in_character",
+      "length"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 18.883,
+      "sd": 11.241,
+      "p10": 6.9,
+      "p25": 9.75,
+      "p50": 17.5,
+      "p75": 25.25,
+      "p90": 33.3,
+      "p99": 47.82
+    },
+    "sent_per_turn": 1.45,
+    "clause_per_turn": 1.65,
+    "punct_rate": {
+      "…": 0.35,
+      "！": 0.0667,
+      "？": 0.1833,
+      "、": 0.05,
+      "，": 0.4,
+      "—": 0.0167,
+      "～": 0.0167,
+      "。": 0.2667,
+      "♪": 0.05,
+      "（": 0.0167
+    },
+    "first_person_rate": 0.45,
+    "filler_rate": 0.2833,
+    "char_dist": {
+      "爱音": 17,
+      "乐奈": 15,
+      "立希": 12,
+      "素世": 10,
+      "灯": 6
+    },
+    "vocab": [
+      {
+        "word": "抹",
+        "logodds": 6.33,
+        "count": 34
+      },
+      {
+        "word": "茶",
+        "logodds": 5.9,
+        "count": 31
+      },
+      {
+        "word": "茶味",
+        "logodds": 5.9,
+        "count": 4
+      },
+      {
+        "word": "芭菲",
+        "logodds": 5.74,
+        "count": 11
+      },
+      {
+        "word": "冰淇淋",
+        "logodds": 4.29,
+        "count": 4
+      },
+      {
+        "word": "饮料",
+        "logodds": 3.13,
+        "count": 6
+      },
+      {
+        "word": "一边",
+        "logodds": 3.07,
+        "count": 4
+      },
+      {
+        "word": "买",
+        "logodds": 2.9,
+        "count": 15
+      },
+      {
+        "word": "吃",
+        "logodds": 2.71,
+        "count": 13
+      },
+      {
+        "word": "羽泽",
+        "logodds": 2.71,
+        "count": 3
+      },
+      {
+        "word": "に",
+        "logodds": 2.43,
+        "count": 3
+      },
+      {
+        "word": "请",
+        "logodds": 2.34,
+        "count": 5
+      },
+      {
+        "word": "し",
+        "logodds": 2.19,
+        "count": 4
+      },
+      {
+        "word": "然后",
+        "logodds": 1.89,
+        "count": 3
+      }
+    ]
+  },
+  "rana_cat": {
+    "cn": "猫/观察",
+    "char_side": "丢一个观察或短判断；不解释",
+    "watch": [
+      "length",
+      "n_sent",
+      "grounding"
+    ],
+    "n_sampled": 60,
+    "length": {
+      "n": 60,
+      "mean": 18.583,
+      "sd": 9.155,
+      "p10": 7.0,
+      "p25": 10.0,
+      "p50": 19.0,
+      "p75": 24.0,
+      "p90": 32.1,
+      "p99": 36.82
+    },
+    "sent_per_turn": 1.63,
+    "clause_per_turn": 1.9,
+    "punct_rate": {
+      "…": 0.3333,
+      "！": 0.1667,
+      "？": 0.15,
+      "、": 0.05,
+      "，": 0.5333,
+      "—": 0.0,
+      "～": 0.0,
+      "。": 0.4167,
+      "♪": 0.0,
+      "（": 0.0333
+    },
+    "first_person_rate": 0.4,
+    "filler_rate": 0.1667,
+    "char_dist": {
+      "立希": 33,
+      "素世": 10,
+      "乐奈": 9,
+      "爱音": 7,
+      "灯": 1
+    },
+    "vocab": [
+      {
+        "word": "躲雨",
+        "logodds": 5.99,
+        "count": 4
+      },
+      {
+        "word": "躲",
+        "logodds": 5.74,
+        "count": 3
+      },
+      {
+        "word": "大厅",
+        "logodds": 5.74,
+        "count": 3
+      },
+      {
+        "word": "淋湿",
+        "logodds": 5.74,
+        "count": 3
+      },
+      {
+        "word": "猫",
+        "logodds": 4.37,
+        "count": 11
+      },
+      {
+        "word": "停",
+        "logodds": 4.16,
+        "count": 6
+      },
+      {
+        "word": "就让",
+        "logodds": 4.13,
+        "count": 3
+      },
+      {
+        "word": "家里",
+        "logodds": 4.05,
+        "count": 4
+      },
+      {
+        "word": "野猫",
+        "logodds": 3.97,
+        "count": 25
+      },
+      {
+        "word": "雨",
+        "logodds": 3.8,
+        "count": 10
+      },
+      {
+        "word": "待",
+        "logodds": 3.34,
+        "count": 3
+      },
+      {
+        "word": "有人",
+        "logodds": 2.83,
+        "count": 5
+      },
+      {
+        "word": "乐器",
+        "logodds": 2.45,
+        "count": 3
+      },
+      {
+        "word": "好多",
+        "logodds": 2.37,
+        "count": 3
+      }
+    ]
+  }
+}

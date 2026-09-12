@@ -1,0 +1,28 @@
+"""taki — 椎名立希的角色专属逻辑包。
+
+为什么单独成包：
+  五个角色用一套通用基建（mygo.py / pet_prompt_registry / character_profiles）够用、
+  但立希是 MyGO 内"行动驱动 + 刺猬型傲娇"的极端样本、需要针对她做：
+    - 毒舌外壳 / 嘴硬心软的稳定切换（不是反复横跳、不是冷酷无情）
+    - 反「撒娇语气词」清洗（呢/哦/啦/嘛/呀 5 词、和爱音 / 灯互补）
+    - softness guard——回复过于温柔正面时触发 rewrite（"好开心""好喜欢"等）
+    - 称呼系统——灯是唯一例外（直呼本名、不加任何前缀 / 后缀），其他人正常名字
+    - 家庭 / 选校深层动机——花咲川转校 = 逃开姐姐学校、对姐姐 / 祥子的劣等感
+    - Afterglow 狂热粉 disambiguation（蘭=Vocal+吉他、巴=鼓手）
+    - 视觉幻觉禁——只有文字交流、不能凭空 visual claim
+    - 鼓 / 作曲 / DTM 知识 QA 模式——技术问题有耐心、其他用"哈？"挡回去
+    - 关心方式 = 行动而非话语（"改好了""发给你了" 而不是"我帮你做"）
+
+所有立希专属代码逐步从 mygo.py / character_profiles.py 抽出来或者新建到这里、
+不再让立希的特殊性把通用代码膨胀。
+
+Entry hook: caller (mygo / chat_server) 通过 `taki.api` 拿入口、
+不直接 import 内部子模块。
+
+进度跟踪：见 `taki/PROGRESS.md`（待建、当前阶段只完成 SSOT 整合）。
+语气约束 SSOT：见 `taki/VOICE_CONSTRAINTS.md`。
+"""
+from __future__ import annotations
+
+__version__ = "0.0.1"
+__all__ = ()

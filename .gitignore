@@ -1,0 +1,24 @@
+# 产物与运行时状态
+report/
+_offline_smoke_out/
+raw/
+*.jsonl
+
+# 密钥（三种来源都不入库）
+.env
+.streamlit/
+secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# 编辑器与系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

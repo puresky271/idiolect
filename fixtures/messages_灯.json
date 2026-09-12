@@ -1,0 +1,10 @@
+[
+  {
+    "role": "system",
+    "content": ""
+  },
+  {
+    "role": "user",
+    "content": "（占位夹具：system 留空，探针用 idiolect.assemble 现场装配；这条 user 会被探针替换成场景文本）"
+  }
+]

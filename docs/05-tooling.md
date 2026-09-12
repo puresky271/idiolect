@@ -1,0 +1,158 @@
+# 工具手册
+
+所有命令在仓库根跑，统一用 `py -X utf8`（Windows 上裸 `python` 可能解析到没装依赖的解释器）。产物默认写进 `report/`，可用 `IDIOLECT_REPORT_DIR` 改。
+
+## 1. 路径与环境变量
+
+| 变量 | 默认 | 用途 |
+|---|---|---|
+| `IDIOLECT_CORPUS_DIR` | `raw/gold` | 语料目录。本仓库不带语料，要用蒸馏/重算脚本时指到自己的语料目录 |
+| `IDIOLECT_REPORT_DIR` | `report` | 探针与评分产物 |
+| `IDIOLECT_DATA_DIR` | `data` | 随仓库发布的派生统计 |
+| `IDIOLECT_MOCK_NOW` | 未设置（= mock） | 覆盖评测时钟，见第 3 节 |
+| `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | — | 探针与 `--with-llm` 才需要 |
+
+路径解析只有一处实现：`tools/_paths.py`。任何脚本都不自己拼语料路径。
+
+## 2. 一条命令的健康检查
+
+```bash
+py -X utf8 tools/offline_smoke.py          # 全套：装配 + 红线 + 数据 + 门禁 + 单测 + 零写校验
+py -X utf8 tools/offline_smoke.py --fast   # 跳过门禁与单测，一秒出结果
+py -X utf8 tools/offline_smoke.py --with-llm   # 额外每角色真调一次模型
+```
+
+它不调 LLM，所以能进 CI。检查项：四层装配齐全、层顺序、层预算、场景覆盖、turn_logic 触发矩阵、角色串味、内容红线扫描、夹具结构、派生统计形状、四道门禁、`tests/`，最后比对仓库文件指纹——除 `report/` 之外的任何文件被改动都会 FAIL。产物是 `report/offline_smoke.md`。
+
+## 3. mock 时钟
+
+```bash
+py -X utf8 tools/mock_clock.py                              # 打印当前生效时间与来源
+py -X utf8 tools/mock_clock.py --set 2026-09-12T03:00:00+09:00
+py -X utf8 tools/mock_clock.py --real                       # 真实时钟（会有警告）
+```
+
+默认 `2026-09-12T15:00:00+09:00`。任何读「现在」的代码都从 `mock_clock.mock_now()` 取，不要直接 `datetime.now()`。探针启动时会打印时钟来源，检测到真实时钟会警告这批数字不可与 mock 批次比较。
+
+## 4. 全量 prompt dump
+
+```bash
+# 单角色一句话
+py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --msg "你今天又想去哪找猫"
+
+# 五角色 × 四条会命中不同层的话
+py -X utf8 tools/gates/dump_prompt.py --all --matrix
+
+# prompt diff 门禁的两臂
+py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase before
+py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase after
+
+# 只装某些层（排查哪一层在撑 prompt）
+py -X utf8 tools/gates/dump_prompt.py --char 灯 --msg "我一直在哭" --layers canon,voice
+
+# 用门禁里的场景名
+py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --case general.comfort
+```
+
+产物三份：`prompt_<char>_<phase>_<label>.json`（最终 messages 数组，与探针喂给模型的对象逐字节相同）、`.txt`（分层审计版）、`.layers.json`（各层字符数）。另有一份 `prompt_dump_index_<phase>.json` 汇总本次所有 dump，用于两臂对比。
+
+`--phase before` 把深模块与通用场景层的 env 回退开关全部置 0，得到「改动前行为」的那一臂。
+
+## 5. 探针
+
+```bash
+# 生成占位夹具（首次）
+py -X utf8 tools/probe/make_fixtures.py
+
+# 干跑：不调 LLM，只验证夹具与装配
+py -X utf8 tools/probe/probe_runner.py --label dry --dry-run --assemble --registry --runs 1
+
+# 正式跑：五角色 × 通用场景夹具 × 每格 3 次
+py -X utf8 tools/probe/probe_runner.py --label repo_standalone --assemble --turn-logic \
+    --registry --cats 通用场景 --runs 3
+```
+
+参数要点：
+
+- `--assemble`：按本轮 user 现场装配四层 system。占位夹具的 system 为空，**不加这个参数测到的是没有角色 prompt 的模型**。装配结果若短于 1000 字符，脚本直接报错退出。
+- `--turn-logic`：注入生产 turn_logic 块。没有它，探针测不到动态层。
+- `--registry`：用统一场景注册表（含语料反推的夹具），每格带 scene key，评分才能按场景聚合。
+- `--runs N`：每格生成次数。分布级指标需要 N ≥ 3，正常评测用 6。
+- `--patch`：实验臂（`targets` 等），把数值目标块插到 persona card 末尾。生产现状用 `none`。
+- `--thinking off|on`：关掉思考链换取可复现与低成本。注意开思考时大预算下仍会出现空 content 的样本，这类样本要计为无效而不是拒答。
+
+夹具来源顺序：`fixtures/` 里最新的 `messages_<char>*.json`，再退到 `_offline_smoke_out/`。要换成自己的运行时 dump，把文件放进 `fixtures/` 即可。
+
+## 6. 评分四件套
+
+```bash
+py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,comfort --cat 通用场景
+```
+
+一条命令跑完四步，产物全在 `report/`：
+
+| 步骤 | 脚本 | 产物 |
+|---|---|---|
+| 分布级评分 | `scene_distill.py` | `scene_distill.md` / `scene_distill_<label>.json` |
+| 逐场景对照 | `scene_feedback.py` | `scene_feedback_<scene>.md` |
+| 同格重复度 | `_repeat_rate.py` | 控制台 + 报告 |
+| 逐字复述审计 | `_copy_audit.py` | 控制台 + 报告 |
+| 多臂池化 | `_pool_arms.py` | 控制台 |
+
+单独的入口：
+
+```bash
+py -X utf8 tools/score/scene_distill.py --labels repo_standalone
+py -X utf8 tools/score/scene_feedback.py --scene comfort --labels repo_standalone --n 8
+py -X utf8 tools/score/_copy_audit.py --cat 通用场景 --labels repo_standalone --detail
+py -X utf8 tools/score/_pool_arms.py off_arm on_arm1,on_arm2,on_arm3
+py -X utf8 tools/score/power_calc.py            # 功效：从探针输出实测单条 sd
+py -X utf8 tools/score/power_audit.py           # 现有样本量够不够
+```
+
+指标口径与读法见 `docs/04-evaluation.md`。
+
+## 7. 机械门禁
+
+```bash
+py -X utf8 tools/gates/voice_meta_gate.py          # 元叙述（canon / voice / 说话尺度 / turn_logic 四个面）
+py -X utf8 tools/gates/_gen_scene_check.py         # 通用场景注入正文规范
+py -X utf8 tools/gates/_tl_deep_check.py           # 深模块注入正文规范
+py -X utf8 tools/gates/audit_role_packages.py      # 角色包结构与注册表一致性
+py -X utf8 tools/gates/dump_turn_logic_gate.py --phase after    # 触发矩阵 + 归属标记 + 角色串味
+py -X utf8 tools/gates/voice_check_diff_check.py   # 后处理清洗的前后差异
+```
+
+`dump_turn_logic_gate.py --phase before` 只产基线，不判期望（回退开关全关时按定义什么都不触发）。
+
+## 8. 语料与蒸馏
+
+需要语料，先设 `IDIOLECT_CORPUS_DIR`。
+
+```bash
+py -X utf8 tools/corpus/crawl_bestdori.py     # 抓取（网络）
+py -X utf8 tools/corpus/build_gold.py         # 合成 raw/gold/<lang>.jsonl
+py -X utf8 tools/corpus/audit_corpus_quality.py
+
+py -X utf8 tools/distill/analyze_corpus.py         # 全局画像
+py -X utf8 tools/distill/export_targets.py         # -> data/style_targets.json
+py -X utf8 tools/distill/export_scene_targets.py   # -> 场景化长度目标
+py -X utf8 tools/distill/scene_char_baseline.py    # -> data/scene_char_baseline.json
+py -X utf8 tools/distill/tic_profile.py            # -> data/tic_profile.json
+py -X utf8 tools/distill/export_profiles.py        # -> data/style_profiles.json（评分用画像）
+py -X utf8 tools/distill/export_profiles.py --check # 校验已发布画像与语料是否一致
+```
+
+`export_profiles.py` 的产物是探针评分用的 gold 画像。语料不在时，探针自动退回读这份发布画像，`[probe] gold 画像来源 = ...` 那行会写清用的是哪条路径。
+
+## 9. 加一个角色或一个场景
+
+1. 在 `idiolect/characters/<key>/` 建包，至少提供 `get_canon_profile()`、`get_voice_manifest()`、`render_supplemental_blocks()`。
+2. 在 `idiolect/registry.py` 的 `_PACKAGE_NAMES` 与 `_ALIASES` 注册角色名与别名。
+3. 通用场景加在 `idiolect/general_scenes.py`，顺序必须与 `idiolect/scene_classifier.py` 的 `_RULES` 一致。
+4. 跑 `py -X utf8 tools/offline_smoke.py`：装配、触发矩阵、红线、门禁会一起告诉你漏了什么。
+5. 改动用 `dump_prompt.py --phase before/after` 留 diff。
+
+## 10. 密钥
+
+探针按顺序取 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`：进程环境变量优先，其次仓库根的 `.env`，最后 `.streamlit/secrets.toml`（继承自原项目，见 `tools/secrets_loader.py`）。三者都不入库。

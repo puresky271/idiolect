@@ -1,0 +1,7 @@
+# 运行时与工具链的基础依赖。
+# 探针与 --with-llm 需要 openai；统计与分词需要 numpy + jieba。
+openai>=1.40
+numpy>=1.24
+jieba>=0.42
+requests>=2.31
+pytest>=7.4

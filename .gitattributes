@@ -1,0 +1,14 @@
+# 统一行尾：仓库里一律 LF，避免 Windows 上的 CRLF 反复改写。
+* text=auto eol=lf
+
+*.svg text
+*.json text
+*.md text
+*.py text
+*.txt text
+
+# 二进制/生成物不做行尾转换
+*.png binary
+*.jpg binary
+*.webp binary
+*.parquet binary
