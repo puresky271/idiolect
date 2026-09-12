@@ -78,10 +78,18 @@ class ContextWorkspace:
         execution_packet: str = "",
         max_chars: int = 0,
     ) -> list[dict]:
-        """装配 messages：system 块按层序 → 对话历史 → 执行包贴最后一条 user。
+        """装配 messages：system 块按层序 → 对话历史 → 执行包贴**已装配的最后一条 user**。
 
         `max_chars` > 0 时做整体预算裁剪：从层序尾部开始整块摘除未 pinned 的块，
         直到 system 总量达标。不切块内文本——切半块上下文比整块缺失更难排查。
+
+        注意 `execution_packet` 的作用对象：它贴的是**这里已有**的最后一条 user，
+        也就是历史里的上一轮。本轮那句话还没进 messages（通常由调用方随后 append），
+        所以「把执行包放到离生成端最近的位置」这件事，`build_workspace_messages`
+        会自己处理——它在 append 本轮 user 时贴上。这里不传 packet 就对了。
+
+        给了 packet 却没有可贴的 user 时**直接报错**：静默丢弃会让「模型没遵守执行
+        指令」变成一个查不出来的现象（这条是踩过的坑）。
         """
         keys = self._ordered_keys()
         if max_chars > 0:
@@ -112,6 +120,14 @@ class ContextWorkspace:
                         str(messages[idx].get("content", "") or "").rstrip() + "\n\n" + packet
                     )
                     break
+            else:
+                raise ValueError(
+                    "execution_packet 没有可贴的 user 消息（history 里没有 user）。\n"
+                    "本轮那句话还没进 messages 时，请不要在这里传 packet：\n"
+                    "  · 用 build_workspace_messages(...) 的 execution_packet 参数，它会贴到本轮 user 上；\n"
+                    "  · 或自己 append 本轮 user 之后再贴。\n"
+                    "静默丢弃执行指令是不允许的——那会让「模型没遵守」变成查不出来的现象。"
+                )
         return messages
 
 
@@ -130,6 +146,10 @@ def build_workspace_messages(
     """一行入口：idiolect 四层进 persona 位，外部块挂其余层，装配成 messages。
 
     `blocks` 为 `(层名, 文本)` 列表；层名见 `LAYER_ORDER`，自定义名排在 12 层后。
+
+    `execution_packet`（本轮执行指令：长度预算、风格提醒）**贴在本轮 user 消息末尾**
+    ——那是模型真正要回答的那条，也是离生成端最近的位置。贴完的 messages 形如
+    `[system…, user(上一轮), assistant, user(本轮 + 执行包)]`。
     """
     ws = ContextWorkspace()
     persona = build_system_prompt(
@@ -140,9 +160,15 @@ def build_workspace_messages(
         if key == "persona":
             continue  # persona 位只允许 idiolect 四层，外部块请挂其余层
         ws.add(key, text)
-    messages = ws.assemble(history=history, execution_packet=execution_packet,
-                           max_chars=max_chars)
-    messages.append({"role": "user", "content": user_text})
+
+    # packet 由这里贴到本轮 user 上，所以不给 assemble 传（它只会贴到历史里那条 user）。
+    messages = ws.assemble(history=history, max_chars=max_chars)
+
+    current = str(user_text or "").rstrip()
+    packet = str(execution_packet or "").strip()
+    if packet:
+        current = f"{current}\n\n{packet}" if current else packet
+    messages.append({"role": "user", "content": current})
     return messages
 
 

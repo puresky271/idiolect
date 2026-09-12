@@ -178,6 +178,31 @@ class SmokeToolTests(unittest.TestCase):
                            errors="replace", env=env)
         self.assertEqual(r.returncode, 0, f"dump 失败：{r.stdout[-800:]}")
 
+    def test_dump_prompt_case_does_not_self_overwrite(self):
+        """`--case` 只能给目标角色建一条 job。
+
+        2026-09-13 踩过：`general.comfort` 同时挂在乐奈与立希名下，旧实现把两条 job
+        平铺后与角色做笛卡尔积，于是同一个角色 dump 两次、同名同角色 → 文件被覆盖，
+        留下的是 per-session 去重后的 `turn_logic=0` 那份，看起来像「场景模块没触发」。
+        """
+        import shutil
+        import tempfile
+
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+        env.pop(MOCK.ENV_VAR, None)
+        with tempfile.TemporaryDirectory() as tmp:
+            env["IDIOLECT_REPORT_DIR"] = tmp
+            r = subprocess.run([sys.executable, "-X", "utf8", "tools/gates/dump_prompt.py",
+                                "--char", "乐奈", "--case", "general.comfort"],
+                               cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", env=env)
+            self.assertEqual(r.returncode, 0, f"dump 失败：{r.stdout[-800:]}")
+            index = json.loads((Path(tmp) / "prompt_dump_index_after.json").read_text(encoding="utf-8"))
+            self.assertEqual(len(index), 1, f"应只产出 1 份，实得 {len(index)}：{index}")
+            self.assertGreater(index[0]["layer_chars"]["turn_logic"], 0,
+                               "turn_logic 为 0 说明这条 job 被自己的重复 dump 覆盖了")
+            shutil.rmtree(tmp, ignore_errors=True)
+
     def test_shipped_profiles_have_no_text(self):
         """随仓库发布的画像只能是聚合量，不能带原作文本。"""
         prof = json.loads((ROOT / "data" / "style_profiles.json").read_text(encoding="utf-8"))

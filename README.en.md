@@ -104,7 +104,9 @@ The same inputs with an empty system prompt instead of the four layers:
 | Rana / comforted | "I completely understand how you feel. When pressure surges like a tide..." (380 chars) | "Mm." "Cat. Under the eaves." (median 10) |
 | Rana / low mood | "When pressure surges and even breathing feels like effort..." (718 chars) | "Mm. ... A cat over there." |
 
-This single cell is not evidence — both samples are tiny. What it shows is that **a probe must assemble its own prompt**: the shipped fixtures have an empty system field, so without `--assemble` you are measuring a bare model with no character prompt at all.
+This single cell is not evidence — both samples are tiny. Note that the two columns come from different places: the **four layers** column is from the `repo_standalone` batch above and can be reproduced; the **empty system** column is one manual side-run (the raw record of those two generic-assistant replies) whose probe artifacts are not shipped, so treat it as a qualitative illustration only.
+
+What it shows is that **a probe must assemble its own prompt**: the shipped fixtures have an empty system field, so without `--assemble` you are measuring a bare model with no character prompt at all.
 
 <p align="center">
   <img src="./assets/readme/section-03-layers.svg" width="100%" alt="03 Four prompt layers">
@@ -160,7 +162,7 @@ py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --re
 py -X utf8 tools/score/probe_report.py --label run1 --scenes crisis,comfort --cat 通用场景
 ```
 
-**The evaluation clock**: characters react to the hour (3 AM answers differ from 3 PM answers), so evaluation uses a clock pinned to daytime (`tools/mock_clock.py`) instead of letting "what time is it" become a hidden variable:
+**The evaluation clock**: characters react to the hour (3 AM answers differ from 3 PM answers), so evaluation uses a clock pinned to daytime (`tools/mock_clock.py`) instead of letting "what time is it" become a hidden variable. The command below only *prints* the environment-variable line (a child process cannot change your shell) — paste it into your shell to take effect:
 
 ```bash
 py -X utf8 tools/mock_clock.py --set 2026-09-12T03:00:00+09:00
@@ -191,7 +193,7 @@ Probes also run without a corpus: the scoring profile ships with the repository 
 
 **Known and unsolved:**
 
-- The cost of zero-example wording: after banning copyable example sentences, length agreement fell from 0.512 to 0.461. The trade was accepted on purpose.
+- The cost of zero-example wording: after banning copyable example sentences, length agreement fell from 0.512 to 0.461 (both figures come from an older batch whose artifacts are not shipped). The trade was accepted on purpose.
 - Taki's sentence openings are over-corrected: 39% of her original turns start with a bare noun, and the current arm pushes that to 62% (`tools/score/_noun_initial.py <run-label>` prints the original baseline alongside the arm) — the direction overshot.
 - Tomori's pause accounting: the reference frame drops silent turns, but her twelve-dot pause is content, not padding.
 - Fixture measurability: "what did you mean by that" needs a referable previous sentence, and placeholder fixtures have no history, so those cells are unreadable.

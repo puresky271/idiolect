@@ -104,6 +104,8 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 | 乐奈 / 被安慰 | 「你的感受我完全能理解。当压力像潮水般涌来……」（380 字） | 「嗯。」「猫。屋檐下面。」（中位 10 字） |
 | 乐奈 / 情绪低落 | 「当压力像潮水般涌来，连呼吸都觉得费力时……」（718 字） | 「嗯。……那边有猫。」 |
 
+两列的出处不同，别当成同一批数据读：**四层那一列**来自上面的 `repo_standalone` 批次，可以自己复现；**空 system 那一列**是当时手工跑的一次对照（那两条通用助手腔回复的原样记录），没有随仓库发布探针产物，所以只能当定性示例。
+
 这一格样本量小、不构成证据，但它说明一件重要的事：**探针必须自己装配 prompt**——仓库自带的夹具 system 是空的，不加 `--assemble` 参数，测到的是「没有任何角色 prompt 的裸模型」。
 
 <p align="center">
@@ -133,7 +135,7 @@ messages = build_workspace_messages(
     "乐奈", "你今天又想去哪找猫",
     blocks=[("current_state", "乐奈在 RiNG 排练室，下午没课"),
             ("fact_workspace", "用户上周提过想养猫")],
-    execution_packet="【本轮执行】回复 ≤19 字",
+    execution_packet="【本轮执行】回复 ≤19 字",   # 贴在本轮 user 末尾
 )
 ```
 
@@ -172,7 +174,7 @@ py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --re
 py -X utf8 tools/score/probe_report.py --label run1 --scenes crisis,comfort --cat 通用场景
 ```
 
-**评测时钟**：角色对时段敏感（凌晨和下午的回答不一样），所以评测统一用固定在白天的假时钟（`tools/mock_clock.py`），不把「现在几点」变成隐藏变量：
+**评测时钟**：角色对时段敏感（凌晨和下午的回答不一样），所以评测统一用固定在白天的假时钟（`tools/mock_clock.py`），不把「现在几点」变成隐藏变量。下面这条只是**打印**要设的环境变量（子进程改不了父进程的 shell），贴进 shell 才生效：
 
 ```bash
 py -X utf8 tools/mock_clock.py --set 2026-09-12T03:00:00+09:00
@@ -203,7 +205,7 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 
 **已知没解决的：**
 
-- 零样本用词的代价：禁用整句例句之后，长度贴合度从 0.512 掉到 0.461。这个代价是自愿接受的。
+- 零样本用词的代价：禁用整句例句之后，长度贴合度从 0.512 掉到 0.461（两个数来自旧批次，产物未随仓库发布）。这个代价是自愿接受的。
 - 立希的起手句式被过度矫正：原作 39% 的回合以名词直出，本批探针里升到 62%（`tools/score/_noun_initial.py <批次名>` 会连原作基线一起打出），方向反了。
 - 灯的停顿记账：参照系剔除了沉默回合，但她的十二点省略号是内容不是赘余，两头不讨好。
 - 探针夹具的可测性：「你刚才那句什么意思」需要上文有一句可指代的话，占位夹具没有上文，这类场景的分不可读。

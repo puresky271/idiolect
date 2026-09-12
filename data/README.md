@@ -4,7 +4,7 @@
 
 | 文件 | 内容 | 生成脚本 | 被谁消费 |
 |---|---|---|---|
-| `style_targets.json` | 每个角色的全局说话尺度：中位/p90 字数、句数、小句数、标点出现率、自称率、高频语气词 | `tools/distill/export_targets.py` | `idiolect/style_target.py` |
+| `style_targets.json` | 每个角色的全局说话尺度：中位/p90 字数、句数、小句数、标点出现率、自称率、高频语气词 | `tools/distill/export_targets.py` | `tools/probe/prompt_patch.py`、`tools/probe/probe_runner.py`、`tools/offline_smoke.py`（**生产 prompt 不读它**：`idiolect/style_target.py` 是手抄的字面量，要人手同步） |
 | `scene_char_baseline.json` | 130 个 `角色\|场景` 组合的原作分布（条数、字数分位、句数分位） | `tools/distill/scene_char_baseline.py` | `tools/score/scene_distill.py` |
 | `scene_stats.json` | 逐场景的通用统计与角色侧对照 | `tools/distill/scene_stats.py` | 场景发现与文档 |
 | `tic_profile.json` | 每角色的口癖排行：频次、每万字出现率、句首/句末占比、专指度 | `tools/distill/tic_profile.py` | `idiolect/characters/*/voice.py` 的编写依据 |
@@ -29,4 +29,6 @@ py -X utf8 tools/distill/scene_char_baseline.py --no-exemplars --out data/scene_
 py -X utf8 tools/distill/scene_stats.py        --no-exemplars --out data/scene_stats.json
 ```
 
-2026-09-13 的实测：金标准 cn 语料（5548 条）跑完上面六条，六个文件与仓库里发布的版本**逐字节相同**（含 `scene_stats.json` 的 26 场景词表）。这条结论依赖两个确定性修正：词表并列项按词排序、`logodds_signature` 的 top-N 截断加兜底排序（`set` 迭代序受哈希随机化影响，此前同一份语料两次跑出的词表会不同）。
+2026-09-13 的实测：金标准 cn 语料（5548 条）跑完上面六条，六个文件的 **JSON 值与键序**与仓库里发布的版本逐字段一致（含 `scene_stats.json` 的 26 场景词表）——数字完全可重建。这是**内容级**结论：生成物与发布版可能在行尾与结尾换行上差一两个字节（Windows 上 Python 文本模式写 CRLF），所以别用 `git diff` 是否为空来判断，逐字段比较才算。
+
+这条结论依赖两个确定性修正：词表并列项按词排序、`logodds_signature` 的 top-N 截断加兜底排序（`set` 迭代序受哈希随机化影响，此前同一份语料两次跑出的词表会不同）。

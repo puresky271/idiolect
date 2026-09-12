@@ -38,7 +38,8 @@ def post_reply_voice_check(*, character: str, reply_text: str) -> dict[str, Any]
        连排句号归一、省略号归一。
     2. `rana.voice_check.strip_redundant_ack` —— **风格改写**（会删字，因此不放进 `clean_reply`）：
        内容已经够长时去掉冗余的「嗯。」起手。依据：原作起手 55% 是名词直出、语气词只有 8%，
-       而生产是 19% / 67%；prompt 侧两次 A/B 均无显著效果，所以改用后处理。
+       而生产臂是 19% / 67%（旧批次记录；当前 repo_standalone 批次实测 24% / 57%，
+       复现见 `tools/score/_noun_initial.py`）；prompt 侧两次 A/B 均无显著效果，所以改用后处理。
        短确认（「嗯。开心」）与疑问起手（「嗯？」）都不动；`RANA_VOICE_CHECK_ACK_STRIP=0` 可关。
     3. 诊断：助手腔/越界（关系承诺 / 元叙述 / 心理归因 / 工整收束 / 客服腔 / 视觉声称）
        + 长度与标点阈值（中位 6 字、p90 12 字、硬上限 16）

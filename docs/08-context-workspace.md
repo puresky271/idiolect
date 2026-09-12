@@ -34,8 +34,15 @@
 | 12 | `recent_dialogue_guard` | 最近对话护栏：防复读、防与上句矛盾 | — |
 
 之后是 user/assistant 交替的**对话历史**；最后，本轮执行指令
-（`execution_packet`：长度预算、风格提醒）不单独成块，而是**追加到最后一条
-user 消息的末尾**——离生成端最近的位置，最不容易被长 prompt 稀释。
+（`execution_packet`：长度预算、风格提醒）不单独成块，而是**追加到本轮那条
+user 消息的末尾**——那条才是模型要回答的输入，也是离生成端最近的位置，最不容易
+被长 prompt 稀释。装配出来的 messages 形如：
+
+```
+[ system(persona) … system(recent_dialogue_guard),
+  user(上一轮), assistant(上一轮),
+  user(本轮 + 执行包) ]        ← 执行包在这里
+```
 
 顺序的设计原则和四层一致：稳定前缀在前（缓存命中），动态上下文居中，
 执行指令贴近生成端。
@@ -46,9 +53,12 @@ user 消息的末尾**——离生成端最近的位置，最不容易被长 pro
 
 - **`ContextWorkspace` / `assemble`**：12 层固定层序、空块剔除、整体字符预算
   （从层序尾部开始**整块摘除**未 pinned 的块——切半块上下文比整块缺失更难
-  排查）、执行包贴最后一条 user。
+  排查）。它自带的 `execution_packet` 只会贴到**已装配的最后一条 user**（也就是
+  历史里的上一轮）；本轮那句话还没进来时请不要用它，`build_workspace_messages`
+  会负责贴（见下）。给了包却没有可贴的 user 时它**直接报错**，不静默丢弃。
 - **`build_workspace_messages`**：一行入口，idiolect 四层进 persona 位
-  （pinned，不可裁剪、不可被外部块覆盖），外部材料挂其余层位：
+  （pinned，不可裁剪、不可被外部块覆盖），外部材料挂其余层位，`execution_packet`
+  贴到本轮 user 上：
 
 ```python
 from idiolect.workspace import build_workspace_messages
@@ -60,6 +70,8 @@ messages = build_workspace_messages(
              {"role": "assistant", "content": "练习。"}],
     execution_packet="【本轮执行】回复 ≤19 字",
 )
+# messages[-1] == {"role": "user",
+#                  "content": "你今天又想去哪找猫\n\n【本轮执行】回复 ≤19 字"}
 ```
 
 - **`select_facts`**：事实选择器（第 4 节的打分模型，词面通道部分）。

@@ -317,7 +317,8 @@ def build_late_night_window_special_block(
     Args:
         user_text: 当前轮 user message（用于话题触发检测）
         now_jst:   当前 JST 时间（用于凌晨窗口判定）
-        ledger:    world_ledger.json 内容（用于 night_owl_today 读取）
+        ledger:    调用方传入的世界状态 dict，读 ledger["plans"]["灯"]["night_owl_today"]
+                   （本仓库不带世界模拟；缺省 None 时按 False 处理）
         session_id: ws session id（per-session dedup + residue key）
         is_developer: 触发对象身份
         mode: "chat" = 被对方找 / "autogreet" / "idle" = 主动开口

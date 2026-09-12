@@ -87,7 +87,10 @@ def describe() -> str:
 def main() -> int:
     import argparse
 
-    ap = argparse.ArgumentParser(description="mock 时钟（评测统一时间源）")
+    ap = argparse.ArgumentParser(
+        description="mock 时钟（评测统一时间源）",
+        epilog="注意：--set / --real / --shell 只**打印**要设的环境变量，"
+               "不会改变当前 shell（子进程改不了父进程的环境）。把那一行贴进 shell 才生效。")
     ap.add_argument("--set", dest="set_iso", default="", help="pinned 时刻（ISO 8601）")
     ap.add_argument("--real", action="store_true", help="改用真实时钟（不要跑评测）")
     ap.add_argument("--shell", action="store_true", help="打印可直接 set 的环境变量行")
@@ -95,6 +98,8 @@ def main() -> int:
 
     if args.real:
         print(f"$env:{ENV_VAR} = 'real'")
+        print("[warn] 真实时钟下跑出来的数字不能与 mock 批次比较："
+              "时段会变成隐藏变量（见 docs/04-evaluation.md 第 7 节）。")
     elif args.set_iso:
         parse_spec(args.set_iso)  # 校验
         print(f"$env:{ENV_VAR} = '{args.set_iso}'")
@@ -102,6 +107,8 @@ def main() -> int:
         print(f"$env:{ENV_VAR} = '{DEFAULT_MOCK_ISO}'")
 
     print(f"当前生效：{describe()}")
+    if args.set_iso or args.real or args.shell:
+        print("        （上面那行是给 shell 用的；本进程没有改变它）")
     return 0
 
 

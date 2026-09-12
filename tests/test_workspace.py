@@ -58,7 +58,8 @@ class TestLayerSkeleton(unittest.TestCase):
 
 
 class TestExecutionPacket(unittest.TestCase):
-    def test_packet_appended_to_last_user(self):
+    def test_packet_appended_to_last_history_user(self):
+        """assemble() 自己贴时，贴的是它已有的最后一条 user（即历史的上一轮）。"""
         ws = ContextWorkspace()
         ws.add("persona", "人格", pinned=True)
         history = [
@@ -70,12 +71,30 @@ class TestExecutionPacket(unittest.TestCase):
         self.assertEqual(messages[-1]["content"], "第二句\n\n【执行】≤19 字")
         self.assertEqual(messages[1]["content"], "第一句")  # 前面的 user 不受影响
 
-    def test_packet_dropped_without_user(self):
+    def test_packet_without_user_raises(self):
+        """没有可贴的 user 时必须报错，不能静默丢弃执行指令。
+
+        2026-09-13 实测过：旧实现直接 `break` 掉，产物里根本没有这段文本，
+        表现成「模型不遵守长度预算」，从产物上查不出原因。
+        """
         ws = ContextWorkspace()
         ws.add("persona", "人格", pinned=True)
-        messages = ws.assemble(execution_packet="【执行】≤19 字")
+        with self.assertRaises(ValueError) as ctx:
+            ws.assemble(execution_packet="【执行】≤19 字")
+        self.assertIn("execution_packet", str(ctx.exception))
+
+    def test_packet_with_only_assistant_history_raises(self):
+        ws = ContextWorkspace()
+        ws.add("persona", "人格", pinned=True)
+        with self.assertRaises(ValueError):
+            ws.assemble(history=[{"role": "assistant", "content": "回复"}],
+                        execution_packet="【执行】≤19 字")
+
+    def test_no_packet_is_fine_without_user(self):
+        ws = ContextWorkspace()
+        ws.add("persona", "人格", pinned=True)
+        messages = ws.assemble()
         self.assertEqual(len(messages), 1)
-        self.assertNotIn("【执行】", messages[0]["content"])
 
 
 class TestBuildWorkspaceMessages(unittest.TestCase):
@@ -96,6 +115,30 @@ class TestBuildWorkspaceMessages(unittest.TestCase):
         messages = build_workspace_messages(
             "乐奈", "找猫", blocks=[("persona", "冒牌人格")])
         self.assertNotIn("冒牌人格", [m["content"] for m in messages])
+
+    def test_execution_packet_lands_on_this_turn(self):
+        """执行包必须贴在本轮 user 上（最后一条），不是历史的上一轮。
+
+        2026-09-13 这是文档与实现的一次真分歧：docs/08 与 README 都写「贴最后一条
+        user、离生成端最近」，而实现把它贴到历史那条，本轮 user 之后才 append。
+        """
+        messages = build_workspace_messages(
+            "乐奈", "你今天又想去哪找猫", include_turn_logic=False,
+            history=[{"role": "user", "content": "在干嘛"},
+                     {"role": "assistant", "content": "练习。"}],
+            execution_packet="【本轮执行】回复 ≤19 字")
+        self.assertEqual(messages[-1]["role"], "user")
+        self.assertTrue(messages[-1]["content"].startswith("你今天又想去哪找猫"))
+        self.assertTrue(messages[-1]["content"].endswith("【本轮执行】回复 ≤19 字"))
+        self.assertEqual(messages[-3]["content"], "在干嘛")  # 历史的 user 不被污染
+
+    def test_execution_packet_survives_without_history(self):
+        """没有 history 时也不能丢——这是旧版最坑的一条（静默丢包）。"""
+        messages = build_workspace_messages(
+            "乐奈", "找猫", include_turn_logic=False,
+            execution_packet="【本轮执行】≤19 字")
+        self.assertIn("【本轮执行】≤19 字", messages[-1]["content"])
+        self.assertEqual(messages[-1]["role"], "user")
 
 
 class TestFactSelector(unittest.TestCase):

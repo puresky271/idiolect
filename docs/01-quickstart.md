@@ -37,7 +37,7 @@ py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --msg "你今天又想去哪
 py -X utf8 tools/gates/dump_prompt.py --all --matrix
 ```
 
-产物在 `report/`：`prompt_ran_a_after_msg.txt` 是分层审计版，`.json` 是最终 messages 数组。第 1 条命令里乐奈的 `turn_logic` 层长度不为 0（命中「猫」这个话题），第 2 条里 `plain`（「在干嘛」）那一格的 `turn_logic` 为 0，因为那一轮没有命中任何场景。
+产物在 `report/`：`prompt_rana_after_msg.txt` 是分层审计版，`.json` 是最终 messages 数组。第 1 条命令里乐奈的 `turn_logic` 层长度不为 0（命中「猫」这个话题），第 2 条里 `plain`（「在干嘛」）那一格的 `turn_logic` 为 0，因为那一轮没有命中任何场景。
 
 ## 验证仓库是健康的
 
@@ -113,17 +113,17 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 | `tools/probe/` | 探针 |
 | `tools/score/` | 评分与审计 |
 | `tools/gates/` | 机械门禁与 prompt diff |
-| `docs/` | 方法论文档集（00 总纲 → 07 turn_logic 与后处理） |
+| `docs/` | 方法论文档集（00 总纲 → 08 上下文工作区；索引见 `docs/README.md`） |
 | `report/` | 所有产物（gitignored） |
 
 ## 验证过什么
 
-- `pytest tests`：107 项通过，1 项跳过（需要语料）。
+- `pytest tests`：129 项通过，1 项跳过（需要语料）。
 - `tools/offline_smoke.py`：装配、场景覆盖、触发矩阵、内容红线、派生统计、四道门禁、零写校验全部通过。
-- 57 个脚本逐个 `--help`：无 import 或语法失败；其中 15 个需要语料的脚本用真实语料实跑过一遍。
+- 58 个脚本过静态 CLI 安全检查（`offline_smoke` 的「工具.CLI 安全」项），其中 57 个（除纯库 `_paths.py`）逐个跑 `--help`：无 import 或语法失败；15 个需要语料或派生产物的脚本用真实语料实跑过一遍，退出码全 0。
 - 一次真实探针：5 角色 × 7 场景 × 3 次 = 105 条回复（数字见 README）。
 - 把仓库克隆到空目录后重跑：`pytest`、`offline_smoke`、探针 dry-run 均通过，不需要任何环境变量。
-- 发布数据可重建：用金标准 cn 语料重跑六条生成命令，`data/` 六个文件与发布版本逐字节相同。
+- 发布数据可重建：用金标准 cn 语料重跑六条生成命令，`data/` 六个文件的 JSON 值、键序与键集合**逐字段一致**（内容级可重建）。注意这不是字节级承诺：生成物与发布版在行尾与结尾换行上可能差一两个字节（Windows 上 Python 文本模式写 CRLF）。
 
 ---
 

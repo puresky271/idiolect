@@ -197,28 +197,45 @@ def main() -> int:
         print("要么给 --char，要么给 --all")
         return 2
 
-    jobs: list[tuple[str, str]] = []  # (label, msg)
+    # job 必须**按角色**分开收集：同一个 owner（如 general.comfort）会挂在多个角色名下，
+    # `--matrix` / `--msg` 则对所有角色都成立。早先的实现把两者倒进同一个平铺列表再做
+    # 笛卡尔积，于是同一个角色会拿到两条同名 job——第二条被 per-session 去重成
+    # turn_logic=0 并覆盖第一条，看起来像「模块没触发」。
+    per_char: dict[str, list[tuple[str, str]]] = {ch: [] for ch in chars}
+
     if args.case:
         owner = args.case
-        for ch, cases in GATE_CASES.items():
-            for text, _want_fire, own in cases:
+        label = owner.replace(".", "_")
+        for ch in chars:
+            for text, _want_fire, own in GATE_CASES.get(ch, ()):
                 if own == owner:
-                    jobs.append((owner.replace(".", "_"), text))
+                    per_char[ch].append((label, text))
                     break
+            else:
+                print(f"[dump] 角色 {ch} 没有 {owner} 这个 case，跳过")
+
+    shared: list[tuple[str, str]] = []
     if args.matrix:
-        jobs += DEFAULT_MATRIX
+        shared += DEFAULT_MATRIX
     if args.msg:
-        jobs.append((args.label or "msg", args.msg))
-    if not jobs:
+        shared.append((args.label or "msg", args.msg))
+
+    for ch in chars:
+        for job in shared:
+            if job not in per_char[ch]:   # 同 label 同文本不重复 dump（会自我覆盖）
+                per_char[ch].append(job)
+
+    total = sum(len(v) for v in per_char.values())
+    if total == 0:
         print("要么给 --msg，要么给 --matrix / --case")
         return 2
 
     print(f"[dump] 时钟 = {MOCK.describe()}")
-    print(f"[dump] phase={args.phase}｜层 = {','.join(want)}｜角色 {len(chars)} × 场景 {len(jobs)}")
+    print(f"[dump] phase={args.phase}｜层 = {','.join(want)}｜角色 {len(chars)} × 共 {total} 份")
     print("-" * 100)
     rows = []
     for char in chars:
-        for label, msg in jobs:
+        for label, msg in per_char[char]:
             rows.append(write_dump(char, label, msg, args.phase, want))
     out = REPORT / f"prompt_dump_index_{args.phase}.json"
     out.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")

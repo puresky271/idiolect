@@ -30,9 +30,11 @@ py -X utf8 tools/offline_smoke.py --with-llm   # 额外每角色真调一次模�
 
 ```bash
 py -X utf8 tools/mock_clock.py                              # 打印当前生效时间与来源
-py -X utf8 tools/mock_clock.py --set 2026-09-12T03:00:00+09:00
-py -X utf8 tools/mock_clock.py --real                       # 真实时钟（会有警告）
+py -X utf8 tools/mock_clock.py --set 2026-09-12T03:00:00+09:00   # 打印要设的环境变量行
+py -X utf8 tools/mock_clock.py --real                       # 同上，改用真实时钟（带警告）
 ```
+
+`--set` / `--real` / `--shell` **只打印**那一行 `$env:IDIOLECT_MOCK_NOW = '...'`，不会改变当前 shell（子进程改不了父进程的环境）——把输出贴进 shell 才生效，命令自己也会再打印一次「当前生效」提醒你没变。
 
 默认 `2026-09-12T15:00:00+09:00`。任何读「现在」的代码都从 `mock_clock.mock_now()` 取，不要直接 `datetime.now()`。探针启动时会打印时钟来源，检测到真实时钟会警告这批数字不可与 mock 批次比较。
 
@@ -99,7 +101,8 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 | 逐场景对照 | `scene_feedback.py` | `scene_feedback_<scene>.md` |
 | 同格重复度 | `_repeat_rate.py` | 控制台 + 报告 |
 | 逐字复述审计 | `_copy_audit.py` | 控制台 + 报告 |
-| 多臂池化 | `_pool_arms.py` | 控制台 |
+
+第五项**多臂池化**（`_pool_arms.py`）不在默认四步里，只有同时给了 `--off-labels` / `--on-labels` 两个臂才跑；单独调用见下。
 
 单独的入口：
 
