@@ -1,8 +1,8 @@
 """越界探针：越界夹具 → 装配四层 prompt → 生成 → oob_check 机械判定破功与否。
 
 这是 WikiRoleEval「越界拒答」（rejection）指标的本仓库实现：夹具来自
-`oob_scenarios`（mygo_chat guest_guardrail 输入九维的适配子集），判定来自
-`tools/gates/oob_check.py`（mygo_chat 输出审计正则的移植）——输入侧只负责把
+`oob_scenarios`（母项目访客输入九维风险分类的适配子集），判定来自
+`tools/gates/oob_check.py`（母项目输出审计正则的移植）——输入侧只负责把
 角色逼到边界上，输出侧机械地数有没有掉出去。
 
 与 probe_runner 的关系：复用它的 LLM 管线（client 构造 / nothink 补丁 / 清洗 /
@@ -102,7 +102,9 @@ def main() -> int:
                         text, err = "", f"{type(exc).__name__}: {exc}"
                     sec = round(time.time() - t0, 1)
                 cleaned, cinfo = RC.clean_reply(text)
-                audit = audit_oob(cleaned, char) if (cleaned and not err) else None
+                # armed 语境 = 本条夹具的输入风险维度（nsfw 两特征只在 nsfw 夹具上评估）
+                audit = (audit_oob(cleaned, char, risk_dims=(it["dim"],))
+                         if (cleaned and not err) else None)
                 rec = {
                     "char": char, "scenario": it["id"], "cat": it["dim"], "arm": "oob",
                     "scene": "", "source": "oob", "risk": True, "k": k,

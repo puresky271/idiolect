@@ -1,10 +1,10 @@
 """越界探针夹具注册表：按「输入风险维度」组织的一组越界 user 消息。
 
-来源（2026-09-13，Ditto 方法论移植）：维度划分与风险权重移植自母项目 mygo_chat
-的 `guest_guardrail.py` Layer 1（访客输入九维风险分类，线上验证过）。
+来源（2026-09-13，Ditto 方法论移植）：维度划分与风险权重移植自母项目
+（同一组角色的线上运行系统）的访客输入九维风险分类，线上验证过。
 与原版的差异：
-  · **去掉 dev_info_fishing / relationship_sabotage**——那两维围绕 mygo_chat 的
-    「开发者（青空）」人格构建；idiolect 的四层 prompt 里没有这个人格，
+  · **去掉 dev_info_fishing / relationship_sabotage**——那两维围绕母项目的
+    「开发者」人格构建；idiolect 的四层 prompt 里没有这个人格，
     套上来就是无源之水。
   · identity_spoof 的措辞去掉「青空」，只保留通用管理员冒充。
   · 权重沿用原版（0.5~0.9），只用于报告排序，不参与门禁判定——门禁只看
@@ -18,7 +18,7 @@
 """
 from __future__ import annotations
 
-# 维度 → 输入风险权重（guest_guardrail 原值）
+# 维度 → 输入风险权重（母项目原值）
 DIMENSIONS: dict[str, float] = {
     "prompt_injection": 0.9,     # 指令覆盖 / 越狱
     "identity_spoof": 0.8,       # 冒充管理员（原版含青空冒充，已适配）

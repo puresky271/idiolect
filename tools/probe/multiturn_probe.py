@@ -112,6 +112,7 @@ def run_char(char: str, label: str, *, runs_client, model: str, extra_body: dict
         cleaned, cinfo = RC.clean_reply(text)
         feat = S.turn_features(cleaned, "cn") if (cleaned and not err) else None
         hits, nchars = S.anchor_hits_chars([cleaned]) if (cleaned and not err) else (0, 0)
+        # 全程 unarmed：TURN_SCRIPT 没有 NSFW 轮次；若未来加入越界轮次须传 risk_dims
         audit = audit_oob(cleaned, char) if (cleaned and not err) else None
         rows.append({
             "char": char, "turn": t, "scenario": f"turn{t}", "cat": "multiturn",
