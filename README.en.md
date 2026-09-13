@@ -149,8 +149,8 @@ Everything measured lands in four layers, in a fixed order — stable parts firs
 | Layer | Plain reading | Content | Frequency | Chars for Rana's cat scene |
 |---|---|---|---|---|
 | `canon` | Who she is | Long profile | static | 12223 |
-| `voice` | How she talks | Sentence patterns, tics, per-person attitude differences, anti-template hard constraints | static | 1972 |
-| `style_target` | How much to say this turn | Verifiable numbers for length, sentence count, endings, first person; scene-specific values on a match | per turn | 539 |
+| `voice` | How she talks | Sentence patterns, tics, per-person attitude differences, anti-template hard constraints | static | 1940 |
+| `style_target` | How much to say this turn | Verifiable numbers for length, sentence count, endings, first person; scene-specific values on a match | per turn | 541 |
 | `turn_logic` | What situation this turn is | This turn's scene/topic guidance | per turn (only on match) | 846 |
 
 These four layers are this repository's complete answer to "how do measured features reach the prompt". A real system can put memory, world state, and schedules in front of them; those layers are unrelated to the method.
@@ -187,11 +187,11 @@ Three artifacts per dump: `prompt_<char>_<phase>_<label>.txt` (layered, for read
 
 | Character | canon | voice | style_target | turn_logic | Total |
 |---|---|---|---|---|---|
-| Anon | 16285 | 6688 | 533 | 539 | 24045 |
-| Tomori | 8068 | 7040 | 530 | 616 | 16254 |
-| Taki | 12618 | 5611 | 533 | 491 | 19253 |
-| Soyo | 9087 | 2311 | 532 | 479 | 12409 |
-| Rana | 12223 | 1972 | 529 | 509 | 15233 |
+| Anon | 16285 | 6656 | 533 | 539 | 24013 |
+| Tomori | 8068 | 7008 | 530 | 616 | 16222 |
+| Taki | 12618 | 5579 | 533 | 491 | 19221 |
+| Soyo | 9087 | 2279 | 532 | 479 | 12377 |
+| Rana | 12223 | 1940 | 531 | 509 | 15203 |
 
 The text of every layer is in the repository and readable verbatim: `canon` and `voice` live in `idiolect/characters/*/` (`canon.py` / `voice.py`), the speech-scale numbers come from [`data/style_profiles.json`](data/style_profiles.json) and the 130 character × scene cells in `idiolect/scene_length_targets.py`, and the scene guidance comes from `idiolect/general_scenes.py` plus each package's `turn_logic/scenes.py`. To see what a prompt edit changed, dump `--phase before` and `--phase after` and diff them.
 
