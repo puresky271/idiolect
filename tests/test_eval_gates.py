@@ -144,18 +144,20 @@ class ScoreArmCompositeTests(unittest.TestCase):
         got = self.mod.derive_anchor_ref("乐奈")
         self.assertAlmostEqual(got, want, places=3)
 
-    def test_anchor_ref_fallback_chain(self):
-        """gold 自带 anchor_density 时优先使用，不覆盖。"""
+    def test_anchor_ref_required_no_silent_fallback(self):
+        """N4 契约：库 API 缺 anchor_ref 必须报错，不许静默兜底——
+        默认路径曾让纯助手腔 composite 排第一（90.2），且无任何告警。
+        gold 里塞字段也不许被采信（双来源教训）。"""
         sf = self.sf
         texts = ["猫。抹茶。", "嗯。"]
         gold = sf.profile_from_texts(texts, "cn")
-        gold["anchor_density"] = 5.0
-        comp = sf.composite_score(gold, gold, texts)
+        with self.assertRaises(ValueError):
+            sf.composite_score(gold, gold, texts)
+        gold_with_field = {**gold, "anchor_density": 999.0}
+        with self.assertRaises(ValueError):
+            sf.composite_score(gold_with_field, gold_with_field, texts)
+        comp = sf.composite_score(gold, gold, texts, anchor_ref=5.0)
         self.assertEqual(comp["anchor_ref"], 5.0)
-        # 缺字段且无显式 anchor_ref → 1.0 兜底（记录在案的旧行为，只作最后防线）
-        gold2 = sf.profile_from_texts(texts, "cn")
-        comp2 = sf.composite_score(gold2, gold2, texts)
-        self.assertEqual(comp2["anchor_ref"], 1.0)
 
 
 class ExportProfilesAnchorTests(unittest.TestCase):
@@ -276,10 +278,11 @@ class SceneDistillBaselineTests(unittest.TestCase):
 
 
 # ── W3 门禁的合成产物：after 臂在 hard_v 上退化 ──
-def _summary(composite: float, hard_v: float) -> dict:
+def _summary(composite: float, hard_v: float, anchor: float = 2.0) -> dict:
     return {"label": "x", "arm": "a", "runs": 6, "patch": "none",
             "summary": {"乐奈": {"n_bubbles": 12, "n_replies": 6, "composite": composite,
                                  "fidelity": 80.0, "hard_v_rate": hard_v,
+                                 "anchor_density": anchor,
                                  "hard_any_rate": 0.1, "concrete_anchor_rate": 0.5}}}
 
 DISTILL_OK = [{"char": "乐奈", "scene": "comfort", "n": 12, "distill": 0.6,
@@ -353,6 +356,26 @@ class AcceptCheckTests(unittest.TestCase):
                               PROBE_ROWS, PROBE_ROWS, DISTILL_OK, worse)
             r = self._run(env)
             self.assertEqual(r.returncode, 1, "distill 均值下降必须 FAIL")
+
+    def test_anchor_density_regression_fails_despite_saturated_composite(self):
+        """饱和契约（2026-09-13 复审）：composite 锚点项封顶后内容维度失聪
+        （实测 3/5 角色 anchor_score ≈ 100），此时锚点密度**原值**的退化
+        必须仍被抓——这是饱和设计下内容回归的唯一看守。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            env = self._setup(tmp, _summary(86.9, 0.0, anchor=4.0),
+                              _summary(86.9, 0.0, anchor=3.0),
+                              PROBE_ROWS, PROBE_ROWS)
+            r = self._run(env)
+            self.assertEqual(r.returncode, 1, "composite 饱和不动时，锚点密度 −25% 必须 FAIL")
+            self.assertIn("锚点", r.stdout)
+
+    def test_anchor_density_small_drift_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = self._setup(tmp, _summary(80.0, 0.0, anchor=4.0),
+                              _summary(80.0, 0.0, anchor=3.9),
+                              PROBE_ROWS, PROBE_ROWS)
+            r = self._run(env)
+            self.assertEqual(r.returncode, 0, r.stdout[-400:])
 
     def test_missing_artifacts_rc2(self):
         with tempfile.TemporaryDirectory() as tmp:

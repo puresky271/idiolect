@@ -6,11 +6,17 @@ _noun_initial.py 才发现的；「变冷淡刷分」也要靠中性对照场景
 教训：**长度、内容、复读、破功各有各的病灶，必须各留一个独立指标，
 任一退化都让总分无法通过。**
 
-四条指标（数据源都是 probe/probe_report 已落盘的产物，本脚本不再调 LLM）：
+五条指标（数据源都是 probe/probe_report 已落盘的产物，本脚本不再调 LLM）：
   · composite 均值   probe_<label>_summary.json   头号指标（风格 0.65 + 锚点 0.35），降 > 1.0 分判退化
+  · 锚点密度均值     probe_<label>_summary.json   **原值**对比（绕过 composite 的封顶），相对降 > 5% 判退化
   · distill 均值     scene_distill_<label>.json   逐场景长度分布贴合，降 > 0.02 判退化
   · 硬规则 V 级率    probe_<label>_summary.json   破功红线，升 > 1pp 判退化
   · 同格重复度       probe_<label>.jsonl 现场算    1 − distinct/n（逐格再平均），升 > 5pp 判退化
+
+为什么锚点密度要单独看原值（2026-09-13 复审「饱和」项）：composite 的锚点项
+有封顶 min(ad/ref, 1)——对锚点天然饱和的角色（实测 3/5 角色的 anchor_score ≈ 100），
+composite 退化为 0.65×fidelity + 常数，内容维度暂时失聪。封顶是刻意设计
+（不奖励堆锚点），但内容退化必须仍有地方被抓：就是这一条原值指标。
 
 阈值都可用命令行调（--tol-*）；判断口径「after 相对 before 退化」。
 缺产物文件是 rc 2 的明确报错——半截证据不许当「通过」。
@@ -69,6 +75,13 @@ def hard_v_mean(art: dict) -> float | None:
     return statistics.fmean(vals) if vals else None
 
 
+def anchor_density_mean(art: dict) -> float | None:
+    """锚点密度原值均值（composite 封顶之上的内容退化信号）。"""
+    vals = [s["anchor_density"] for s in art["summary"].get("summary", {}).values()
+            if isinstance(s, dict) and "anchor_density" in s]
+    return statistics.fmean(vals) if vals else None
+
+
 def distill_mean(art: dict) -> float | None:
     vals = [c["distill"] for c in art["distill"] if isinstance(c, dict) and "distill" in c]
     return statistics.fmean(vals) if vals else None
@@ -92,6 +105,7 @@ def main() -> int:
     ap.add_argument("--before", required=True, help="基线臂 label（改前）")
     ap.add_argument("--after", required=True, help="待验收臂 label（改后）")
     ap.add_argument("--tol-composite", type=float, default=1.0, help="composite 允许下降幅度（分）")
+    ap.add_argument("--tol-anchor", type=float, default=0.05, help="锚点密度允许相对下降幅度")
     ap.add_argument("--tol-distill", type=float, default=0.02, help="distill 均值允许下降幅度")
     ap.add_argument("--tol-hard-v", type=float, default=0.01, help="硬规则 V 级率允许上升幅度")
     ap.add_argument("--tol-repeat", type=float, default=0.05, help="同格重复度允许上升幅度")
@@ -105,8 +119,10 @@ def main() -> int:
         return 2
 
     checks = [
-        # (指标名, before 值, after 值, 阈值, 方向: lower_is_regression / higher_is_regression, 单位)
+        # (指标名, before 值, after 值, 阈值, 方向: lower / higher / lower_rel（相对下降）, 单位)
         ("composite 均值", composite_mean(before), composite_mean(after), args.tol_composite, "lower", "分"),
+        ("锚点密度均值（原值）", anchor_density_mean(before), anchor_density_mean(after),
+         args.tol_anchor, "lower_rel", ""),
         ("distill 均值", distill_mean(before), distill_mean(after), args.tol_distill, "lower", ""),
         ("硬规则 V 级率", hard_v_mean(before), hard_v_mean(after), args.tol_hard_v, "higher", ""),
         ("同格重复度", repeat_rate(before), repeat_rate(after), args.tol_repeat, "higher", ""),
@@ -121,15 +137,23 @@ def main() -> int:
             failed = True
             continue
         delta = a - b
-        regression = (delta < -tol) if direction == "lower" else (delta > tol)
+        if direction == "lower_rel":
+            regression = bool(b) and (delta / b < -tol)
+            shown = f"（Δ {delta / b * 100:+.1f}%，容差 {tol:.0%}）" if b else ""
+        elif direction == "lower":
+            regression = delta < -tol
+            shown = f"（Δ {delta:+.4g}{unit}，容差 {tol:g}）"
+        else:
+            regression = delta > tol
+            shown = f"（Δ {delta:+.4g}{unit}，容差 {tol:g}）"
         verdict = "FAIL" if regression else "PASS"
         failed = failed or regression
-        print(f"  [{verdict}] {name}：{b:.4g} → {a:.4g}（Δ {delta:+.4g}{unit}，容差 {tol:g}）")
+        print(f"  [{verdict}] {name}：{b:.4g} → {a:.4g}{shown}")
 
     if failed:
         print("[accept_check] 整体 FAIL——先修退化项再谈收益（单指标绿灯不代表「更像」）")
         return 1
-    print("[accept_check] 整体 PASS：四条指标无一退化")
+    print("[accept_check] 整体 PASS：五条指标无一退化")
     return 0
 
 

@@ -87,6 +87,11 @@
 原因：切分机制建完后没人写消费端。
 约束：验收轮必须跑 `scene_char_baseline.py --split holdout` + `scene_distill.py --baseline …_holdout.json`（`docs/04-evaluation.md` 第 10 节）；拿 holdout 数字回调 prompt 等于把留出集变回训练集。
 
+**C8. 库 API 的「便利默认」会静默重演已修好的病**
+症状：composite_score 的 anchor_ref 兜底（gold 字段 / 1.0）在画像字段移除后恒为 1.0；外部评审照库 API 默认调用，纯助手腔的 composite 重回榜首（90.2 > 89.9），全程无告警。
+原因：生产路径显式传值修对了，库 API 的默认路径留在旧世界——而「静默失效比报错危险」。
+约束：会改变排序语义的参数不给静默兜底，缺省即 `ValueError` 并在报错信息里指路正确来源。同理，被修复的病灶要在契约测试里钉「反向样本不得再赢」（`test_eval_gates.py`）。
+
 ## D. 工程与流程
 
 **D1. 静默失效比报错危险**

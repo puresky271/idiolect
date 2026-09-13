@@ -487,18 +487,26 @@ def composite_score(gold: dict, actual: dict, texts: Iterable[str],
     要防的病灶是**模板化/助手腔**，不是啰嗦，所以目标函数必须同时看
     「像不像这个角色」和「有没有在说具体的事」，否则优化会退化成「变冷淡」。
 
-    anchor_ref 的取法（2026-09-11 修正；2026-09-13 定死单一来源）：
+    anchor_ref 的取法（2026-09-11 修正；2026-09-13 定死单一来源；同日 N4 复审改为必填）：
       曾写死 4.0，但**各角色的天然锚点密度差 3 倍**（乐奈的场景基线加权值 ≈3.4、
       素世 ≈1.5），写死会把「该角色本来就不提具体物」误判成质量差。
       所以参照线是**该角色自身常态**，不跨角色比。
-      生产调用方（probe_runner.score_arm）**必须显式传** anchor_ref——
-      唯一来源是场景基线派生值（derive_anchor_ref），有过「画像字段 vs 派生值
-      两个真相来源、同一份产物两个 composite」的教训；gold 字段与 1.0
-      只是本函数作为库 API 的兜底，不应在生产路径生效。
+      anchor_ref 为 None 时**直接报错**，不做任何兜底：历史上的兜底
+      （gold 字段 / 1.0）量程错误，曾让纯助手腔的 composite 排到第一
+      （外部评审照库 API 默认调用第一次就踩中，且全程静默无告警）。
+      生产路径用 `probe_runner.derive_anchor_ref` 的场景基线派生值（唯一口径）。
+
+    anchor_score 有封顶（min(ad/ref, 1)）：达到该角色自身常态即满分，
+    超过常态的波动不可见——这是刻意不奖励堆锚点，代价与兜底指标见
+    docs/04-evaluation.md 第 2.1 节（饱和段）。
     """
     fid = style_fidelity(gold, actual)
     if anchor_ref is None:
-        anchor_ref = gold.get("anchor_density") or 1.0
+        raise ValueError(
+            "anchor_ref 必填：历史兜底（gold 字段 / 1.0）量程错误，曾让纯助手腔的 "
+            "composite 静默排到第一（2026-09-13 复审 N4）。"
+            "生产路径传 probe_runner.derive_anchor_ref 的场景基线派生值；"
+            "测试里也要显式给参照线。")
     ad = anchor_density(texts)
     anchor_score = min(ad / anchor_ref, 1.0) * 100.0 if anchor_ref else 0.0
     total = w_style * fid["fidelity"] + w_anchor * anchor_score

@@ -23,11 +23,18 @@ composite = 0.65 × fidelity（风格保真） + 0.35 × anchor_score（内容�
 anchor_score = min(输出锚点密度 / anchor_ref, 1.0) × 100
 ```
 
+**封顶的后果必须知道**：达到该角色自身常态锚点密度即满分（刻意不奖励堆锚点），
+代价是超过常态的波动不可见——对锚点天然饱和的角色（本批素世/灯/乐奈的
+anchor_score ≈ 100，3/5 撞顶），composite 实际上退化为 `0.65×fidelity + 常数`，
+内容维度暂时失聪（灯与乐奈 fidelity 同为 79.9 → composite 同为 86.9，
+尽管参照线差 2.3 倍）。所以 accept_check 另设一条**锚点密度原值**指标
+（第 11 节）：封顶只意味着「超常发挥不加分」，内容退化仍然必被抓。
+
 为什么不能再只看 fidelity：它只量长度/句数等分布拟合，**测的是「听话」不是「像」**。
 2026-09-13 外部评审用本仓库的评分函数跑构造样本证实：一段完全出戏的通用助手腔
 fidelity 84.9、distill 0.606，**高于**真像乐奈的样本（82.0 / 0.286）；接线 composite
 后同一批样本的排序翻正且差距拉开（真在安慰 89.9 > 合格短句 88.3 > 助手腔 76.0 >
-语义空白 49.1，复算留档 `report/eval_fix_evidence.md`）。
+语义空白 49.1）。
 这条判别力由 `tests/test_eval_gates.py::ScoreArmCompositeTests` 钉成契约。
 
 `anchor_ref` **只有一个来源**（2026-09-13 复审定死）：`data/scene_char_baseline.json`
@@ -35,8 +42,8 @@ fidelity 84.9、distill 0.606，**高于**真像乐奈的样本（82.0 / 0.286�
 它与场景评分同源、随仓库发布、有无语料都是同一个文件，所以任何路径跑出同一个
 composite。曾经同时存在「画像字段」与「派生值」两个来源（乐奈两者差 28%，同一份
 产物 composite 差 3.2 分，是 accept_check 默认容差的 3 倍，足以翻转验收判定），
-画像字段已移除。`composite_score` 作为库 API 仍保留 gold 字段 / 1.0 兜底，
-但生产路径必须显式传派生值（`tests/test_eval_gates.py` 钉住这条单一来源）。
+画像字段已移除。`composite_score` 的 anchor_ref 是**必填**——缺省直接报错
+（历史兜底曾让库 API 默认调用静默重演反向排序，见 `docs/06-lessons.md` C8）。
 探针启动时 `[probe] …｜anchor_ref 来源 = 场景基线派生（唯一口径）` 那行可核对。
 
 fidelity 保留为对照列：它与 composite 背离时（fidelity 涨、composite 不涨），
@@ -169,14 +176,18 @@ py -X utf8 tools/score/scene_distill.py --labels <验收批> \
 py -X utf8 tools/gates/accept_check.py --before <基线臂> --after <待验收臂>
 ```
 
-四条指标**各自独立**判定，任一退化整体 FAIL（数据源都是已落盘的探针产物，不再调 LLM）：
+五条指标**各自独立**判定，任一退化整体 FAIL（数据源都是已落盘的探针产物，不再调 LLM）：
 
 | 指标 | 数据源 | 默认容差 |
 |---|---|---|
 | composite 均值 | `probe_<label>_summary.json` | 降 > 1.0 分 |
+| 锚点密度均值（原值） | `probe_<label>_summary.json` | 相对降 > 5% |
 | distill 均值 | `scene_distill_<label>.json` | 降 > 0.02 |
 | 硬规则 V 级率 | summary JSON | 升 > 1pp |
 | 同格重复度 | probe jsonl 现场算 | 升 > 5pp |
+
+锚点密度看原值是为了绕过 composite 的封顶（见第 2.1 节饱和段）——
+封顶的角色 composite 里内容项是常数，内容退化只能靠这一条抓。
 
 容差都可用 `--tol-*` 调。设计原则：复合分（composite / distill）任一单独通过都**不够**——立希名词直出退化、「变冷淡刷分」这些真实事故全是单指标漏检。缺产物文件是 rc 2 的明确报错，半截证据不许当「通过」。
 
