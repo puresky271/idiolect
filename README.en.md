@@ -51,9 +51,9 @@ The running example is the five members of **BanG Dream! It's MyGO!!!!!**. Note 
 | You get | Concretely |
 |---|---|
 | **A drop-in assembly library** | `pip install .` then `from idiolect.assemble import build_messages` returns the four-layer prompt. **Zero third-party runtime dependencies** (openai / numpy / jieba are only needed for probing and distillation) |
-| **An evaluation loop that proves "closer"** | Probe → (distribution fit / within-cell repetition / verbatim-copy audit) → multi-arm pooling → power estimate. The table below is one real run of 105 replies |
-| **Four mechanical gates plus a prompt-diff gate** | Prompt edits should not rest on vibes: one `offline_smoke.py` run covers assembly, scene coverage, trigger matrix, content red lines, data shape, the gates and a zero-write check |
-| **Tooling that transfers to another work** | 58 scripts: acquisition and cleaning, corpus splitting, scene discovery, tic distillation, length-target export, probing and scoring. The method is not tied to one show — point it at another cast and re-run |
+| **An evaluation loop that proves "closer"** | Probe → (distribution fit / within-cell repetition / verbatim-copy audit) → multi-arm pooling → power estimate. Two dedicated probes cover boundary refusal and multi-turn drift, and an evidence gate checks fact consistency. The table below is one real run of 105 replies |
+| **Six mechanical gates plus a prompt-diff gate** | Prompt edits should not rest on vibes: one `offline_smoke.py` run covers assembly, scene coverage, trigger matrix, content red lines, data shape, the gates and a zero-write check |
+| **Tooling that transfers to another work** | 65 scripts: acquisition and cleaning, corpus splitting, scene discovery, tic distillation, length-target export, probing and scoring. The method is not tied to one show — point it at another cast and re-run |
 | **Ready-made character data (aggregates only)** | 26 scenes (13 general + 13 character-specific), 130 character × scene length targets, 114 per-scene tic cells, style profiles for five characters |
 | **Nine methodology documents** | Where the corpus comes from, how each feature class is computed and landed, how to evaluate, and the pitfalls already paid for |
 
@@ -110,7 +110,7 @@ Using the MyGO!!!!! five as the example:
 | Soyo | 16 chars | 1.4 | Gentle and restrained; only 6% exclamation rate |
 | Rana | 6 chars | 1.2 | Extremely short, 3% exclamation rate, topic often hijacked by cats |
 
-Of these, every median, sentence count and punctuation share can be looked up in [`data/style_profiles.json`](data/style_profiles.json); Taki's noun-opening rate comes from the corpus-level counter, and `tools/score/_noun_initial.py <run-label>` prints the original baseline alongside the arm.
+Every median, sentence count and punctuation share in the table can be looked up in [`data/style_profiles.json`](data/style_profiles.json); Taki's noun-opening rate comes from the corpus-level counter, and `tools/score/_noun_initial.py <run-label>` prints the original baseline alongside the arm.
 
 The gap widens per scene too: in a confession scene, for instance, Rana says 7 characters and Soyo 17. That is exactly why the constraints have to be "this character in this situation", not one shared average.
 
@@ -250,6 +250,8 @@ py -X utf8 tools/probe/make_fixtures.py
 py -X utf8 tools/probe/probe_runner.py --label dry --dry-run --assemble --registry --runs 1
 py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --registry --runs 3
 py -X utf8 tools/score/probe_report.py --label run1 --scenes crisis,comfort --cat 通用场景
+py -X utf8 tools/probe/oob_probe.py --label oob1 --runs 2 --gate       # boundary-refusal probe (fails on a high-severity break)
+py -X utf8 tools/probe/multiturn_probe.py --label mt1 --gate           # multi-turn style-drift probe
 ```
 
 **The evaluation clock**: characters react to the hour (3 AM answers differ from afternoon answers), so evaluation uses a clock pinned to daytime (`tools/mock_clock.py`) instead of letting "what time is it" become a hidden variable. The command below only *prints* the environment-variable line (a child process cannot change your shell) — paste it into your shell to take effect:
@@ -313,7 +315,7 @@ The methodology documents are written in Chinese. Each file stands alone; if you
 | [`docs/01-quickstart.md`](docs/01-quickstart.md) | Install and first five minutes |
 | [`docs/02-corpus.md`](docs/02-corpus.md) | Corpus acquisition, cleaning, and the derived statistics inventory |
 | [`docs/03-features.md`](docs/03-features.md) | The five feature classes: how they are computed, where they land, trigger discipline |
-| [`docs/04-evaluation.md`](docs/04-evaluation.md) | Metrics, pooling, gates, fixture design, common misreadings |
+| [`docs/04-evaluation.md`](docs/04-evaluation.md) | Metrics, pooling, gates, boundary refusal & multi-turn drift, evidence consistency, fixture design, common misreadings |
 | [`docs/05-tooling.md`](docs/05-tooling.md) | Tool reference, including prompt dump, mock clock, and offline smoke |
 | [`docs/06-lessons.md`](docs/06-lessons.md) | The pitfall list: what taught each constraint |
 | [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | Building turn_logic modules and voice_check post-processing: wiring, gates, acceptance |

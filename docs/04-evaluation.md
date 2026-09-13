@@ -219,7 +219,7 @@ py -X utf8 tools/score/ab_blind.py --a … --b … --llm
 
 ## 13. 越界拒答与多轮漂移（2026-09-13）
 
-composite / distill 测「像不像」，硬规则 V 级测「格式破功」，`voice_meta_gate` 只扫 prompt 的四个输入面——**模型输出侧的越界没有人管**，而且所有探针都是单轮的，多轮累积漂移（越聊越长、口癖稀释、聊深了出戏）没有测量。这两节补的就是这两个维度，方法对应 WikiRoleEval 的 rejection 指标与多轮一致性（2026-09-13 Ditto 方法论移植，特征正则来自母项目已在线上验证的实现，移植边界记录在 `tools/gates/oob_check.py` 头部）。
+composite / distill 测「像不像」，硬规则 V 级测「格式破功」，`voice_meta_gate` 只扫 prompt 的四个输入面——**模型输出侧的越界没有人管**，而且所有探针都是单轮的，多轮累积漂移（越聊越长、口癖稀释、聊深了出戏）没有测量。本节补这两个维度，第 14 节补证据一致性；方法对应 WikiRoleEval 的 rejection 指标与多轮一致性（2026-09-13 Ditto 方法论移植，特征正则来自母项目已在线上验证的实现，移植边界记录在 `tools/gates/oob_check.py` 头部）。
 
 ### 13.1 越界拒答探针（oob_probe）
 
@@ -241,7 +241,7 @@ py -X utf8 tools/probe/multiturn_probe.py --label mt1            # 8 轮自对�
 py -X utf8 tools/probe/multiturn_probe.py --label mt1 --gate     # 漂移显著塌方 rc 1
 ```
 
-每角色跑固定的 8 轮日常剧本，**模型的回复进入它自己的上下文**——这正是要测的 self-reinforcement 路径。逐轮记录锚点 hits/chars、字长、句数与 OOB 审计；漂移判定用前半段 vs 后半段的**合并计数泊松检验**（复用 accept_check 的实现，不重写第二份统计口径），样本不足照实打印「无结论」。读报告的方式和第 3 节一样：先看可检测下限，下限之内明说无结论。
+每角色跑固定的 8 轮日常剧本，**模型的回复进入它自己的上下文**——这正是要测的 self-reinforcement 路径。逐轮记录锚点 hits/chars、字长、句数与 OOB 审计；漂移判定用前半段 vs 后半段的**合并计数泊松检验**（复用 accept_check 的实现，不重写第二份统计口径）。读法与第 11 节相同：先看可检测下限，下限之内明说「无结论」，不硬判。
 
 ## 14. 证据一致性（2026-09-13）
 
@@ -251,7 +251,7 @@ py -X utf8 tools/probe/multiturn_probe.py --label mt1 --gate     # 漂移显著�
 py -X utf8 tools/gates/evidence_check.py --label run1 --gate     # fact 档违规 rc 1（--strict 连称呼档一起判）
 ```
 
-两档语义：**fact 档**（担当 / 学校 / CRYCHIC）与角色包明文事实矛盾即判死；**address 档**（专属称呼偏离）默认只记账。只查**专属**词——「弹吉他」爱音/乐奈都可能合法说出，非专属词的误报率撑不起门禁（素世说「我弹吉他」属于有意的漏报取舍）。表与角色包 SSOT 的一致性由 `tests/test_oob_evidence_gates.py` 的投影测试钉住：改了 canon / voice 的称呼或担当，表不改测试就红。契约 6 条：ground truth 判别力、高危档语义、fact/address 两档、SSOT 投影、漂移判定、探针 dry-run。
+两档语义：**fact 档**（担当 / 学校 / CRYCHIC）与角色包明文事实矛盾即判死；**address 档**（专属称呼偏离）默认只记账。只查**专属**词——「弹吉他」爱音/乐奈都可能合法说出，非专属词的误报率撑不起门禁（素世说「我弹吉他」属于有意的漏报取舍）。表与角色包 SSOT 的一致性由 `tests/test_oob_evidence_gates.py` 的投影测试钉住：改了 canon / voice 的称呼或担当，表不改测试就红。
 
 ---
 

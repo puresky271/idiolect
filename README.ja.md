@@ -51,9 +51,9 @@
 | 手に入るもの | 具体的に |
 |---|---|
 | **そのまま使えるアセンブリライブラリ** | `pip install .` のあと `from idiolect.assemble import build_messages` で四層 prompt が返ります。**実行時のサードパーティ依存はゼロ**（openai / numpy / jieba が要るのは probe と蒸留だけ） |
-| **「近づいた」を証明する評価ループ** | probe →（分布適合 / 同一セル内の重複 / 逐字コピー監査）→ マルチアームのプーリング → 検出力の見積もり。下の表は実際に走らせた 105 件の返答です |
-| **四つの機械ゲート + prompt diff ゲート** | prompt の変更を勘で決めないため。`offline_smoke.py` の一回でアセンブリ・場面カバレッジ・トリガ行列・内容レッドライン・データ形状・ゲート・ゼロ書き込み検査まで通ります |
-| **作品を差し替えられるツール群** | 58 本のスクリプト：取得と洗浄、コーパス分割、場面発見、口癖の蒸留、長さ目標の書き出し、probe と採点。方法は作品に縛られないので、別のキャストに当てて再実行するだけ |
+| **「近づいた」を証明する評価ループ** | probe →（分布適合 / 同一セル内の重複 / 逐字コピー監査）→ マルチアームのプーリング → 検出力の見積もり。このほか、境界越えの拒否と多ターンドリフトの二種の専用 probe、さらに事実整合のゲートがあります。下の表は実際に走らせた 105 件の返答です |
+| **六つの機械ゲート + prompt diff ゲート** | prompt の変更を勘で決めないため。`offline_smoke.py` の一回でアセンブリ・場面カバレッジ・トリガ行列・内容レッドライン・データ形状・ゲート・ゼロ書き込み検査まで通ります |
+| **作品を差し替えられるツール群** | 65 本のスクリプト：取得と洗浄、コーパス分割、場面発見、口癖の蒸留、長さ目標の書き出し、probe と採点。方法は作品に縛られないので、別のキャストに当てて再実行するだけ |
 | **そのまま使えるキャラクターデータ（集計値のみ）** | 26 場面（汎用 13 + キャラ固有 13）、130 個の「キャラ × 場面」長さ目標、114 セルの場面別口癖、五人分のスタイルプロファイル |
 | **九本の方法論ドキュメント** | コーパスの出どころ、五種類の特徴の計算と落とし込み方、評価の仕方、すでに払った失敗の記録 |
 
@@ -252,6 +252,8 @@ py -X utf8 tools/probe/make_fixtures.py                                # プレ�
 py -X utf8 tools/probe/probe_runner.py --label dry --dry-run --assemble --registry --runs 1
 py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --registry --runs 3
 py -X utf8 tools/score/probe_report.py --label run1 --scenes crisis,comfort --cat 通用场景
+py -X utf8 tools/probe/oob_probe.py --label oob1 --runs 2 --gate       # 境界越え拒否の probe（高危で破綻したら FAIL）
+py -X utf8 tools/probe/multiturn_probe.py --label mt1 --gate           # 多ターンドリフトの probe
 ```
 
 **評価用の時計**：キャラクターは時間帯に敏感（深夜と午後で返答が変わります）なので、評価は昼に固定した偽時計（`tools/mock_clock.py`）で統一し、「今何時か」を隠れた変数にしません。下のコマンドは設定すべき環境変数を**表示するだけ**です（子プロセスは親の shell を変えられません）。shell に貼って初めて効きます：
@@ -317,7 +319,7 @@ py -X utf8 tools/distill/export_profiles.py --check  # 公開済みプロファ�
 | [`docs/01-quickstart.md`](docs/01-quickstart.md) | インストールと五分で分かるまで |
 | [`docs/02-corpus.md`](docs/02-corpus.md) | コーパスの取得・洗浄・派生統計の一覧 |
 | [`docs/03-features.md`](docs/03-features.md) | 五種類の特徴の算出・落とし込み・トリガ語の規律 |
-| [`docs/04-evaluation.md`](docs/04-evaluation.md) | 三種の指標、プーリング、ゲート、fixture 設計、よくある誤読 |
+| [`docs/04-evaluation.md`](docs/04-evaluation.md) | 三種の指標、プーリング、ゲート、境界越え拒否と多ターンドリフト、事実整合、fixture 設計、よくある誤読 |
 | [`docs/05-tooling.md`](docs/05-tooling.md) | ツールマニュアル（prompt dump、mock 時計、offline smoke を含む） |
 | [`docs/06-lessons.md`](docs/06-lessons.md) | 失敗録：どの制約が何に教えられたか |
 | [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | turn_logic モジュールと voice_check 後処理の組み方・配線・受け入れ |

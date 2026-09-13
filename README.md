@@ -35,7 +35,7 @@
 
 孩子们，随着现在的厂商越来越追求model在coding和agent方面的能力，我们的AI RP真是越来越难绷了啊，本仓库是基于作者的部分经验总结出来的一份“AI 角色扮演对话系统的评测方法学 + prompt 工程踩坑实录”，外加一套可复用的约束框架，希望能帮到想做AI角色的同好们。
 
-如果你用通用模型扮演角色，说着说着就会变成同一类客服腔：话越来越长、爱说「你的感受我完全能理解」、结尾还要升华一下，稳稳的接住你。这个仓库的做法是：先从角色原来的台词里**量出 ta 说话的习惯**——一句话多长、说几句、爱用什么口头禅、什么场合说什么话——把这些习惯写成 prompt 里的硬约束，再用一套自动检查验证「这次是不是真的更像了」。不做微调，仓库里也没有原作台词，只有统计出来的数字。
+如果你用通用模型扮演角色，说着说着就会变成同一类客服腔：话越来越长、爱说「你的感受我完全能理解」、结尾还要升华一下，稳稳地接住你。这个仓库的做法是：先从角色原来的台词里**量出 ta 说话的习惯**——一句话多长、说几句、爱用什么口头禅、什么场合说什么话——把这些习惯写成 prompt 里的硬约束，再用一套自动检查验证「这次是不是真的更像了」。不做微调，仓库里也没有原作台词，只有统计出来的数字。
 
 为了让方法看得见摸得着，全程用《BanG Dream! It's MyGO!!!!!》的五名成员做**示例角色**。请注意**方法本身和具体作品无关**，换成任何角色都成立；我们只解决一件事——怎么证明「说话像」，并把它做成独立、可复现的一套。
 
@@ -51,9 +51,9 @@
 | 你能拿到                        | 具体是什么                                                                                                                          |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **一个能直接用的装配库**              | `pip install .` 之后 `from idiolect.assemble import build_messages` 就能拿到四层 prompt。**运行时零第三方依赖**（探针与蒸馏才需要 openai / numpy / jieba） |
-| **一套能证明「更像了」的评测**           | 探针 →（分布贴合 / 同格重复 / 逐字复述）三件套 → 多臂池化 → 功效估算。下面那张表就是一次真跑的 105 条回复                                                                 |
-| **四道机械门禁 + prompt diff 门禁** | 改 prompt 不能只靠手感：`offline_smoke.py` 一条命令跑完装配、场景覆盖、触发矩阵、内容红线、数据形状、门禁与零写校验                                                        |
-| **可换作品的工具链**                | 58 个脚本：抓取清洗、语料切分、场景发现、口癖蒸馏、长度目标导出、探针与评分。方法不绑作品，换角色只需重跑                                                                         |
+| **一套能证明「更像了」的评测**           | 探针 →（分布贴合 / 同格重复 / 逐字复述）三件套 → 多臂池化 → 功效估算；另有越界拒答与多轮漂移两个专项探针，加上事实一致性门禁。下面那张表就是一次真跑的 105 条回复                                                                |
+| **六道机械门禁 + prompt diff 门禁** | 改 prompt 不能只靠手感：`offline_smoke.py` 一条命令跑完装配、场景覆盖、触发矩阵、内容红线、数据形状、门禁与零写校验                                                        |
+| **可换作品的工具链**                | 65 个脚本：抓取清洗、语料切分、场景发现、口癖蒸馏、长度目标导出、探针与评分。方法不绑作品，换角色只需重跑                                                                         |
 | **现成的角色数据（只有聚合量）**          | 26 个场景（13 通用 + 13 角色专属）、130 个「角色 × 场景」长度目标、114 格场景口癖、五个角色的风格画像                                                                 |
 | **九篇方法论文档**                 | 语料怎么来、五类特征怎么算怎么落地、怎么评测、踩过哪些坑，各自独立可读                                                                                            |
 
@@ -110,7 +110,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")   # 直接发
 | 素世  | 16 字         | 1.4 句 | 温柔克制，感叹率只有 6%          |
 | 乐奈  | 6 字          | 1.2 句 | 极短，感叹率 3%，话题经常被猫带走     |
 
-其中表中位数、句数与感叹/省略号占比都能在 [`data/style_profiles.json`](data/style_profiles.json) 里逐条查到；立希那行的「名词起手」是语料口径统计，用 `tools/score/_noun_initial.py <批次名>` 能连原作基线一起打出。
+表里的中位数、句数与感叹/省略号占比都能在 [`data/style_profiles.json`](data/style_profiles.json) 里逐条查到；立希那行的「名词起手」是语料口径统计，用 `tools/score/_noun_initial.py <批次名>` 能连原作基线一起打出。
 
 同一场景下差异还会放大：例如乐奈在「被表白」场景说 7 个字，素世在同一场景说 17 个字。所以这就是为什么约束必须是「这个角色 × 这个场合」的，不能是「所有人共用一个平均数」。
 
@@ -251,6 +251,8 @@ py -X utf8 tools/probe/make_fixtures.py                                # 生成�
 py -X utf8 tools/probe/probe_runner.py --label dry --dry-run --assemble --registry --runs 1
 py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --registry --runs 3
 py -X utf8 tools/score/probe_report.py --label run1 --scenes crisis,comfort --cat 通用场景
+py -X utf8 tools/probe/oob_probe.py --label oob1 --runs 2 --gate       # 越界拒答探针（高危破功即 FAIL）
+py -X utf8 tools/probe/multiturn_probe.py --label mt1 --gate           # 多轮风格漂移探针
 ```
 
 **评测时钟**：角色对时段敏感（凌晨和下午的回答不一样），所以评测统一用固定在白天的假时钟（`tools/mock_clock.py`），不把「现在几点」变成隐藏变量。下面这条只是**打印**要设的环境变量（子进程改不了父进程的 shell），贴进 shell 才生效：
@@ -314,7 +316,7 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 | [`docs/01-quickstart.md`](docs/01-quickstart.md)                                       | 安装与五分钟上手                                  |
 | [`docs/02-corpus.md`](docs/02-corpus.md)                                               | 语料获取、清洗、派生统计清单                            |
 | [`docs/03-features.md`](docs/03-features.md)                                           | 五类特征怎么算、怎么落地、触发词纪律                        |
-| [`docs/04-evaluation.md`](docs/04-evaluation.md)                                       | 三件套指标、池化、门禁、夹具设计、常见误读                     |
+| [`docs/04-evaluation.md`](docs/04-evaluation.md)                                       | 三件套指标、池化、门禁、越界拒答与多轮漂移、证据一致性、夹具设计、常见误读                     |
 | [`docs/05-tooling.md`](docs/05-tooling.md)                                             | 工具手册（含 prompt dump、mock 时钟、offline smoke） |
 | [`docs/06-lessons.md`](docs/06-lessons.md)                                             | 踩坑清单：每条约束是被什么教出来的                         |
 | [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | turn_logic 模块与 voice_check 后处理的搭建流程、接线与验收 |

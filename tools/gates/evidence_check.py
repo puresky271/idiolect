@@ -2,10 +2,10 @@
 
 为什么存在（2026-09-13，Ditto 方法论移植）：WikiRoleEval 用「黄金证据」让评判 LLM
 检验回复与角色知识是否一致；本仓库不走 LLM judge，改走**机械投影**——canon / voice
-里本来就写死了五套可检验事实（乐队担当、就读学校、CRYCHIC 成员资格）与一张称呼表
-（NICKNAME_RULE / 【关系差异】），把它们收拢成表，逐句扫描回复中的自我断言与称呼，
-偏离即记违规。`tests/test_oob_evidence_gates.py` 的 SSOT 投影测试保证：角色包改了
-事实或称呼，这张表不改就会红。
+里本来就写死了五名角色各自的可检验事实（乐队担当、就读学校、CRYCHIC 成员资格）
+与一张专属称呼表（NICKNAME_RULE / 【关系差异】），把它们收拢成表，逐句扫描回复中的
+自我断言与称呼，偏离即记违规。`tests/test_oob_evidence_gates.py` 的 SSOT 投影测试
+保证：角色包改了事实或称呼，这张表不改就会红。
 
 两档语义：
   · fact 档（role / school / crychic）：**与角色包明文事实矛盾**，--gate 任一命中即 rc 1。

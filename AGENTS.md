@@ -52,8 +52,8 @@ tools/               # 工具链，按职责分子目录
   mock_clock.py      #   评测时钟
   secrets_loader.py  #   密钥加载
   distill/           #   从语料统计派生量（export_targets / tic_profile / scene_char_baseline …）
-  gates/             #   机械门禁（dump_prompt、voice_meta_gate、_tl_deep_check、accept_check 验收门禁 …）
-  probe/             #   探针（make_fixtures、probe_runner、prompt_patch …）
+  gates/             #   机械门禁（voice_meta_gate、_tl_deep_check、oob_check、evidence_check、accept_check 验收门禁 …）
+  probe/             #   探针（probe_runner、oob_probe 越界、multiturn_probe 多轮漂移、prompt_patch …）
   score/             #   评分（probe_report、scene_distill、_copy_audit、power_calc、ab_blind 盲评 …）
   corpus/            #   语料抓取与构建（需要 IDIOLECT_CORPUS_DIR）
 data/                # 随仓库发布的派生统计（无原作文本），每个文件的生成脚本见 data/README.md
