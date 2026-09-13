@@ -265,6 +265,21 @@ def wrap_blocks(blocks: list[str]) -> str:
 
 
 # ── 深模块统一执行器（消除五个角色包的 try/except 复制体）──────────────
+# CPython 调用签名错误的固定措辞（f"……() got an unexpected keyword argument …" 等）
+_SIG_ERR_MARKERS = (
+    "unexpected keyword argument",    # 多传 / 拼错了 kwargs
+    "required positional argument",   # 漏了必填参数
+    "positional arguments but",       # 位置参数个数不匹配
+    "multiple values for argument",   # 位置参数与 kwargs 重名
+)
+
+
+def _is_signature_error(err: TypeError) -> bool:
+    """判断 TypeError 是不是**调用签名错配**（而不是模块内部逻辑抛的）。"""
+    msg = str(err)
+    return any(m in msg for m in _SIG_ERR_MARKERS)
+
+
 def run_modules(
     modules,
     user_text: str,
@@ -280,6 +295,8 @@ def run_modules(
 
     语义与各角色包的手写复制体逐一对齐：
       · 单个模块异常只记日志、不中断，后续模块照跑（错误日志带 `[label/key]`）；
+        **例外**：调用签名错配的 TypeError（kwargs 拼错 / 漏参）直接 raise——
+        那是接线 bug，吞掉它模块就静默失效了（2026-09-13 评审 S2）；
       · `needs_text` 列出的模块在 user_text 为空时跳过（灯的 text-driven 层）；
       · `max_blocks` 封顶产出块数（None = 不封顶：anon/tomori/taki 的既有行为；
         soyo/rana 传 1）——只数**产出了块**的模块，返 "" 的不占额度；
@@ -299,6 +316,15 @@ def run_modules(
             kwargs = dict(shared_kwargs)
             kwargs.update(extras.get(key, {}))
             blk = builder(user_text, **kwargs)
+        except TypeError as _err:
+            # 调用签名错配（kwargs 拼错 / 漏参）是接线 bug、不是运行态故障：
+            # 吞掉它等于「配错了但看起来正常」，模块从此静默失效（2026-09-13 评审 S2）。
+            # CPython 的签名错误措辞稳定，用它与模块内部逻辑抛的 TypeError 区分。
+            if _is_signature_error(_err):
+                _log.error("[%s/%s] 模块签名错配，拒绝静默跳过: %s", label, key, _err)
+                raise
+            _log.warning("[%s/%s] error: %s", label, key, _err)
+            continue
         except Exception as _err:  # 单模块故障不该拖垮整轮装配
             _log.warning("[%s/%s] error: %s", label, key, _err)
             continue

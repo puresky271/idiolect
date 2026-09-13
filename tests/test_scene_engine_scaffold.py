@@ -65,6 +65,22 @@ class RunModulesTests(unittest.TestCase):
         self.assertEqual(fired, ["good"])
         self.assertTrue(any("[T/bad] error: x" in line for line in cm.output))
 
+    def test_signature_mismatch_raises_not_silently_skipped(self):
+        # kwargs 拼错 / 漏参是接线 bug：吞掉它模块就静默失效（2026-09-13 评审 S2）
+        def bad(text, not_a_real_kw): return "B"
+        with self.assertRaises(TypeError):
+            se.run_modules((("m", bad),), "hi",
+                           label="T", shared_kwargs={"session_id": "s"})
+
+    def test_in_module_type_error_still_isolated(self):
+        # 模块内部逻辑抛的 TypeError 仍走「记日志、跳过、不拖垮整轮」的老语义
+        def boom(text, **kw): raise TypeError("'NoneType' object is not subscriptable")
+        def ok(text, **kw): return "B"
+        blocks, fired = se.run_modules((("bad", boom), ("good", ok)), "hi",
+                                       label="T", shared_kwargs={})
+        self.assertEqual(blocks, ["B"])
+        self.assertEqual(fired, ["good"])
+
     def test_max_blocks_counts_only_produced(self):
         def empty(text, **kw): return ""
         def ok(text, **kw): return "B"
