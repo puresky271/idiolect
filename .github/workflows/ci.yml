@@ -47,6 +47,17 @@ jobs:
           python -m pip install .
       - name: 离线 smoke（装配 + 红线 + 数据 + 门禁 + 单测 + 零写校验）
         run: python -X utf8 tools/offline_smoke.py
+      # smoke 的 PASS 明细平时只躺在 gitignore 的 report/ 里；把它搬进 job summary，
+      # 「自检真的跑过」在 CI 页面上就有据可查（2026-09-13 评审 S4）
+      - name: smoke 摘要写进 job summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f report/offline_smoke.md ]; then
+            cat report/offline_smoke.md >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+          else
+            echo "（offline_smoke 未产出摘要文件）" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+          fi
 
   wheel:
     runs-on: ubuntu-latest
