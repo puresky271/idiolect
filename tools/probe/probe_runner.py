@@ -306,8 +306,10 @@ def main() -> int:
                     scene=sc.get("scene", ""), scene_cn=sc.get("cat", ""))
             else:
                 sys_text = patched_sys
-            # 补丁可以**叠加**在装配结果之上：本仓库的占位夹具没有 persona card，
-            # 补丁的插入点找不到时会退化成「追加到末尾」，正是差分实验想要的位置。
+            # 补丁可以**叠加**在装配结果之上：插入点 = style_target 层开始
+            # （persona card 末尾）。装配结果必有该层；夹具/外部 dump 里没有层边界时
+            # prompt_patch 会直接报错退出，而不是悄悄换个落点（2026-09-13 评审 C1：
+            # 旧锚点曾落在一句交叉引用内部，把句子腰斩）。
             if args.assemble and args.patch != "none":
                 sys_text = PP.apply_patch(
                     sys_text, CHARKEY[char], args.patch, targets,

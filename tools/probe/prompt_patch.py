@@ -35,10 +35,27 @@ def load_targets(lang: str = "cn") -> dict:
     return json.loads(TARGETS_PATH.read_text(encoding="utf-8"))[lang]
 
 
+# persona card 结束 = style_target 层开始：发布版四层装配里 canon + voice 之后
+# 的第一个块头就是【说话尺度·…】。锚真实层边界，不锚可能被别的句子复用的短语。
+PERSONA_END_MARK = "【说话尺度·"
+
+
 def find_persona_end(system: str) -> int:
-    """返回 persona card 结束位置（= 共享反客服腔块开始处；找不到则返回 -1）。"""
-    i = system.find("【所有角色共用·反客服腔硬约束】")
-    return i
+    """返回 persona card 结束位置（= style_target 层【说话尺度·】块的行首）。
+
+    2026-09-13 评审 C1：旧锚点串「【所有角色共用·反客服腔硬约束】」在发布版
+    prompt 里只出现在一句交叉引用内部，find 返回的是句子中间的偏移，A/B 补丁
+    会把句子腰斩。改成锚真实层边界后，找不到就报错退出——静默退化成「追加到
+    system 末尾」会把被测块甩出 persona card，两臂差异就不再只是被测块。
+    """
+    if system.startswith(PERSONA_END_MARK):
+        return 0
+    i = system.find("\n" + PERSONA_END_MARK)
+    if i >= 0:
+        return i + 1
+    raise SystemExit(
+        "find_persona_end：system 里没有 style_target 层边界（行首的【说话尺度·…】）。"
+        "发布版四层装配必有这一层；外部 dump 请先确认布局，补丁落点不许靠猜。")
 
 
 def build_targets_block(char_cn: str, t: dict) -> str:
@@ -138,6 +155,21 @@ def build_anchor_block(char_cn: str, t: dict) -> str:
 RANA_REGISTER_BLOCK = "【句式结构·这是你最大的辨识点】"
 
 
+def _rana_block_end(text: str, start: int) -> int:
+    """乐奈句式块的结束边界：下一个行首【标题 或 （跨角色… 说明段，取先到者。
+
+    2026-09-13 修：manifest 在句式块之后新增了【常用物件与话题】等节，
+    只认「（跨角色」说明段会把后面三节一并剥掉——取两个候选里更早的那个。
+    """
+    cands = [
+        x for x in (
+            text.find("\n【", start + len(RANA_REGISTER_BLOCK)),
+            text.find("\n（跨角色", start),
+        ) if x >= 0
+    ]
+    return min(cands) if cands else -1
+
+
 def strip_rana_register(system: str) -> str:
     """从夹具里**移除**已落盘的乐奈句式块，构造干净的 before 臂。
 
@@ -148,10 +180,7 @@ def strip_rana_register(system: str) -> str:
     start = system.find(RANA_REGISTER_BLOCK)
     if start < 0:
         raise SystemExit("夹具里没有乐奈句式块——before 臂无法构造")
-    # 块结束：下一个以【开头的标题行（即跨角色引用说明那段）
-    nxt = system.find("\n（跨角色", start)
-    if nxt < 0:
-        nxt = system.find("\n【", start + len(RANA_REGISTER_BLOCK))
+    nxt = _rana_block_end(system, start)
     if nxt < 0:
         raise SystemExit("找不到乐奈句式块的结束边界")
     out = system[:start] + system[nxt + 1:]
@@ -199,25 +228,30 @@ def build_scene_module_blocks(scene_keys: list[str]) -> str:
 
 
 def _persona_card_from_code(char_key: str, *, drop_rana_register: bool) -> str:
-    """用**当前代码**重建 persona card，可选择性剔除乐奈句式块。
+    """用**当前代码**重建 persona card（= canon + voice 两层全文），可选择性剔除乐奈句式块。
 
     为什么需要：夹具是历史 dump（往往是打补丁之前），里面嵌的是旧的 manifest / persona card。
-    探针若直接用夹具，就测不到 manifest 层的改动。这里现读 `_get_persona_card()`，
+    探针若直接用夹具，就测不到 manifest 层的改动。这里现读 registry 的 canon / voice，
     保证测的是当前代码；A/B 两臂都走它，唯一差别就是要测的那个块。
+
+    2026-09-13 修：旧实现 import 的 `idiolect.style_target._get_persona_card` 在发布版
+    仓库里不存在（那是私有完整系统的入口），live_persona 系补丁一跑就 ImportError。
+    发布版的 persona card 就是 canon + voice，从 `idiolect.registry` 取。
     """
     names = {"anon": "爱音", "soyo": "素世", "tomori": "灯", "taki": "立希", "rana": "乐奈"}
-    from idiolect.style_target import _get_persona_card
+    from idiolect.registry import get_canon_profile, get_voice_manifest
 
-    card = _get_persona_card(names[char_key])
+    name = names[char_key]
+    canon = (get_canon_profile(name) or "").strip()
+    voice = (get_voice_manifest(name) or "").strip()
+    card = "\n\n".join(x for x in (canon, voice) if x)
     if not card:
-        raise SystemExit(f"无法从代码取到 {names[char_key]} 的 persona card")
+        raise SystemExit(f"无法从代码取到 {name} 的 persona card（canon/voice 均为空）")
     if drop_rana_register:
         start = card.find(RANA_REGISTER_BLOCK)
         if start >= 0:
-            nxt = card.find("\n（跨角色", start)
-            if nxt < 0:
-                nxt = card.find("\n【", start + len(RANA_REGISTER_BLOCK))
-            card = card[:start] + card[nxt + 1:] if nxt > 0 else card
+            nxt = _rana_block_end(card, start)
+            card = card[:start] + card[nxt + 1:] if nxt >= 0 else card
             if RANA_REGISTER_BLOCK in card:
                 raise SystemExit("剔除乐奈句式块失败")
     return card
@@ -226,19 +260,25 @@ def _persona_card_from_code(char_key: str, *, drop_rana_register: bool) -> str:
 def swap_in_live_persona_card(system: str, char_key: str, *, drop_rana_register: bool) -> str:
     """把夹具里的旧 persona card 替换成当前代码构建的版本。
 
-    定位方式：从【输出格式·所有角色共用】到【所有角色共用·反客服腔硬约束】块结束。
+    定位（发布版四层装配）：persona card = 从 system 开头到 style_target 层
+    （【说话尺度·】块）之间的全部内容，即 canon + voice。私有完整系统的历史
+    dump 带【输出格式·所有角色共用】标记的，仍按旧两标记定位。
     """
     new_card = _persona_card_from_code(char_key, drop_rana_register=drop_rana_register)
     start = system.find("【输出格式·所有角色共用】")
-    if start < 0:
-        raise SystemExit("夹具里找不到 persona card 起点")
-    end = system.find("【所有角色共用·反客服腔硬约束】", start)
-    if end < 0:
-        raise SystemExit("夹具里找不到 persona card 终点")
-    # 反客服腔块本身属于 persona card，需一并替换：找到它的结束（下一个二级标题或串尾）
-    tail = system.find("\n【", end + len("【所有角色共用·反客服腔硬约束】"))
-    end_full = tail if tail > 0 else len(system)
-    return system[:start] + new_card + system[end_full:]
+    if start >= 0:
+        # 私有完整系统 dump：card 从【输出格式·所有角色共用】到反客服腔块结束
+        end = system.find("【所有角色共用·反客服腔硬约束】", start)
+        if end < 0:
+            raise SystemExit("夹具里找不到 persona card 终点")
+        # 反客服腔块本身属于 persona card，需一并替换：找到它的结束（下一个二级标题或串尾）
+        tail = system.find("\n【", end + len("【所有角色共用·反客服腔硬约束】"))
+        end_full = tail if tail > 0 else len(system)
+        return system[:start] + new_card + system[end_full:]
+    # 发布版四层：canon 是第 0 层，card 一直延伸到 style_target 层开始；
+    # 层间的空行分隔符属于装配器，不在 card 里，替换时要补回来
+    end = find_persona_end(system)
+    return new_card + "\n\n" + system[end:]
 
 
 def apply_patch(system: str, char_key: str, patch: str, targets: dict,
@@ -282,8 +322,6 @@ def apply_patch(system: str, char_key: str, patch: str, targets: dict,
                 f"（导出时样本 < 20 的组合会被丢弃）——要么换场景，要么先补基线。")
         block = build_scene_block(name, st) + "\n\n" + build_hardcap_block(t.get("name", name), t)
         i = find_persona_end(system)
-        if i < 0:
-            return system + "\n\n" + block
         return system[:i].rstrip() + "\n\n" + block + "\n\n" + system[i:]
     if patch == "scenes_v3":
         # 场景模块候选版：数值目标 + 硬上限 + 按场景注入模块，故意**不含**句式块，
@@ -295,8 +333,6 @@ def apply_patch(system: str, char_key: str, patch: str, targets: dict,
         block = (build_targets_block(name, t) + "\n\n" + build_hardcap_block(name, t)
                  + "\n\n" + build_scene_module_blocks(list(SCENE_MODULE_CANDIDATES)))
         i = find_persona_end(system)
-        if i < 0:
-            return system + "\n\n" + block
         return system[:i].rstrip() + "\n\n" + block + "\n\n" + system[i:]
     t = targets.get(char_key)
     if not t:
@@ -312,9 +348,8 @@ def apply_patch(system: str, char_key: str, patch: str, targets: dict,
     else:
         raise SystemExit(f"unknown patch: {patch}")
     i = find_persona_end(system)
-    # 插在共享反客服腔块**之前**（persona card 末尾），与生产装配位置一致
-    if i < 0:
-        return system + "\n\n" + block
+    # 插在 style_target 层之前（canon + voice 的末尾 = persona card 结束），
+    # 与生产装配的层序一致；找不到层边界时 find_persona_end 会直接报错
     return system[:i].rstrip() + "\n\n" + block + "\n\n" + system[i:]
 
 
