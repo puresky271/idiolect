@@ -28,7 +28,7 @@ from .style_target import build_style_target_block
 LAYER_ORDER = ("canon", "voice", "style_target", "turn_logic")
 
 
-def build_system_prompt(
+def _build_layers(
     char: str,
     user_text: str = "",
     *,
@@ -36,11 +36,12 @@ def build_system_prompt(
     include_turn_logic: bool = True,
     is_developer: bool = False,
     now: datetime | None = None,
-) -> str:
-    """把四层约束拼成 system prompt。缺哪层就跳过哪层。
+) -> dict[str, str]:
+    """装配各层并返回 `{层名: 文本}`——`build_system_prompt` 与 `layer_sizes` 的唯一实现。
 
-    `now` 是「现在」的显式入口：turn_logic 里对时间敏感的场景（犯困 / 深夜）
-    靠它判定。不传时由下游决定，工具与评测请统一传 `mock_clock.mock_now()`。
+    诊断值与装配值必须同源（2026-09-13 评审 S1）：以前 `layer_sizes` 自己把
+    `classify` / `render_turn_special_block` 重算一遍，两处结果碰巧一致，但任一侧
+    改了措辞或条件，尺寸报告就会静默说谎。现在两边都走这里。
     """
     layers: dict[str, str] = {}
 
@@ -64,6 +65,26 @@ def build_system_prompt(
         if block.strip():
             layers["turn_logic"] = block.strip()
 
+    return layers
+
+
+def build_system_prompt(
+    char: str,
+    user_text: str = "",
+    *,
+    session_id: str | None = None,
+    include_turn_logic: bool = True,
+    is_developer: bool = False,
+    now: datetime | None = None,
+) -> str:
+    """把四层约束拼成 system prompt。缺哪层就跳过哪层。
+
+    `now` 是「现在」的显式入口：turn_logic 里对时间敏感的场景（犯困 / 深夜）
+    靠它判定。不传时由下游决定，工具与评测请统一传 `mock_clock.mock_now()`。
+    """
+    layers = _build_layers(
+        char, user_text, session_id=session_id, include_turn_logic=include_turn_logic,
+        is_developer=is_developer, now=now)
     return "\n\n".join(layers[k] for k in LAYER_ORDER if k in layers)
 
 
@@ -91,18 +112,15 @@ def layer_sizes(
     char: str, user_text: str = "", *, session_id: str | None = None,
     include_turn_logic: bool = True, is_developer: bool = False, now: datetime | None = None,
 ) -> dict[str, int]:
-    """各层字符数（诊断用：一眼看出哪一层在撑 prompt）。参数面与 `build_system_prompt` 对齐。"""
-    out: dict[str, int] = {}
-    for key, text in (
-        ("canon", get_canon_profile(char) or ""),
-        ("voice", get_voice_manifest(char) or ""),
-        ("style_target", build_style_target_block(char, classify(user_text, char) if user_text else "")),
-        ("turn_logic", render_turn_special_block(
-            char, user_text, session_id=session_id, is_developer=is_developer,
-            mode="chat", now_jst=now) if (user_text and include_turn_logic) else ""),
-    ):
-        out[key] = len(text.strip())
-    return out
+    """各层字符数（诊断用：一眼看出哪一层在撑 prompt）。参数面与 `build_system_prompt` 对齐。
+
+    与装配同源：走同一条 `_build_layers` 路径，报告的永远是装配值本身，
+    不再有「诊断自己重算一遍」的分叉隐患。
+    """
+    layers = _build_layers(
+        char, user_text, session_id=session_id, include_turn_logic=include_turn_logic,
+        is_developer=is_developer, now=now)
+    return {key: len(layers.get(key, "")) for key in LAYER_ORDER}
 
 
 __all__ = ["LAYER_ORDER", "build_messages", "build_system_prompt", "layer_sizes"]
