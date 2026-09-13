@@ -104,6 +104,10 @@ py -X utf8 tools/gates/dump_prompt.py --all --matrix
 py -X utf8 tools/probe/make_fixtures.py
 py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --registry --runs 3
 py -X utf8 tools/score/probe_report.py --label run1 --scenes crisis,comfort --cat 通用场景
+py -X utf8 tools/probe/oob_probe.py --label oob1 --runs 2 --gate          # 越界拒答探针（高危破功即 FAIL）
+py -X utf8 tools/probe/multiturn_probe.py --label mt1 --gate              # 多轮风格漂移探针
+py -X utf8 tools/gates/oob_check.py --label run1 --gate                   # 输出侧越界审计（可扫任意探针批次）
+py -X utf8 tools/gates/evidence_check.py --label run1 --gate              # 证据一致性校验（担当/学校/称呼）
 
 # 用自己的语料重算派生统计
 $env:IDIOLECT_CORPUS_DIR = "D:\corpus\mygo-gold"
@@ -127,14 +131,15 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
 
 ## 测试策略
 
-- `tests/` 下是 pytest（`unittest` 风格类），分七类契约测试，每条断言对应真实踩过的坑：
+- `tests/` 下是 pytest（`unittest` 风格类），分八类契约测试，每条断言对应真实踩过的坑：
   - `test_tooling_contracts.py`：mock 时钟、装配完整性、`--assemble` 不被覆盖、元叙述门禁覆盖面、README 字数表与实测一致；
   - `test_scene_turn_logic.py` / `test_soyo_rana_deep_turn_logic.py`：触发器命中正确且不过宽、per-session 去重、角色隔离与 env 回退开关、触发词有语料实证；
   - `test_workspace.py`：上下文层序固定、pinned 层不被预算裁掉、执行包贴最后一条 user、事实选择器的阈值与双预算；
   - `test_scene_engine_scaffold.py`：turn_logic 共享脚手架（SessionStore 的 mark/has/reset 与 LRU 淘汰、SessionValues 值状态表、env 假值表、深模块执行器）；
   - `test_voice_check_wiring.py`：tomori/taki/anon 后处理真的接线（不再是 stub）、清洗确定性（按输入定种）、`<CHAR>_VOICE_CHECK_ENABLED` 总开关与非本角色透传；
   - `test_score_golden.py`：评分链 golden 文件（scene_distill / _pool_arms 全量输出、probe_report 编排契约；golden 由测试内的合成输入离线复现，失配先确认是预期改动再重新生成，不要手改）；
-  - `test_eval_gates.py`：评测链路修复契约（composite 必须能分出助手腔、anchor_ref 单一来源（场景基线派生，画像不导出 anchor_density）、holdout 的 split 过滤与零结果守卫、`--baseline` 换参照物、accept_check 任一退化即 FAIL（锚点密度走合并泊松精确检验、打印可检测下限、噪声级波动不误报）、ab_blind 盲评确定性与不泄臂名、三语 README 旗舰表以 composite 领衔且三语数字多重集合一致）。
+  - `test_eval_gates.py`：评测链路修复契约（composite 必须能分出助手腔、anchor_ref 单一来源（场景基线派生，画像不导出 anchor_density）、holdout 的 split 过滤与零结果守卫、`--baseline` 换参照物、accept_check 任一退化即 FAIL（锚点密度走合并泊松精确检验、打印可检测下限、噪声级波动不误报）、ab_blind 盲评确定性与不泄臂名、三语 README 旗舰表以 composite 领衔且三语数字多重集合一致）；
+  - `test_oob_evidence_gates.py`：越界与证据契约（2026-09-13 Ditto 方法论移植，特征正则来自 mygo_chat：OOB 输出审计的 ground truth 判别力与高危档语义、evidence_check 的 fact/address 两档与否定守卫、证据表必须能投影回 canon/voice SSOT、多轮漂移的泊松判定（塌方 FAIL／平稳 PASS／欠功效「无结论」）、越界夹具注册表形状、两个探针 dry-run 全链路）。
 - 新增约束时**先写契约测试再改实现**；触发词必须能拿出语料实证（`tools/distill/verify_triggers.py`）。
 - `tools/offline_smoke.py` 是总闸，会跑门禁与单测，适合当作提交前检查。
 

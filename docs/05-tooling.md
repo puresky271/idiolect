@@ -89,6 +89,13 @@ py -X utf8 tools/probe/probe_runner.py --label repo_standalone --assemble --turn
 
 夹具来源顺序：`fixtures/` 里最新的 `messages_<char>*.json`，再退到 `_offline_smoke_out/`。要换成自己的运行时 dump，把文件放进 `fixtures/` 即可。
 
+另有两个专项探针（`--label` 产物可直接被 `oob_check` / `evidence_check` 的 `--label` 扫描，详见 `docs/04-evaluation.md` 第 13、14 节）：
+
+```bash
+py -X utf8 tools/probe/oob_probe.py --label oob1 --runs 2 --gate    # 越界拒答：7 维越界夹具 → 输出侧高危审计
+py -X utf8 tools/probe/multiturn_probe.py --label mt1 --gate        # 多轮漂移：8 轮自对话，前后半段泊松检验
+```
+
 ## 6. 评分四件套
 
 ```bash
@@ -142,6 +149,8 @@ py -X utf8 tools/gates/_tl_deep_check.py           # 深模块注入正文规范
 py -X utf8 tools/gates/audit_role_packages.py      # 角色包结构与注册表一致性
 py -X utf8 tools/gates/dump_turn_logic_gate.py --phase after    # 触发矩阵 + 归属标记 + 角色串味
 py -X utf8 tools/gates/voice_check_diff_check.py   # 后处理清洗的前后差异
+py -X utf8 tools/gates/oob_check.py                # 输出侧越界审计（无参=自检；--label 扫探针批次，--gate 判定）
+py -X utf8 tools/gates/evidence_check.py           # 证据一致性：担当/学校/CRYCHIC/称呼（无参=自检）
 ```
 
 `dump_turn_logic_gate.py --phase before` 只产基线，不判期望（回退开关全关时按定义什么都不触发）。

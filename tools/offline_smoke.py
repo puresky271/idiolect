@@ -66,7 +66,8 @@ FORBIDDEN = {
     "截断标记": ("已截断", "[[__MEMCTX_TAIL_SLOT__]]", "……（略"),
 }
 
-GATES = ["voice_meta_gate.py", "_gen_scene_check.py", "_tl_deep_check.py", "audit_role_packages.py"]
+GATES = ["voice_meta_gate.py", "_gen_scene_check.py", "_tl_deep_check.py", "audit_role_packages.py",
+         "oob_check.py", "evidence_check.py"]
 
 
 class Result:
