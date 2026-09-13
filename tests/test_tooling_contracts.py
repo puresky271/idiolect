@@ -203,6 +203,20 @@ class SmokeToolTests(unittest.TestCase):
                                "turn_logic 为 0 说明这条 job 被自己的重复 dump 覆盖了")
             shutil.rmtree(tmp, ignore_errors=True)
 
+    def test_readme_size_tables_match_reality(self):
+        """三语 README 的字数表必须与 layer_sizes 实测逐格一致。
+
+        2026-09-13 踩过：voice manifest 末尾共享块改写（每角色 -32 字）后表格
+        没重生成，comfort 表 voice 列全员漂移没人发现。这条断言把「文档说谎」
+        变成 FAIL——改 prompt 层的人必须同步重生成表格（dump_prompt --all --matrix）。
+        """
+        osm = _load(ROOT / "tools" / "offline_smoke.py", "offline_smoke_readme_check")
+        res = osm.Result()
+        osm.check_readme_tables(res)
+        row = [r for r in res.rows if r["name"] == "文档.README 字数表"]
+        self.assertEqual(len(row), 1, f"应恰好产出一条检查结果：{[r['name'] for r in res.rows]}")
+        self.assertEqual(row[0]["status"], "PASS", row[0]["detail"])
+
     def test_shipped_profiles_have_no_text(self):
         """随仓库发布的画像只能是聚合量，不能带原作文本。"""
         prof = json.loads((ROOT / "data" / "style_profiles.json").read_text(encoding="utf-8"))

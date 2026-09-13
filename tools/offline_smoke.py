@@ -37,6 +37,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -318,6 +319,81 @@ def check_llm(res: Result) -> None:
         res.add("LLM.异常汇总", False, str(bad))
 
 
+# ── 文档.README 字数表 ──────────────────────────────────────────────────
+# 三语 README 里有两张实测表：四层表（乐奈找猫场景）与 comfort 格表。
+# 改了 prompt 层就必须重生成表格——2026-09-13 踩过：voice 末尾共享块改写后
+# 表格没更新，voice 列全员差 -32 没人发现。这里用同一条装配路径（layer_sizes）
+# 现场复算、逐格对账：对不上就是文档在说谎。
+README_COMFORT_MSG = "我一直在哭，快撑不住了"   # README 表注明的 comfort 格输入
+README_CAT_MSG = "你今天又想去哪找猫"           # 四层表注明的找猫输入
+
+# comfort 表的角色名拼写（三语各异）→ CHARKEY 的罗马字 key
+README_CHAR_NAMES = {
+    "README.md": {"爱音": "anon", "灯": "tomori", "立希": "taki", "素世": "soyo", "乐奈": "rana"},
+    "README.en.md": {"Anon": "anon", "Tomori": "tomori", "Taki": "taki", "Soyo": "soyo", "Rana": "rana"},
+    "README.ja.md": {"愛音": "anon", "燈": "tomori", "立希": "taki", "そよ": "soyo", "楽奈": "rana"},
+}
+
+
+def check_readme_tables(res: Result) -> None:
+    """三语 README 的字数表与 `layer_sizes` 现场实测逐格对账。
+
+    口径必须与 README 注明的一致：comfort 格 = 输入「我一直在哭，快撑不住了」；
+    四层表 = 乐奈 × 找猫。合计列 = 四层之和（表自身口径）。
+    """
+    from idiolect.assemble import layer_sizes
+
+    t0 = time.time()
+    # 表格是在**默认** mock 时刻下量出来的；--mock-now 是单次调试覆盖，
+    # 不该让文档校验跟着漂，所以这里显式摘掉环境变量再量。
+    saved_now = os.environ.pop(MOCK.ENV_VAR, None)
+    try:
+        # session 后缀带时间戳：turn_logic 去重表按 session 记账，
+        # 同进程里重复调用也要每次拿到完整块。
+        stamp = time.time_ns()
+        comfort = {CHARKEY[c]: layer_sizes(c, README_COMFORT_MSG,
+                                           session_id=f"smoke:readme:{CHARKEY[c]}:{stamp}",
+                                           now=MOCK.mock_now())
+                   for c in CHARS}
+        cat = layer_sizes("乐奈", README_CAT_MSG,
+                          session_id=f"smoke:readme:rana-cat:{stamp}", now=MOCK.mock_now())
+    finally:
+        if saved_now is not None:
+            os.environ[MOCK.ENV_VAR] = saved_now
+
+    bad: list[str] = []
+    n_cells = 0
+    for fname, names in README_CHAR_NAMES.items():
+        text = (ROOT / fname).read_text(encoding="utf-8")
+        lines = text.splitlines()
+        # 四层表：行首是 `层名`（全文件唯一），行内最后一个数字是该层字数
+        for layer in LAYERS:
+            row = next((l for l in lines if l.startswith(f"| `{layer}`")), None)
+            n_cells += 1
+            if row is None:
+                bad.append(f"{fname} 四层表缺 {layer} 行")
+                continue
+            nums = [int(x) for x in re.findall(r"\d+", row)]
+            if not nums or nums[-1] != cat[layer]:
+                bad.append(f"{fname} 四层表 {layer}={nums[-1] if nums else '—'} 实测={cat[layer]}")
+        # comfort 格表：整行形如「| 名 | 四层各一格 | 合计 |」的纯整数
+        for cn, key in names.items():
+            pat = re.compile(rf"^\|\s*{re.escape(cn)}\s*\|(?:\s*\d+\s*\|){{5}}\s*$", re.M)
+            m = pat.search(text)
+            n_cells += 1
+            if m is None:
+                bad.append(f"{fname} comfort 表缺 {cn} 行")
+                continue
+            nums = [int(x) for x in re.findall(r"\d+", m.group(0))]
+            want = [comfort[key][k] for k in LAYERS]
+            if nums[:4] != want:
+                bad.append(f"{fname} comfort 表 {cn}={nums[:4]} 实测={want}")
+            elif nums[4] != sum(want):
+                bad.append(f"{fname} comfort 表 {cn} 合计 {nums[4]} ≠ 四层和 {sum(want)}")
+    res.add("文档.README 字数表", not bad,
+            f"{n_cells} 格对账（三语 × 两表）；不一致={bad or '无'}", time.time() - t0)
+
+
 def check_cli_safety(res: Result) -> None:
     """会写到**外部数据目录**的脚本必须带 argparse，否则 `--help` 也会真的动手。
 
@@ -372,6 +448,7 @@ def main() -> int:
     check_fixtures(res)
     check_data(res)
     check_cli_safety(res)
+    check_readme_tables(res)
     if not args.fast:
         check_gates(res)
         check_tests(res)
