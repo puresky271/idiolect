@@ -8,7 +8,7 @@ _noun_initial.py 才发现的；「变冷淡刷分」也要靠中性对照场景
 
 五条指标（数据源都是 probe/probe_report 已落盘的产物，本脚本不再调 LLM）：
   · composite 均值   probe_<label>_summary.json   头号指标（风格 0.65 + 锚点 0.35），降 > 1.0 分判退化
-  · 锚点密度均值     probe_<label>_summary.json   **原值**对比（绕过 composite 的封顶），相对降 > 5% 判退化
+  · 锚点密度         probe_<label>_summary.json   **原值**逐角色对比，任一角色相对降 > 5% 判退化
   · distill 均值     scene_distill_<label>.json   逐场景长度分布贴合，降 > 0.02 判退化
   · 硬规则 V 级率    probe_<label>_summary.json   破功红线，升 > 1pp 判退化
   · 同格重复度       probe_<label>.jsonl 现场算    1 − distinct/n（逐格再平均），升 > 5pp 判退化
@@ -17,6 +17,8 @@ _noun_initial.py 才发现的；「变冷淡刷分」也要靠中性对照场景
 有封顶 min(ad/ref, 1)——对锚点天然饱和的角色（实测 3/5 角色的 anchor_score ≈ 100），
 composite 退化为 0.65×fidelity + 常数，内容维度暂时失聪。封顶是刻意设计
 （不奖励堆锚点），但内容退化必须仍有地方被抓：就是这一条原值指标。
+且必须**逐角色取最差**而非跨角色均值（复审 N6）：各角色锚点量级差 2 倍以上时，
+统一的相对门槛压在均值上有盲区——素世 −25% 的退化只让均值动 −3.4% 会漏检。
 
 阈值都可用命令行调（--tol-*）；判断口径「after 相对 before 退化」。
 缺产物文件是 rc 2 的明确报错——半截证据不许当「通过」。
@@ -75,11 +77,27 @@ def hard_v_mean(art: dict) -> float | None:
     return statistics.fmean(vals) if vals else None
 
 
-def anchor_density_mean(art: dict) -> float | None:
-    """锚点密度原值均值（composite 封顶之上的内容退化信号）。"""
-    vals = [s["anchor_density"] for s in art["summary"].get("summary", {}).values()
-            if isinstance(s, dict) and "anchor_density" in s]
-    return statistics.fmean(vals) if vals else None
+def anchor_density_worst(before: dict, after: dict) -> tuple[str, float, float, float] | None:
+    """逐角色锚点密度相对变化，取**最差**的那个角色：(char, before, after, 相对变化)。
+
+    为什么是逐角色取最差而不是跨角色均值（2026-09-13 复审 N6）：各角色锚点量级差
+    2 倍以上，统一的相对门槛压在均值上会有量级盲区——实测素世 −25% 的退化只让
+    批量均值动 −3.4%（PASS 漏检），乐奈同样的 −25% 却让均值动 −8.2%（FAIL 抓到）。
+    而素世恰好同时是 composite 饱和角色（锚点项失聪）+ 量级最低角色（均值盲区），
+    双重盲区叠加。门槛语义必须与「任一退化即 FAIL」一致：逐角色各自比，取最差。
+    """
+    sb = before["summary"].get("summary", {})
+    sa = after["summary"].get("summary", {})
+    worst: tuple[str, float, float, float] | None = None
+    for char in sorted(set(sb) & set(sa)):
+        b = sb[char].get("anchor_density") if isinstance(sb[char], dict) else None
+        a = sa[char].get("anchor_density") if isinstance(sa[char], dict) else None
+        if b is None or a is None or not b:
+            continue
+        rel = (a - b) / b
+        if worst is None or rel < worst[3]:
+            worst = (char, b, a, rel)
+    return worst
 
 
 def distill_mean(art: dict) -> float | None:
@@ -119,10 +137,8 @@ def main() -> int:
         return 2
 
     checks = [
-        # (指标名, before 值, after 值, 阈值, 方向: lower / higher / lower_rel（相对下降）, 单位)
+        # (指标名, before 值, after 值, 阈值, 方向: lower / higher, 单位)
         ("composite 均值", composite_mean(before), composite_mean(after), args.tol_composite, "lower", "分"),
-        ("锚点密度均值（原值）", anchor_density_mean(before), anchor_density_mean(after),
-         args.tol_anchor, "lower_rel", ""),
         ("distill 均值", distill_mean(before), distill_mean(after), args.tol_distill, "lower", ""),
         ("硬规则 V 级率", hard_v_mean(before), hard_v_mean(after), args.tol_hard_v, "higher", ""),
         ("同格重复度", repeat_rate(before), repeat_rate(after), args.tol_repeat, "higher", ""),
@@ -130,25 +146,37 @@ def main() -> int:
 
     print(f"[accept_check] {args.before} → {args.after}（任一指标退化即整体 FAIL）")
     failed = False
+    rows: list[str] = []
     for name, b, a, tol, direction, unit in checks:
         if b is None or a is None:
-            print(f"  [SKIP] {name}：数据缺失（before={b} after={a}）——"
-                  f"缺证据不算通过，请补齐产物后重跑")
+            rows.append(f"  [SKIP] {name}：数据缺失（before={b} after={a}）——"
+                        f"缺证据不算通过，请补齐产物后重跑")
             failed = True
             continue
         delta = a - b
-        if direction == "lower_rel":
-            regression = bool(b) and (delta / b < -tol)
-            shown = f"（Δ {delta / b * 100:+.1f}%，容差 {tol:.0%}）" if b else ""
-        elif direction == "lower":
-            regression = delta < -tol
-            shown = f"（Δ {delta:+.4g}{unit}，容差 {tol:g}）"
-        else:
-            regression = delta > tol
-            shown = f"（Δ {delta:+.4g}{unit}，容差 {tol:g}）"
+        regression = (delta < -tol) if direction == "lower" else (delta > tol)
         verdict = "FAIL" if regression else "PASS"
         failed = failed or regression
-        print(f"  [{verdict}] {name}：{b:.4g} → {a:.4g}{shown}")
+        rows.append(f"  [{verdict}] {name}：{b:.4g} → {a:.4g}（Δ {delta:+.4g}{unit}，容差 {tol:g}）")
+
+    # 锚点密度单独成段：逐角色相对变化取最差（量级盲区的教训，见 anchor_density_worst）
+    worst = anchor_density_worst(before, after)
+    if worst is None:
+        anchor_row = ("  [SKIP] 锚点密度（逐角色最差）：两臂没有可比较的角色数据——"
+                      "缺证据不算通过，请补齐产物后重跑")
+        failed = True
+    else:
+        char, b, a, rel = worst
+        regression = rel < -args.tol_anchor
+        verdict = "FAIL" if regression else "PASS"
+        failed = failed or regression
+        anchor_row = (f"  [{verdict}] 锚点密度（逐角色最差）：{char} {b:.4g} → {a:.4g}"
+                      f"（Δ {rel * 100:+.1f}%，容差 {args.tol_anchor:.0%}）")
+    # 打印顺序：composite 领衔，锚点其次，其余随后
+    print(rows[0])
+    print(anchor_row)
+    for row in rows[1:]:
+        print(row)
 
     if failed:
         print("[accept_check] 整体 FAIL——先修退化项再谈收益（单指标绿灯不代表「更像」）")

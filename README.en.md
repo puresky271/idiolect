@@ -154,7 +154,7 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 - **composite** is the headline metric: 0.65 style fidelity + 0.35 content anchors (see `docs/04-evaluation.md` §2.1). fidelity only measures length/sentence-count distributions and stays as a control column — on its own it rewards correct-but-empty assistant tone. Anon is the live example: top fidelity, bottom composite (polished phrasing, few concrete details). When the two disagree, trust composite.
 - **Scene fit** measures agreement with the original same-character-same-scene distribution (length, sentence count); 1.0 is full agreement, this batch averages 0.466 over 35 cells. It is a **relative** score for before/after comparison inside one batch — not comparable across models, fixtures, or clocks.
 - Distinct replies within a cell: 93/105. Verbatim reuse of prompt text: 1%, and the 3 copied characters were a verbal tic, not an example sentence.
-- Leak rate covers thinking tags, inner monologue, speaker echo, and Chinese stage directions — all zero here.
+- Leak rate covers thinking tags, inner monologue, speaker echo, and Chinese stage directions — all 0 here.
 
 Let us see what happens with the same inputs when the four layers are replaced by an empty system prompt:
 
@@ -252,7 +252,7 @@ py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --re
 py -X utf8 tools/score/probe_report.py --label run1 --scenes crisis,comfort --cat 通用场景
 ```
 
-**The evaluation clock**: characters react to the hour (3 AM answers differ from 3 PM answers), so evaluation uses a clock pinned to daytime (`tools/mock_clock.py`) instead of letting "what time is it" become a hidden variable. The command below only *prints* the environment-variable line (a child process cannot change your shell) — paste it into your shell to take effect:
+**The evaluation clock**: characters react to the hour (3 AM answers differ from afternoon answers), so evaluation uses a clock pinned to daytime (`tools/mock_clock.py`) instead of letting "what time is it" become a hidden variable. The command below only *prints* the environment-variable line (a child process cannot change your shell) — paste it into your shell to take effect:
 
 ```bash
 py -X utf8 tools/mock_clock.py --set 2026-09-12T03:00:00+09:00

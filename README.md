@@ -142,7 +142,7 @@ py -X utf8 tools/probe/probe_runner.py --label repo_standalone \
 py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,comfort --cat 通用场景
 ```
 
-| 角色  | 回复数 | composite（像不像，百分制） | fidelity（风格贴合，对照列） | 踩红线比例 | 说漏嘴比例 | 场景贴合分 |
+| 角色  | 回复数 | composite（像不像，100 分制） | fidelity（风格贴合，对照列） | 踩红线比例 | 说漏嘴比例 | 场景贴合分 |
 | --- | --- | ------------------- | ----------------- | ----- | ----- | ----- |
 | 爱音  | 21  | 64.6               | 86.5              | 4.9%  | 0%    | 0.545 |
 | 素世  | 21  | 90.5               | 85.4              | 0.0%  | 0%    | 0.532 |

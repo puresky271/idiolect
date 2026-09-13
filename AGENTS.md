@@ -134,7 +134,7 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
   - `test_scene_engine_scaffold.py`：turn_logic 共享脚手架（SessionStore 的 mark/has/reset 与 LRU 淘汰、SessionValues 值状态表、env 假值表、深模块执行器）；
   - `test_voice_check_wiring.py`：tomori/taki/anon 后处理真的接线（不再是 stub）、清洗确定性（按输入定种）、`<CHAR>_VOICE_CHECK_ENABLED` 总开关与非本角色透传；
   - `test_score_golden.py`：评分链 golden 文件（scene_distill / _pool_arms 全量输出、probe_report 编排契约；golden 由测试内的合成输入离线复现，失配先确认是预期改动再重新生成，不要手改）；
-  - `test_eval_gates.py`：评测链路修复契约（composite 必须能分出助手腔、anchor_ref 单一来源（场景基线派生，画像不导出 anchor_density）、holdout 的 split 过滤与零结果守卫、`--baseline` 换参照物、accept_check 任一退化即 FAIL、ab_blind 盲评确定性与不泄臂名、三语 README 旗舰表以 composite 领衔）。
+  - `test_eval_gates.py`：评测链路修复契约（composite 必须能分出助手腔、anchor_ref 单一来源（场景基线派生，画像不导出 anchor_density）、holdout 的 split 过滤与零结果守卫、`--baseline` 换参照物、accept_check 任一退化即 FAIL（锚点密度逐角色取最差）、ab_blind 盲评确定性与不泄臂名、三语 README 旗舰表以 composite 领衔且三语数字多重集合一致）。
 - 新增约束时**先写契约测试再改实现**；触发词必须能拿出语料实证（`tools/distill/verify_triggers.py`）。
 - `tools/offline_smoke.py` 是总闸，会跑门禁与单测，适合当作提交前检查。
 

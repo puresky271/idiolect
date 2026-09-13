@@ -210,7 +210,7 @@ def check_fixtures(res: Result) -> None:
             bad.append(f"{char}:没有 user 轮")
         note.append(f"{char}:{len(rows)}条/system{len(rows[0].get('content', '')) if rows else 0}字")
     res.add("夹具.结构", not bad, f"{' '.join(note)}｜异常={bad or '无'}")
-    if note and all("system0字" in n.replace("system0字", "system0字") for n in note):
+    if note and all("system0字" in n for n in note):
         res.add("夹具.占位提示", None, "5 份都是占位夹具（system 为空）→ 探针请加 --assemble")
     elif any("system0字" in n for n in note):
         res.add("夹具.占位提示", None, "部分夹具 system 为空 → 探针请加 --assemble")

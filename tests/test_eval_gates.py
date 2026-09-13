@@ -377,6 +377,24 @@ class AcceptCheckTests(unittest.TestCase):
             r = self._run(env)
             self.assertEqual(r.returncode, 0, r.stdout[-400:])
 
+    def test_anchor_metric_is_per_char_worst_not_batch_mean(self):
+        """N6 契约：同样的 −25% 退化，落在低量级角色（素世）上也必须 FAIL——
+        跨角色均值曾把它稀释成 −3.4% 漏检；逐角色取最差才与「任一退化即 FAIL」一致。"""
+        anchors_before = {"爱音": 1.6, "灯": 1.8, "立希": 2.0, "素世": 1.4, "乐奈": 3.4}
+        anchors_after = {**anchors_before, "素世": 1.05}   # 素世 −25%，其余不动
+        mk = lambda anchors: {"label": "x", "arm": "a", "runs": 6, "patch": "none",
+                              "summary": {c: {"n_bubbles": 12, "n_replies": 6, "composite": 85.0,
+                                              "fidelity": 80.0, "hard_v_rate": 0.0,
+                                              "anchor_density": a,
+                                              "hard_any_rate": 0.1, "concrete_anchor_rate": 0.5}
+                                          for c, a in anchors.items()}}
+        with tempfile.TemporaryDirectory() as tmp:
+            env = self._setup(tmp, mk(anchors_before), mk(anchors_after),
+                              PROBE_ROWS, PROBE_ROWS)
+            r = self._run(env)
+            self.assertEqual(r.returncode, 1, "低量级角色的 −25% 退化不得被批量均值稀释掉")
+            self.assertIn("素世", r.stdout, "FAIL 行必须点名最差角色")
+
     def test_missing_artifacts_rc2(self):
         with tempfile.TemporaryDirectory() as tmp:
             (Path(tmp) / "report").mkdir()
@@ -477,6 +495,31 @@ class ReadmeMetricNamingTests(unittest.TestCase):
                               "fidelity 列必须标注为对照列")
                 self.assertNotIn(self.LIKENESS[name], fid_cell,
                                  "fidelity 列不得再挂「像不像」的名义——那是误读，已移给 composite")
+
+
+class ReadmeNumericParityTests(unittest.TestCase):
+    """S2 契约（仓库质量评审）：三语 README 的数字必须一致。
+
+    「三语同步」纪律此前靠人肉执行（M1 的同步漂移就是这么漏的）；实测三语独立
+    数字个数曾差 1（ja 多一个，全是翻译排版分歧：九篇/9 本、五个/5 人分、
+    all zero/全为 0）。口径：全部数字 token 的**多重集合**逐语言相等
+    （含徽章与表格），多一个少一个都立刻红。"""
+
+    READMES = ("README.md", "README.en.md", "README.ja.md")
+
+    def test_numeric_tokens_identical_across_languages(self):
+        import re
+        from collections import Counter
+        multisets = {}
+        for name in self.READMES:
+            text = (ROOT / name).read_text(encoding="utf-8")
+            multisets[name] = Counter(re.findall(r"\d+(?:\.\d+)?", text))
+        base = multisets["README.md"]
+        for name in self.READMES[1:]:
+            with self.subTest(readme=name):
+                self.assertEqual(multisets[name], base,
+                                 f"{name} 的数字与 README.md 不一致："
+                                 f"多出来 {multisets[name] - base}｜缺 {base - multisets[name]}")
 
 
 if __name__ == "__main__":

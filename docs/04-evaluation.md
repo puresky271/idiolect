@@ -181,13 +181,15 @@ py -X utf8 tools/gates/accept_check.py --before <基线臂> --after <待验收�
 | 指标 | 数据源 | 默认容差 |
 |---|---|---|
 | composite 均值 | `probe_<label>_summary.json` | 降 > 1.0 分 |
-| 锚点密度均值（原值） | `probe_<label>_summary.json` | 相对降 > 5% |
+| 锚点密度（逐角色最差） | `probe_<label>_summary.json` | 任一角色相对降 > 5% |
 | distill 均值 | `scene_distill_<label>.json` | 降 > 0.02 |
 | 硬规则 V 级率 | summary JSON | 升 > 1pp |
 | 同格重复度 | probe jsonl 现场算 | 升 > 5pp |
 
 锚点密度看原值是为了绕过 composite 的封顶（见第 2.1 节饱和段）——
 封顶的角色 composite 里内容项是常数，内容退化只能靠这一条抓。
+判定是**逐角色相对变化取最差**，不是跨角色均值：各角色锚点量级差 2 倍以上，
+统一相对门槛压在均值上有盲区（素世 −25% 曾被均值 −3.4% 掩盖，2026-09-13 复审 N6）。
 
 容差都可用 `--tol-*` 调。设计原则：复合分（composite / distill）任一单独通过都**不够**——立希名词直出退化、「变冷淡刷分」这些真实事故全是单指标漏检。缺产物文件是 rc 2 的明确报错，半截证据不许当「通过」。
 
