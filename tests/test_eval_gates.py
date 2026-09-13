@@ -10,7 +10,8 @@
   1. **判别力**：probe_runner.score_arm 必须带 composite 分，且对构造样本的排序
      能把助手腔排在真像样本之下（D > A > B）。这是「指标必须能分出助手腔」的
      回归测试——将来谁改评分公式把它改回去，这里立刻红。
-  2. **anchor_ref 三来源**：gold 自带 → 场景基线派生 → 1.0 兜底，各自正确。
+  2. **anchor_ref 单一来源**：唯一定死场景基线派生值；画像不导出 anchor_density
+     （曾有过两个真相来源、同一份产物差 3.2 分的教训，2026-09-13 复审 N3）。
   3. **holdout 消费**：scene_char_baseline 的语料加载可按 split 过滤，
      holdout 为零时是显式报错而不是写出空基线。
   4. **多指标门禁**：accept_check 对 before/after 两臂逐指标独立判定，
@@ -89,14 +90,9 @@ class ScoreArmCompositeTests(unittest.TestCase):
         cls.sf = _load("style_features", ROOT / "tools" / "distill" / "style_features.py")
 
     def _gold_rana(self) -> dict:
-        """随仓库发布的乐奈画像 + 派生 anchor_ref（复现 probe_runner 无语料路径）。"""
+        """随仓库发布的乐奈画像（anchor_ref 由 score_arm 内部统一派生，画像不参与）。"""
         raw = json.loads((ROOT / "data" / "style_profiles.json").read_text(encoding="utf-8"))
-        gold = dict(raw["rana"])
-        if gold.get("anchor_density") is None:
-            ref = self.mod.derive_anchor_ref("乐奈")
-            self.assertIsNotNone(ref, "场景基线派生 anchor_ref 失败")
-            gold["anchor_density"] = ref
-        return gold
+        return dict(raw["rana"])
 
     def test_score_arm_has_composite_fields(self):
         gold = self._gold_rana()
@@ -106,6 +102,19 @@ class ScoreArmCompositeTests(unittest.TestCase):
                 self.assertIn(field, out)
         self.assertGreater(out["anchor_ref"], 1.0,
                            "乐奈的 anchor_ref 不该退回 1.0 兜底（场景基线派生必须生效）")
+
+    def test_anchor_ref_single_source(self):
+        """N3 契约：anchor_ref 只有一个真相来源（场景基线派生值）。
+        画像里塞什么字段都不能改变它——两个来源曾让同一份产物差 3.2 分。"""
+        gold = self._gold_rana()
+        want = self.mod.derive_anchor_ref("乐奈")
+        plain = self.mod.score_arm("乐奈", CAND_A_IN_CHARACTER, gold)
+        polluted = self.mod.score_arm("乐奈", CAND_A_IN_CHARACTER,
+                                      {**gold, "anchor_density": 999.0})
+        self.assertAlmostEqual(plain["anchor_ref"], round(want, 2), places=3,
+                               msg="score_arm 输出的 anchor_ref（两位小数）必须等于派生值")
+        self.assertEqual(plain["composite"], polluted["composite"],
+                         "画像字段不得影响 composite——anchor_ref 只能来自场景基线派生")
 
     def test_composite_ranks_assistant_tone_below_in_character(self):
         """评审核心论断的反向契约：纯助手腔 B 的 composite 必须低于真像样本 A/D。"""
@@ -150,15 +159,18 @@ class ScoreArmCompositeTests(unittest.TestCase):
 
 
 class ExportProfilesAnchorTests(unittest.TestCase):
-    """W1 契约：export_profiles 的画像必须含 anchor_density 字段（聚合量，可发布）。"""
+    """N3 契约（2026-09-13 复审）：画像**不导出** anchor_density 字段。
+
+    这个字段曾短暂存在又移除：它与场景基线派生值构成 anchor_ref 的两个真相
+    来源（乐奈差 28%，同一份产物 composite 差 3.2 分）。钉住「不导出」，
+    防止字段回潮重新造成双口径。
+    """
 
     @classmethod
     def setUpClass(cls):
         cls.mod = _load("export_profiles", ROOT / "tools" / "distill" / "export_profiles.py")
 
-    def test_build_includes_anchor_density(self):
-        """用模块内函数直接构造（语料加载被换成合成文本），画像必须带 anchor_density。"""
-        sf = _load("style_features", ROOT / "tools" / "distill" / "style_features.py")
+    def test_build_excludes_anchor_density(self):
         fake = {k: ["猫。抹茶。", "嗯……", "去学校。", "RiNG 见。"] for k in
                 ("anon", "tomori", "taki", "soyo", "rana")}
         old = self.mod.load_train
@@ -169,9 +181,15 @@ class ExportProfilesAnchorTests(unittest.TestCase):
             self.mod.load_train = old
         for key in fake:
             with self.subTest(char=key):
-                self.assertIn("anchor_density", out[key])
-                self.assertAlmostEqual(out[key]["anchor_density"],
-                                       round(sf.anchor_density(fake[key]), 3), places=3)
+                self.assertNotIn("anchor_density", out[key],
+                                 "画像不得导出 anchor_density——anchor_ref 唯一来源是场景基线派生")
+
+    def test_shipped_profiles_have_no_anchor_density(self):
+        """随仓库发布的画像同样不含该字段（与导出口径一致）。"""
+        raw = json.loads((ROOT / "data" / "style_profiles.json").read_text(encoding="utf-8"))
+        for key in ("anon", "tomori", "taki", "soyo", "rana"):
+            with self.subTest(char=key):
+                self.assertNotIn("anchor_density", raw[key])
 
 
 class HoldoutSplitTests(unittest.TestCase):
@@ -411,6 +429,31 @@ class AbBlindTests(unittest.TestCase):
             for arm, w in wins.items():
                 self.assertIn(f"{arm} {w:.1f}", t.stdout,
                               f"tally 结果里 {arm} 的胜场数不对：\n{t.stdout}")
+
+
+class ReadmeMetricNamingTests(unittest.TestCase):
+    """N1 契约（2026-09-13 复审）：三语 README 旗舰表的头号指标必须是 composite，
+    fidelity 必须标注为对照列——落地页不许再把 fidelity 叫作「像不像」
+    （docs/04 第 8 节已把那条列为常见误读，落地页与文档不得打架）。
+    smoke 的 README 对账只管字数表，指标命名由这里守。"""
+
+    READMES = {"README.md": "对照", "README.en.md": "control", "README.ja.md": "対照"}
+    LIKENESS = {"README.md": "像不像", "README.en.md": "closest", "README.ja.md": "似ている"}
+
+    def test_headline_metric_is_composite(self):
+        for name, control_mark in self.READMES.items():
+            text = (ROOT / name).read_text(encoding="utf-8")
+            header = next((l for l in text.splitlines()
+                           if l.startswith("|") and "fidelity" in l and "composite" in l), None)
+            with self.subTest(readme=name):
+                self.assertIsNotNone(header, f"{name} 旗舰表头必须同时含 composite 与 fidelity")
+                self.assertLess(header.index("composite"), header.index("fidelity"),
+                                "composite 必须排在 fidelity 前（头号指标位置）")
+                fid_cell = next(c for c in header.split("|") if "fidelity" in c)
+                self.assertIn(control_mark, fid_cell,
+                              "fidelity 列必须标注为对照列")
+                self.assertNotIn(self.LIKENESS[name], fid_cell,
+                                 "fidelity 列不得再挂「像不像」的名义——那是误读，已移给 composite")
 
 
 if __name__ == "__main__":

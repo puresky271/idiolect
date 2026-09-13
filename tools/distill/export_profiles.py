@@ -53,9 +53,6 @@ def build(lang: str = "cn") -> dict:
     out: dict = {"lang": lang, "note": "派生统计（聚合量），不含任何原作台词；由 tools/distill/export_profiles.py 生成"}
     for char, key in CHARKEY.items():
         out[key] = S.profile_from_texts(texts[key], lang)
-        # composite_score 的 anchor_ref 取自这里（该角色自身常态，不跨角色硬比）；
-        # 2026-09-13 补字段——旧画像缺它时 probe_runner 会从场景基线派生兜底
-        out[key]["anchor_density"] = round(S.anchor_density(texts[key]), 3)
     return out
 
 
@@ -73,15 +70,9 @@ def main() -> int:
             return 1
         old = json.loads(dst.read_text(encoding="utf-8"))
         diff = []
-        missing_new_field = False
         for key in CHARKEY.values():
             a, b = old.get(key, {}), fresh.get(key, {})
-            for field in ("n", "length", "n_sent", "punct_rate", "first_person_rate", "anchor_density"):
-                if field == "anchor_density" and field not in a:
-                    # 2026-09-13 补的字段：旧画像没有不算不一致，但提醒重跑补齐
-                    # （缺它时 probe_runner 会从场景基线派生 anchor_ref，行为仍正确）
-                    missing_new_field = True
-                    continue
+            for field in ("n", "length", "n_sent", "punct_rate", "first_person_rate"):
                 if json.dumps(a.get(field), sort_keys=True) != json.dumps(b.get(field), sort_keys=True):
                     diff.append(f"{key}.{field} 旧={str(a.get(field))[:60]} 新={str(b.get(field))[:60]}")
         if diff:
@@ -90,9 +81,6 @@ def main() -> int:
                 print("   ", d)
             return 1
         print(f"[ ok ] {dst.name} 与语料一致（{len(CHARKEY)} 角色）")
-        if missing_new_field:
-            print("[warn] 画像缺 anchor_density 字段（2026-09-13 补）："
-                  "重跑 export_profiles.py 补齐；在此之前 probe_runner 会从场景基线派生 anchor_ref")
         return 0
 
     DATA.mkdir(parents=True, exist_ok=True)

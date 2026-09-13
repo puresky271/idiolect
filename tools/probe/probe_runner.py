@@ -129,13 +129,14 @@ def make_client():
 
 
 def derive_anchor_ref(char: str) -> float | None:
-    """从随仓库发布的场景基线派生角色级锚点参照（各场景格按 n 加权均值）。
+    """anchor_ref 的**唯一来源**：随仓库发布的场景基线，该角色各场景格按 n 加权均值。
 
-    为什么需要（2026-09-13 外部评审）：composite_score 的 anchor_ref 默认取
-    gold["anchor_density"]，但 2026-09 之前发布的 style_profiles.json 没有这个字段，
-    会静默退回 1.0——而各角色金标准实测在 1.8~7.3，1.0 的量程是错的。
-    在画像补齐之前，用 data/scene_char_baseline.json 的 130 格派生一个近似参照，
-    远好于错误兜底。返回 None = 连场景基线也没有（调用方走 composite_score 的兜底）。
+    为什么定死这一个来源（2026-09-13 评审 N3）：anchor_ref 曾经有过两个真相来源——
+    画像字段（全 train 行实测，含沉默回合）与场景基线派生值——乐奈两者差 28%，
+    同一份产物走不同路径 composite 差 3.2 分，是 accept_check 默认容差的 3 倍，
+    足以让同一臂被判通过或退回。场景基线与场景评分（scene_distill）同源、
+    随仓库发布、有无语料都是同一个文件，所以定为唯一口径；画像不再导出自己的
+    anchor_density 字段。返回 None = 连场景基线也没有（composite_score 走 1.0 兜底）。
     """
     p = DATA / "scene_char_baseline.json"
     if not p.exists():
@@ -161,7 +162,9 @@ def score_arm(char: str, replies: list[str], gold: dict) -> dict:
     if not prof.get("n") or not gold.get("n"):
         return out
     fid = S.style_fidelity(gold, prof)
-    comp = S.composite_score(gold, prof, replies)
+    # anchor_ref 唯一定死场景基线派生值（见 derive_anchor_ref 的 docstring）——
+    # 有语料/无语料两条路径产出同一个参照，同一份产物不会走出两个 composite
+    comp = S.composite_score(gold, prof, replies, anchor_ref=derive_anchor_ref(char))
     out["composite"] = comp["composite"]
     out["anchor_density"] = comp["anchor_density"]
     out["anchor_ref"] = comp["anchor_ref"]
@@ -240,7 +243,6 @@ def main() -> int:
 
     gold: dict[str, dict] = {}
     gold_src = ""
-    anchor_src = ""
     corpus_cn = CORPUS_DIR / "cn.jsonl"
     if corpus_cn.exists():
         # 有语料：现场按同一套特征代码算 gold 画像（与历史批次数字逐位可比）
@@ -252,10 +254,7 @@ def main() -> int:
                     if r["character"] == key and r.get("split") == "train":
                         texts.append(r["text"])
             gold[char] = S.profile_from_texts(texts, "cn")
-            # composite 的 anchor_ref：该角色金标准语料自身的锚点密度（只问她自己的常态）
-            gold[char]["anchor_density"] = round(S.anchor_density(texts), 3)
         gold_src = f"语料现场计算（{corpus_cn}）"
-        anchor_src = "语料实测"
     else:
         # 无语料：用随仓库发布的派生画像（同样的聚合量，不是原作文本）。
         # 本仓库不分发原作台词，所以这是**默认**路径；数字口径与上面一致。
@@ -266,20 +265,15 @@ def main() -> int:
                   flush=True)
             return 2
         raw = json.loads(prof_path.read_text(encoding="utf-8"))
-        derived: list[str] = []
         for char, key in CHARKEY.items():
             gold[char] = raw.get(key, {"n": 0})
-            # 2026-09 之前发布的画像没有 anchor_density 字段 → 从场景基线派生，
-            # 否则 composite 的 anchor_ref 会静默退回 1.0（量程错误，见 derive_anchor_ref）
-            if gold[char].get("n") and gold[char].get("anchor_density") is None:
-                ref = derive_anchor_ref(char)
-                if ref is not None:
-                    gold[char]["anchor_density"] = round(ref, 3)
-                    derived.append(char)
         gold_src = f"派生统计 {prof_path.name}（无原作文本）"
-        anchor_src = ("场景基线派生（画像缺 anchor_density 字段）：" + "、".join(derived)) \
-            if derived else "画像自带"
-    print(f"[probe] gold 画像来源 = {gold_src}｜anchor_ref 来源 = {anchor_src}", flush=True)
+    # anchor_ref 不走 gold 画像（有过两个真相来源的教训，见 derive_anchor_ref）：
+    # 两条路径统一从场景基线派生，启动时就把来源印出来
+    refs = {c: derive_anchor_ref(c) for c in CHARKEY}
+    missing = [c for c, r in refs.items() if r is None]
+    print(f"[probe] gold 画像来源 = {gold_src}｜anchor_ref 来源 = 场景基线派生（唯一口径）"
+          + (f"｜⚠ 派生失败走兜底：{'、'.join(missing)}" if missing else ""), flush=True)
 
     client = None if args.dry_run else make_client()
     model = os.environ.get("LLM_MODEL", "deepseek-flash")

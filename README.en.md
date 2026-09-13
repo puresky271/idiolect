@@ -118,15 +118,16 @@ py -X utf8 tools/probe/probe_runner.py --label repo_standalone \
 py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,comfort --cat 通用场景
 ```
 
-| Character | Replies | fidelity (100 = closest) | Red-line rate | Leak rate | Scene fit |
-|---|---|---|---|---|---|
-| Anon | 21 | 86.5 | 4.9% | 0% | 0.545 |
-| Soyo | 21 | 85.4 | 0.0% | 0% | 0.532 |
-| Taki | 21 | 82.4 | 0.0% | 0% | 0.386 |
-| Tomori | 21 | 79.9 | 0.0% | 0% | 0.365 |
-| Rana | 21 | 79.9 | 0.0% | 0% | 0.504 |
+| Character | Replies | composite (likeness, 100) | fidelity (style fit, control column) | Red-line rate | Leak rate | Scene fit |
+|---|---|---|---|---|---|---|
+| Anon | 21 | 64.6 | 86.5 | 4.9% | 0% | 0.545 |
+| Soyo | 21 | 90.5 | 85.4 | 0.0% | 0% | 0.532 |
+| Taki | 21 | 75.6 | 82.4 | 0.0% | 0% | 0.386 |
+| Tomori | 21 | 86.9 | 79.9 | 0.0% | 0% | 0.365 |
+| Rana | 21 | 86.9 | 79.9 | 0.0% | 0% | 0.504 |
 
 - Conditions: `deepseek-flash`, temperature 0.75, max_tokens 420, clock pinned to daytime, 3 samples per cell, 105 replies, zero errors.
+- **composite** is the headline metric: 0.65 style fidelity + 0.35 content anchors (see `docs/04-evaluation.md` §2.1). fidelity only measures length/sentence-count distributions and stays as a control column — on its own it rewards correct-but-empty assistant tone. Anon is the live example: top fidelity, bottom composite (polished phrasing, few concrete details). When the two disagree, trust composite.
 - **Scene fit** measures agreement with the original same-character-same-scene distribution (length, sentence count); 1.0 is full agreement, this batch averages 0.466 over 35 cells. It is a **relative** score for before/after comparison inside one batch — not comparable across models, fixtures, or clocks.
 - Distinct replies within a cell: 93/105. Verbatim reuse of prompt text: 1%, and the 3 copied characters were a verbal tic, not an example sentence.
 - Leak rate covers thinking tags, inner monologue, speaker echo, and Chinese stage directions — all zero here.
@@ -263,7 +264,7 @@ The short version: **everything the corpus can tell you is automatic** (scene sy
 
 **No original script text is shipped.** The repository contains aggregate numbers only: length distributions, sentence counts, punctuation rates, tic frequencies, per-scene baselines (130 character-scene cells), and scoring profiles. Example-sentence fields were stripped before publication, and both the health check and the unit tests guard that line. Character and franchise rights belong to Bushiroad, Craft Egg, and related rights holders; this project is unaffiliated. See [`NOTICE.md`](NOTICE.md).
 
-**Scores are relative.** Scene fit and fidelity compare before/after inside one batch. They do not travel across batches, models, fixtures, or clocks.
+**Scores are relative.** Scene fit, fidelity, and composite compare before/after inside one batch. They do not travel across batches, models, fixtures, or clocks.
 
 **Known and unsolved:**
 

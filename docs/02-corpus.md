@@ -78,7 +78,7 @@ split = "holdout" if (h % 100) < HOLDOUT_RATIO * 100 else "train"   # HOLDOUT_RA
 三处口径细节容易踩：
 
 - `tools/_paths.py` 的格式注释写的是 `"train"|"test"`，与实际写入的 `holdout` 不一致，以代码为准。
-- 消费端目前只读 `train`：`scene_char_baseline.py`、`scene_stats.py`、`tic_profile.py`、`tic_by_scene.py`、`validate_scenes.py`、`export_profiles.py`、`probe_runner.py` 都显式过滤 `split == "train"`，全仓库没有任何脚本读取 `holdout`。
+- 消费端默认只读 `train`：`scene_char_baseline.py`、`scene_stats.py`、`tic_profile.py`、`tic_by_scene.py`、`validate_scenes.py`、`export_profiles.py`、`probe_runner.py` 都显式过滤 `split == "train"`。**holdout 的消费端只有一条验收路径**（2026-09-13 补上；此前全仓库零消费，留出形同虚设）：`scene_char_baseline.py --split holdout` 建验收基线，`scene_distill.py --baseline` 用它打样本外分数，详见 `docs/04-evaluation.md` 第 10 节。
 - **一个例外**：`tools/distill/export_targets.py` 读语料时不过滤 split，所以它算出的 `n` 含留出行。`data/style_targets.json` 里 `cn.anon.n` 是 1579，`data/style_profiles.json` 里 `anon.n` 是 1244，差约 1.27 倍，来源就是这条口径差异。`idiolect/characters/taki/voice.py` 的注释里也记着「含 holdout 的旧口径」这个坑。
 
 ## 3. 质量审计

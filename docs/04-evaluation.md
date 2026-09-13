@@ -26,14 +26,18 @@ anchor_score = min(输出锚点密度 / anchor_ref, 1.0) × 100
 为什么不能再只看 fidelity：它只量长度/句数等分布拟合，**测的是「听话」不是「像」**。
 2026-09-13 外部评审用本仓库的评分函数跑构造样本证实：一段完全出戏的通用助手腔
 fidelity 84.9、distill 0.606，**高于**真像乐奈的样本（82.0 / 0.286）；接线 composite
-后同一批样本的排序翻正且差距拉开（真在安慰 89.9 > 合格短句 85.1 > 助手腔 71.4 >
+后同一批样本的排序翻正且差距拉开（真在安慰 89.9 > 合格短句 88.3 > 助手腔 76.0 >
 语义空白 49.1，复算留档 `report/eval_fix_evidence.md`）。
 这条判别力由 `tests/test_eval_gates.py::ScoreArmCompositeTests` 钉成契约。
 
-`anchor_ref` 的三个来源（按优先级）：① gold 画像自带的 `anchor_density` 字段
-（`export_profiles.py` 实测导出，该角色自身常态，不跨角色硬比）；② 画像缺字段时
-从 `data/scene_char_baseline.json` 按 n 加权派生；③ 1.0 兜底（只是最后防线）。
-探针启动时 `[probe] gold 画像来源 = …｜anchor_ref 来源 = …` 那行会写明走了哪条。
+`anchor_ref` **只有一个来源**（2026-09-13 复审定死）：`data/scene_char_baseline.json`
+里该角色各场景格按 n 加权的锚点密度均值（`probe_runner.derive_anchor_ref`）——
+它与场景评分同源、随仓库发布、有无语料都是同一个文件，所以任何路径跑出同一个
+composite。曾经同时存在「画像字段」与「派生值」两个来源（乐奈两者差 28%，同一份
+产物 composite 差 3.2 分，是 accept_check 默认容差的 3 倍，足以翻转验收判定），
+画像字段已移除。`composite_score` 作为库 API 仍保留 gold 字段 / 1.0 兜底，
+但生产路径必须显式传派生值（`tests/test_eval_gates.py` 钉住这条单一来源）。
+探针启动时 `[probe] …｜anchor_ref 来源 = 场景基线派生（唯一口径）` 那行可核对。
 
 fidelity 保留为对照列：它与 composite 背离时（fidelity 涨、composite 不涨），
 说明改动在压长度而不是在塑角色。
