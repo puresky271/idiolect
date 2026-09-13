@@ -110,11 +110,25 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 
 ```bash
 py -X utf8 tools/score/scene_distill.py --labels repo_standalone
+py -X utf8 tools/score/scene_distill.py --labels repo_standalone \
+    --baseline report/scene_char_baseline_holdout.json   # 验收轮：holdout 基线（样本外）
 py -X utf8 tools/score/scene_feedback.py --scene comfort --labels repo_standalone --n 8
 py -X utf8 tools/score/_copy_audit.py --cat 通用场景 --labels repo_standalone --detail
 py -X utf8 tools/score/_pool_arms.py off_arm on_arm1,on_arm2,on_arm3
 py -X utf8 tools/score/power_calc.py            # 功效：从探针输出实测单条 sd
 py -X utf8 tools/score/power_audit.py           # 现有样本量够不够
+```
+
+探针汇总表的头号指标是 **composite**（风格 0.65 + 内容锚点 0.35），fidelity 是对照列——
+单看 fidelity 会奖励助手腔（口径与依据见 `docs/04-evaluation.md` 第 2.1 节）。
+
+验收与盲评（合并前的最后两道）：
+
+```bash
+py -X utf8 tools/gates/accept_check.py --before off_arm --after on_arm   # 多指标门禁：任一退化即 FAIL
+py -X utf8 tools/score/ab_blind.py --a off_arm --b on_arm                # A/B 盲评出题（worksheet + key）
+py -X utf8 tools/score/ab_blind.py --tally 答卷.json --key report/ab_blind_off_arm_vs_on_arm_key.json
+py -X utf8 tools/score/ab_blind.py --a off_arm --b on_arm --llm          # LLM 判卷（正交参考，不进门禁）
 ```
 
 指标口径与读法见 `docs/04-evaluation.md`。
@@ -147,6 +161,8 @@ py -X utf8 tools/distill/analyze_corpus.py         # 全局画像
 py -X utf8 tools/distill/export_targets.py         # -> report/style_targets.json（发布副本在 data/）
 py -X utf8 tools/distill/export_scene_targets.py   # -> idiolect/scene_length_targets.py
 py -X utf8 tools/distill/scene_char_baseline.py    # -> report/scene_char_baseline.json
+py -X utf8 tools/distill/scene_char_baseline.py --split holdout --no-exemplars
+                                                   # -> report/scene_char_baseline_holdout.json（验收专用）
 py -X utf8 tools/distill/scene_stats.py            # -> report/scene_stats.json
 py -X utf8 tools/distill/tic_profile.py            # -> report/tic_profile.json
 py -X utf8 tools/distill/tic_by_scene.py           # -> report/tic_by_scene.json

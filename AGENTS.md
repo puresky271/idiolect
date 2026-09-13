@@ -52,9 +52,9 @@ tools/               # 工具链，按职责分子目录
   mock_clock.py      #   评测时钟
   secrets_loader.py  #   密钥加载
   distill/           #   从语料统计派生量（export_targets / tic_profile / scene_char_baseline …）
-  gates/             #   机械门禁（dump_prompt、voice_meta_gate、_tl_deep_check …）
+  gates/             #   机械门禁（dump_prompt、voice_meta_gate、_tl_deep_check、accept_check 验收门禁 …）
   probe/             #   探针（make_fixtures、probe_runner、prompt_patch …）
-  score/             #   评分（probe_report、scene_distill、_copy_audit、power_calc …）
+  score/             #   评分（probe_report、scene_distill、_copy_audit、power_calc、ab_blind 盲评 …）
   corpus/            #   语料抓取与构建（需要 IDIOLECT_CORPUS_DIR）
 data/                # 随仓库发布的派生统计（无原作文本），每个文件的生成脚本见 data/README.md
 fixtures/            # 探针夹具（messages_<角色>.json；占位夹具 system 为空）
@@ -127,13 +127,14 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
 
 ## 测试策略
 
-- `tests/` 下是 pytest（`unittest` 风格类），分六类契约测试，每条断言对应真实踩过的坑：
+- `tests/` 下是 pytest（`unittest` 风格类），分七类契约测试，每条断言对应真实踩过的坑：
   - `test_tooling_contracts.py`：mock 时钟、装配完整性、`--assemble` 不被覆盖、元叙述门禁覆盖面、README 字数表与实测一致；
   - `test_scene_turn_logic.py` / `test_soyo_rana_deep_turn_logic.py`：触发器命中正确且不过宽、per-session 去重、角色隔离与 env 回退开关、触发词有语料实证；
   - `test_workspace.py`：上下文层序固定、pinned 层不被预算裁掉、执行包贴最后一条 user、事实选择器的阈值与双预算；
   - `test_scene_engine_scaffold.py`：turn_logic 共享脚手架（SessionStore 的 mark/has/reset 与 LRU 淘汰、SessionValues 值状态表、env 假值表、深模块执行器）；
   - `test_voice_check_wiring.py`：tomori/taki/anon 后处理真的接线（不再是 stub）、清洗确定性（按输入定种）、`<CHAR>_VOICE_CHECK_ENABLED` 总开关与非本角色透传；
-  - `test_score_golden.py`：评分链 golden 文件（scene_distill / _pool_arms 全量输出、probe_report 编排契约；golden 由测试内的合成输入离线复现，失配先确认是预期改动再重新生成，不要手改）。
+  - `test_score_golden.py`：评分链 golden 文件（scene_distill / _pool_arms 全量输出、probe_report 编排契约；golden 由测试内的合成输入离线复现，失配先确认是预期改动再重新生成，不要手改）；
+  - `test_eval_gates.py`：评测链路修复契约（composite 必须能分出助手腔、anchor_ref 三来源、holdout 的 split 过滤与零结果守卫、`--baseline` 换参照物、accept_check 任一退化即 FAIL、ab_blind 盲评确定性与不泄臂名）。
 - 新增约束时**先写契约测试再改实现**；触发词必须能拿出语料实证（`tools/distill/verify_triggers.py`）。
 - `tools/offline_smoke.py` 是总闸，会跑门禁与单测，适合当作提交前检查。
 
@@ -143,4 +144,4 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
 - **角色可见文本里不许有元叙述**。「语料」「实测」「中位」「频次」「基线」这类词进了 prompt，模型会顺着谈自己的设定。`tools/gates/voice_meta_gate.py` 扫 canon / voice / style_target / turn_logic 四个面，改任何 prompt 文本后必须过这道门禁。
 - **密钥不入库**：探针按 进程环境变量 → 仓库根 `.env` → `.streamlit/secrets.toml` 的顺序取 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`（见 `tools/secrets_loader.py`）。
 - 角色与作品权利属于 Bushiroad / Craft Egg 及相关权利方，本项目与权利方无关，见 `NOTICE.md`；代码以 MIT 发布。
-- 指标（蒸馏分、fidelity）是**相对量**，只用于同批次 before/after 比较；换模型、换夹具、换时钟后跨批次不可比。
+- 指标（蒸馏分、fidelity、composite）是**相对量**，只用于同批次 before/after 比较；换模型、换夹具、换时钟后跨批次不可比。

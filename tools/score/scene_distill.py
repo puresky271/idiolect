@@ -52,8 +52,11 @@ REPORT = REPORT
 CHARS = ["爱音", "素世", "灯", "立希", "乐奈"]
 
 
-def load_baseline() -> dict:
-    return json.loads((DATA / "scene_char_baseline.json").read_text(encoding="utf-8"))
+def load_baseline(path: str = "") -> dict:
+    """加载 (char, scene) 基线。默认随仓库发布的 train 基线；
+    --baseline 可指向 holdout 基线做样本外验收（2026-09-13 补上 holdout 消费闭环）。"""
+    p = Path(path) if path else (DATA / "scene_char_baseline.json")
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 
@@ -106,11 +109,19 @@ def dev(a: float, b: float) -> float:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--labels", required=True, help="probe 轮次（逗号分隔）")
+    ap.add_argument("--baseline", default="",
+                    help="基线文件路径（默认 data/scene_char_baseline.json，train 口径）。"
+                         "验收轮指向 holdout 基线：先跑 scene_char_baseline.py --split holdout，"
+                         "再把产出的 scene_char_baseline_holdout.json 传给本参数")
     args = ap.parse_args()
 
-    base = load_baseline()
+    base = load_baseline(args.baseline)
+    # 自定义基线（验收口径）的产物名带基线文件名后缀——不得静默覆盖 train 口径的评分结果
+    suffix = f"_vs_{Path(args.baseline).stem}" if args.baseline else ""
+    base_src = args.baseline or "data/scene_char_baseline.json（train 口径）"
     lines = ["# 逐场景蒸馏评分：输出 vs 原作同场景基线\n",
              "> 参照物 = **同一角色在同一场景**下的原作台词分布（130 个组合）",
+             f"> 基线来源 = {base_src}",
              "> 各列为「输出 / 原作」原值；蒸馏分 1.0 = 与原作同场景分布一致\n"]
 
     for label in [x for x in args.labels.split(",") if x]:
@@ -206,10 +217,10 @@ def main() -> int:
             lines.append("\n按角色：" + "｜".join(
                 f"{c} {statistics.fmean(v):.3f}" for c, v in sorted(byc.items(), key=lambda kv: -statistics.fmean(kv[1]))))
 
-        (REPORT / f"scene_distill_{label}.json").write_text(
+        (REPORT / f"scene_distill_{label}{suffix}.json").write_text(
             json.dumps(scored, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    (REPORT / "scene_distill.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (REPORT / f"scene_distill{suffix}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     return 0
 

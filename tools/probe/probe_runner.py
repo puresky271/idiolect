@@ -128,13 +128,44 @@ def make_client():
     return OpenAI(api_key=key, base_url=base)
 
 
+def derive_anchor_ref(char: str) -> float | None:
+    """从随仓库发布的场景基线派生角色级锚点参照（各场景格按 n 加权均值）。
+
+    为什么需要（2026-09-13 外部评审）：composite_score 的 anchor_ref 默认取
+    gold["anchor_density"]，但 2026-09 之前发布的 style_profiles.json 没有这个字段，
+    会静默退回 1.0——而各角色金标准实测在 1.8~7.3，1.0 的量程是错的。
+    在画像补齐之前，用 data/scene_char_baseline.json 的 130 格派生一个近似参照，
+    远好于错误兜底。返回 None = 连场景基线也没有（调用方走 composite_score 的兜底）。
+    """
+    p = DATA / "scene_char_baseline.json"
+    if not p.exists():
+        return None
+    base = json.loads(p.read_text(encoding="utf-8"))
+    cells = [c for k, c in base.items()
+             if k.startswith(f"{char}|") and c.get("n") and c.get("anchor_density") is not None]
+    if not cells:
+        return None
+    return sum(c["n"] * c["anchor_density"] for c in cells) / sum(c["n"] for c in cells)
+
+
 def score_arm(char: str, replies: list[str], gold: dict) -> dict:
-    """对一个「角色 × 臂」的全部回复做三层评分。"""
+    """对一个「角色 × 臂」的全部回复做三层评分。
+
+    头号指标是 composite（风格保真 0.65 + 内容锚点 0.35，见 style_features.composite_score）：
+    单看 fidelity 会奖励「短」——实测纯助手腔 fidelity 84.9 高于真像角色的 82.0
+    （2026-09-13 外部评审用本仓库函数复算确认），所以上报口径以 composite 领衔，
+    fidelity 保留为对照列。
+    """
     prof = S.profile_from_texts(replies, "cn")
     out: dict = {"n_bubbles": prof.get("n", 0), "n_replies": len(replies)}
     if not prof.get("n") or not gold.get("n"):
         return out
     fid = S.style_fidelity(gold, prof)
+    comp = S.composite_score(gold, prof, replies)
+    out["composite"] = comp["composite"]
+    out["anchor_density"] = comp["anchor_density"]
+    out["anchor_ref"] = comp["anchor_ref"]
+    out["anchor_score"] = comp["anchor_score"]
     out["fidelity"] = fid["fidelity"]
     out["rmse"] = fid["rmse"]
     out["worst_dims"] = sorted(
@@ -209,6 +240,7 @@ def main() -> int:
 
     gold: dict[str, dict] = {}
     gold_src = ""
+    anchor_src = ""
     corpus_cn = CORPUS_DIR / "cn.jsonl"
     if corpus_cn.exists():
         # 有语料：现场按同一套特征代码算 gold 画像（与历史批次数字逐位可比）
@@ -220,7 +252,10 @@ def main() -> int:
                     if r["character"] == key and r.get("split") == "train":
                         texts.append(r["text"])
             gold[char] = S.profile_from_texts(texts, "cn")
+            # composite 的 anchor_ref：该角色金标准语料自身的锚点密度（只问她自己的常态）
+            gold[char]["anchor_density"] = round(S.anchor_density(texts), 3)
         gold_src = f"语料现场计算（{corpus_cn}）"
+        anchor_src = "语料实测"
     else:
         # 无语料：用随仓库发布的派生画像（同样的聚合量，不是原作文本）。
         # 本仓库不分发原作台词，所以这是**默认**路径；数字口径与上面一致。
@@ -231,10 +266,20 @@ def main() -> int:
                   flush=True)
             return 2
         raw = json.loads(prof_path.read_text(encoding="utf-8"))
+        derived: list[str] = []
         for char, key in CHARKEY.items():
             gold[char] = raw.get(key, {"n": 0})
+            # 2026-09 之前发布的画像没有 anchor_density 字段 → 从场景基线派生，
+            # 否则 composite 的 anchor_ref 会静默退回 1.0（量程错误，见 derive_anchor_ref）
+            if gold[char].get("n") and gold[char].get("anchor_density") is None:
+                ref = derive_anchor_ref(char)
+                if ref is not None:
+                    gold[char]["anchor_density"] = round(ref, 3)
+                    derived.append(char)
         gold_src = f"派生统计 {prof_path.name}（无原作文本）"
-    print(f"[probe] gold 画像来源 = {gold_src}", flush=True)
+        anchor_src = ("场景基线派生（画像缺 anchor_density 字段）：" + "、".join(derived)) \
+            if derived else "画像自带"
+    print(f"[probe] gold 画像来源 = {gold_src}｜anchor_ref 来源 = {anchor_src}", flush=True)
 
     client = None if args.dry_run else make_client()
     model = os.environ.get("LLM_MODEL", "deepseek-flash")
@@ -388,31 +433,34 @@ def main() -> int:
     errs = sum(1 for r in records if r["error"])
     lines.append(f"- 夹具：每角色真实 messages dump，仅替换末条 user；生产同参 temperature={args.temperature} max_tokens={args.max_tokens}")
     lines.append(f"- 生成：{len(records)} 条（error {errs}）｜ 每场景 {args.runs} 次\n")
-    lines.append(f"| 角色 | 气泡 | fidelity | 硬规则V | 硬规则任一 | 具体锚点率 | 泄漏率 | 最漂维度 |")
-    lines.append("|---|---|---|---|---|---|---|---|")
+    lines.append(f"| 角色 | 气泡 | composite | fidelity | 锚点(出/参) | 硬规则V | 硬规则任一 | 具体锚点率 | 泄漏率 | 最漂维度 |")
+    lines.append("|---|---|---|---|---|---|---|---|---|---|")
     leak_by_char: dict[str, list[int]] = defaultdict(list)
     for r in records:
         if r["reply"] or r["error"] == "EMPTY_CONTENT":
             leak_by_char[r["char"]].append(1 if r["clean"]["leak"] else 0)
     for char, s in summary.items():
         if not s.get("n_bubbles"):
-            lines.append(f"| {char} | 0 | — | — | — | — | — | — |")
+            lines.append(f"| {char} | 0 | — | — | — | — | — | — | — | — |")
             continue
         worst = "、".join(d["dim"] for d in s.get("worst_dims", [])[:3])
         lk = leak_by_char.get(char, [])
         lk_rate = sum(lk) / len(lk) * 100 if lk else 0.0
         lines.append(
-            f"| {char} | {s['n_bubbles']} | {s['fidelity']} | {s['hard_v_rate'] * 100:.1f}% | "
+            f"| {char} | {s['n_bubbles']} | **{s['composite']}** | {s['fidelity']} | "
+            f"{s['anchor_density']}/{s['anchor_ref']} | {s['hard_v_rate'] * 100:.1f}% | "
             f"{s['hard_any_rate'] * 100:.1f}% | {s['concrete_anchor_rate'] * 100:.0f}% | "
             f"{lk_rate:.0f}% | {worst} |"
         )
     if summary:
+        comps = [s["composite"] for s in summary.values() if "composite" in s]
         fids = [s["fidelity"] for s in summary.values() if "fidelity" in s]
         vs = [s["hard_v_rate"] for s in summary.values() if "hard_v_rate" in s]
         concs = [s["concrete_anchor_rate"] for s in summary.values() if "concrete_anchor_rate" in s]
-        if fids:
+        if comps:
             lines.append(
-                f"\n**总体**：fidelity 均值 {sum(fids) / len(fids):.1f}｜"
+                f"\n**总体**：composite 均值 {sum(comps) / len(comps):.1f}（头号指标，风格 0.65 + 锚点 0.35）｜"
+                f"fidelity 均值 {sum(fids) / len(fids):.1f}｜"
                 f"硬规则 V 级均值 {sum(vs) / len(vs) * 100:.1f}%｜"
                 f"具体锚点率均值 {sum(concs) / len(concs) * 100:.0f}%"
             )

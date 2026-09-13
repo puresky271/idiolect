@@ -10,8 +10,13 @@
   · 本模块**先按角色过滤、再按场景原型检索**，得到 (char, scene) 的真基线
     → 也就是「灯在『情绪崩溃』场景真说了什么」这一层的分布
 
-产出 report/scene_char_baseline.json
+产出 report/scene_char_baseline.json（train，默认）/ report/scene_char_baseline_holdout.json（--split holdout）
   {(char, scene): {profile, exemplars, n}}
+
+split 的设计意图（build_gold.py）：按文本 hash 稳定切 20% 作 holdout，
+**调参只能看 train 的分布，验收用 holdout**。2026-09-13 之前本脚本只读 train，
+holdout 零消费点（外部评审指出）；现在 `--split holdout` 建出验收基线，
+配合 `scene_distill.py --baseline` 完成样本外验收。
 """
 from __future__ import annotations
 
@@ -43,29 +48,47 @@ MODEL = "BAAI/bge-small-zh-v1.5"
 CHARS = {"tomori": "灯", "anon": "爱音", "rana": "乐奈", "soyo": "素世", "taki": "立希"}
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--k", type=int, default=40, help="每 (char,scene) 取多少条最近邻")
-    ap.add_argument("--min-n", type=int, default=12, help="少于此数则该组合不产出（标为证据不足）")
-    ap.add_argument("--no-exemplars", action="store_true",
-                    help="剥掉例句字段（发布用：本仓库不分发原作文本）")
-    ap.add_argument("--out", default="", help=f"输出路径（默认 {REPORT / 'scene_char_baseline.json'}）")
-    args = ap.parse_args()
+def load_corpus(split: str = "train") -> dict[str, list[str]]:
+    """按角色分组读语料，只收指定 split 的行。
 
-    from validate_scenes import PROTOTYPES
-
-    # 按角色分组读语料
+    train = 蒸馏参照（调参能看的部分）；holdout = 验收参照（最终验收才用）。
+    """
     by_char: dict[str, list[str]] = defaultdict(list)
     require_corpus("cn")
     for line in (CORPUS_DIR / "cn.jsonl").read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
         r = json.loads(line)
-        if r.get("split") != "train":
+        if r.get("split") != split:
             continue
         t = r["text"]
         if len(t) >= 4 and not S.turn_features(t, "cn").silent:
             by_char[r["character"]].append(t)
+    return by_char
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--k", type=int, default=40, help="每 (char,scene) 取多少条最近邻")
+    ap.add_argument("--min-n", type=int, default=12, help="少于此数则该组合不产出（标为证据不足）")
+    ap.add_argument("--split", choices=["train", "holdout"], default="train",
+                    help="用哪部分语料建基线：train=蒸馏参照（默认，与历史一致）；"
+                         "holdout=验收参照（调参不得看它，只用于最终验收轮）")
+    ap.add_argument("--no-exemplars", action="store_true",
+                    help="剥掉例句字段（发布用：本仓库不分发原作文本）")
+    ap.add_argument("--out", default="", help=f"输出路径（默认 {REPORT / 'scene_char_baseline.json'}；"
+                                              f"holdout 时为 …_holdout.json）")
+    args = ap.parse_args()
+
+    from validate_scenes import PROTOTYPES
+
+    by_char = load_corpus(args.split)
+    total = sum(len(v) for v in by_char.values())
+    if not total:
+        raise SystemExit(
+            f"[stop] split={args.split} 的可用语料是 0 行——基线会是空壳，"
+            f"直接退出不写产物（语料：{CORPUS_DIR / 'cn.jsonl'}）。")
+    print(f"[baseline] split={args.split} 可用语料 {total} 行", flush=True)
 
     from sentence_transformers import SentenceTransformer
 
@@ -105,7 +128,8 @@ def main() -> int:
                 out[f"{cname}|{scene}"].pop("exemplars", None)
         print(f"  {cname}: {len(texts)} 条语料 → 产出 {sum(1 for k in out if k.startswith(cname + '|'))} 个场景基线")
 
-    dst = Path(args.out) if args.out else (REPORT / "scene_char_baseline.json")
+    default_name = "scene_char_baseline.json" if args.split == "train" else "scene_char_baseline_holdout.json"
+    dst = Path(args.out) if args.out else (REPORT / default_name)
     dst.parent.mkdir(parents=True, exist_ok=True)
     dst.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n共 {len(out)} 个 (角色 × 场景) 基线")

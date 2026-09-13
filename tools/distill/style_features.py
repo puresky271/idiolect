@@ -487,11 +487,13 @@ def composite_score(gold: dict, actual: dict, texts: Iterable[str],
     要防的病灶是**模板化/助手腔**，不是啰嗦，所以目标函数必须同时看
     「像不像这个角色」和「有没有在说具体的事」，否则优化会退化成「变冷淡」。
 
-    anchor_ref 的取法（2026-09-11 修正）：
-      曾写死 4.0，但**各角色的天然锚点密度差 3 倍**（乐奈 ≈7.3、灯 ≈1.8）。
+    anchor_ref 的取法（2026-09-11 修正；2026-09-13 数值更新为随仓库发布的画像口径）：
+      曾写死 4.0，但**各角色的天然锚点密度差 3 倍**（乐奈 4.40、素世 1.43，
+      见 data/style_profiles.json 的 anchor_density 字段，由 export_profiles.py 实测导出）。
       写死会导致「该角色在该场景本来就不提具体物」被误判成质量差。
       现在默认取**该角色金标准语料自身的锚点密度**当满分线，
       即只问「有没有达到她自己的常态」，不再跨角色比。
+      画像缺该字段时 probe_runner 会从场景基线派生，1.0 只是最后兜底。
     """
     fid = style_fidelity(gold, actual)
     if anchor_ref is None:
