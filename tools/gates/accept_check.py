@@ -8,17 +8,25 @@ _noun_initial.py 才发现的；「变冷淡刷分」也要靠中性对照场景
 
 五条指标（数据源都是 probe/probe_report 已落盘的产物，本脚本不再调 LLM）：
   · composite 均值   probe_<label>_summary.json   头号指标（风格 0.65 + 锚点 0.35），降 > 1.0 分判退化
-  · 锚点密度         probe_<label>_summary.json   **原值**逐角色对比，任一角色相对降 > 5% 判退化
+  · 锚点密度         probe_<label>_summary.json   **合并计数**的泊松精确检验（单侧 5% 显著），
+                                                   打印可检测下限；逐角色只作诊断列
   · distill 均值     scene_distill_<label>.json   逐场景长度分布贴合，降 > 0.02 判退化
   · 硬规则 V 级率    probe_<label>_summary.json   破功红线，升 > 1pp 判退化
   · 同格重复度       probe_<label>.jsonl 现场算    1 − distinct/n（逐格再平均），升 > 5pp 判退化
 
-为什么锚点密度要单独看原值（2026-09-13 复审「饱和」项）：composite 的锚点项
-有封顶 min(ad/ref, 1)——对锚点天然饱和的角色（实测 3/5 角色的 anchor_score ≈ 100），
-composite 退化为 0.65×fidelity + 常数，内容维度暂时失聪。封顶是刻意设计
-（不奖励堆锚点），但内容退化必须仍有地方被抓：就是这一条原值指标。
-且必须**逐角色取最差**而非跨角色均值（复审 N6）：各角色锚点量级差 2 倍以上时，
-统一的相对门槛压在均值上有盲区——素世 −25% 的退化只让均值动 −3.4% 会漏检。
+为什么锚点密度走「合并计数 + 泊松检验」（2026-09-13 复审 N6/N7 的合力）：
+  · composite 的锚点项有封顶 min(ad/ref, 1)——对锚点天然饱和的角色（实测 3/5
+    角色的 anchor_score ≈ 100），composite 退化为 0.65×fidelity + 常数，
+    内容维度暂时失聪，所以必须有独立的内容退化看守。
+  · 但 hits 是小整数计数（实测 repo_standalone 批次：每角色 2~19 次 / 21 条，
+    爱音只有 2 次 → 相对标准误 71%）。固定百分比门槛 + 跨角色均值会被量级稀释
+    （N6：素世 −25% 被均值 −3.4% 掩盖）；改「逐角色取最差」又等于取噪声极值
+    （N7：空比较的误报率被推到 ~95%）。两条路在小计数下都不成立。
+  · 唯一诚实的做法：合并全部角色的 hits/chars 做精确的泊松率比较
+    （二项条件检验，零第三方依赖），显著性可控（误报 ≤ α），并把**可检测下限**
+    打印出来——样本量不够就明说「无结论」，这是仓库自己的纪律（docs/00 §4.4）。
+  · 逐角色数字照打（诊断列，无判定）：单角色退化靠人读，21 条/角色的量级
+    任何机械门槛都既抓不准也躲不开噪声。
 
 阈值都可用命令行调（--tol-*）；判断口径「after 相对 before 退化」。
 缺产物文件是 rc 2 的明确报错——半截证据不许当「通过」。
@@ -77,27 +85,61 @@ def hard_v_mean(art: dict) -> float | None:
     return statistics.fmean(vals) if vals else None
 
 
-def anchor_density_worst(before: dict, after: dict) -> tuple[str, float, float, float] | None:
-    """逐角色锚点密度相对变化，取**最差**的那个角色：(char, before, after, 相对变化)。
+def anchor_counts_pooled(art: dict) -> tuple[int, int] | None:
+    """合并全部角色的 (hits, chars)。summary 里没有计数（旧批次产物）时返回 None。"""
+    hits = chars = 0
+    found = False
+    for s in art["summary"].get("summary", {}).values():
+        if isinstance(s, dict) and "anchor_hits" in s and "anchor_chars" in s:
+            hits += s["anchor_hits"]
+            chars += s["anchor_chars"]
+            found = True
+    return (hits, chars) if found else None
 
-    为什么是逐角色取最差而不是跨角色均值（2026-09-13 复审 N6）：各角色锚点量级差
-    2 倍以上，统一的相对门槛压在均值上会有量级盲区——实测素世 −25% 的退化只让
-    批量均值动 −3.4%（PASS 漏检），乐奈同样的 −25% 却让均值动 −8.2%（FAIL 抓到）。
-    而素世恰好同时是 composite 饱和角色（锚点项失聪）+ 量级最低角色（均值盲区），
-    双重盲区叠加。门槛语义必须与「任一退化即 FAIL」一致：逐角色各自比，取最差。
+
+def anchor_per_char(art: dict) -> dict[str, tuple[int, int]]:
+    """逐角色 (hits, chars)——只作诊断列，不参与判定（小计数，见模块 docstring）。"""
+    out: dict[str, tuple[int, int]] = {}
+    for char, s in art["summary"].get("summary", {}).items():
+        if isinstance(s, dict) and "anchor_hits" in s and "anchor_chars" in s and s["anchor_chars"]:
+            out[char] = (s["anchor_hits"], s["anchor_chars"])
+    return out
+
+
+def poisson_decrease_pvalue(hits_b: int, chars_b: int, hits_a: int, chars_a: int) -> float:
+    """单侧精确检验：after 的锚点率是否显著低于 before。
+
+    条件检验（两泊松率比较的标准精确做法）：零假设两臂率相同，
+    给定总命中 N = hits_a + hits_b，after 的命中数 ~ Binomial(N, p0)，
+    p0 = chars_a / (chars_a + chars_b)（按曝光量加权）。math.comb 手算，
+    不需要 scipy。N 到几百时浮点足够稳。
     """
-    sb = before["summary"].get("summary", {})
-    sa = after["summary"].get("summary", {})
-    worst: tuple[str, float, float, float] | None = None
-    for char in sorted(set(sb) & set(sa)):
-        b = sb[char].get("anchor_density") if isinstance(sb[char], dict) else None
-        a = sa[char].get("anchor_density") if isinstance(sa[char], dict) else None
-        if b is None or a is None or not b:
-            continue
-        rel = (a - b) / b
-        if worst is None or rel < worst[3]:
-            worst = (char, b, a, rel)
-    return worst
+    from math import comb
+
+    n = hits_a + hits_b
+    if n == 0 or not chars_a or not chars_b:
+        return 1.0
+    p0 = chars_a / (chars_a + chars_b)
+    return sum(comb(n, k) * p0 ** k * (1 - p0) ** (n - k) for k in range(hits_a + 1))
+
+
+def critical_drop(hits_b: int, chars_b: int, chars_a: int, alpha: float) -> float | None:
+    """当前样本量下能判 FAIL 的最小相对降幅（5% 显著临界）。
+
+    找不到（计数太少，任何降幅都不显著）返回 None——调用方照实打印「无结论」。
+    """
+    rate_b = hits_b / chars_b if chars_b else 0.0
+    if not rate_b:
+        return None
+    best: int | None = None
+    for k in range(hits_b + 1):
+        if poisson_decrease_pvalue(hits_b, chars_b, k, chars_a) < alpha:
+            best = k
+        else:
+            break
+    if best is None:
+        return None
+    return 1.0 - (best / chars_a) / rate_b
 
 
 def distill_mean(art: dict) -> float | None:
@@ -123,7 +165,7 @@ def main() -> int:
     ap.add_argument("--before", required=True, help="基线臂 label（改前）")
     ap.add_argument("--after", required=True, help="待验收臂 label（改后）")
     ap.add_argument("--tol-composite", type=float, default=1.0, help="composite 允许下降幅度（分）")
-    ap.add_argument("--tol-anchor", type=float, default=0.05, help="锚点密度允许相对下降幅度")
+    ap.add_argument("--alpha-anchor", type=float, default=0.05, help="锚点密度泊松检验的单侧显著性水平")
     ap.add_argument("--tol-distill", type=float, default=0.02, help="distill 均值允许下降幅度")
     ap.add_argument("--tol-hard-v", type=float, default=0.01, help="硬规则 V 级率允许上升幅度")
     ap.add_argument("--tol-repeat", type=float, default=0.05, help="同格重复度允许上升幅度")
@@ -159,22 +201,40 @@ def main() -> int:
         failed = failed or regression
         rows.append(f"  [{verdict}] {name}：{b:.4g} → {a:.4g}（Δ {delta:+.4g}{unit}，容差 {tol:g}）")
 
-    # 锚点密度单独成段：逐角色相对变化取最差（量级盲区的教训，见 anchor_density_worst）
-    worst = anchor_density_worst(before, after)
-    if worst is None:
-        anchor_row = ("  [SKIP] 锚点密度（逐角色最差）：两臂没有可比较的角色数据——"
-                      "缺证据不算通过，请补齐产物后重跑")
+    # 锚点密度单独成段：合并计数的泊松精确检验（小计数的教训，见模块 docstring N6/N7 段）
+    cb = anchor_counts_pooled(before)
+    ca = anchor_counts_pooled(after)
+    if cb is None or ca is None:
+        anchor_row = ("  [SKIP] 锚点密度（合并泊松检验）：summary 里没有 anchor_hits/anchor_chars"
+                      "（旧批次产物？重跑 probe_runner 再验收）——缺证据不算通过")
         failed = True
     else:
-        char, b, a, rel = worst
-        regression = rel < -args.tol_anchor
+        hb, xb = cb
+        ha, xa = ca
+        p = poisson_decrease_pvalue(hb, xb, ha, xa)
+        regression = p < args.alpha_anchor
         verdict = "FAIL" if regression else "PASS"
         failed = failed or regression
-        anchor_row = (f"  [{verdict}] 锚点密度（逐角色最差）：{char} {b:.4g} → {a:.4g}"
-                      f"（Δ {rel * 100:+.1f}%，容差 {args.tol_anchor:.0%}）")
-    # 打印顺序：composite 领衔，锚点其次，其余随后
+        rate_b = hb / xb * 100 if xb else 0.0
+        rate_a = ha / xa * 100 if xa else 0.0
+        mde = critical_drop(hb, xb, xa, args.alpha_anchor)
+        mde_txt = (f"当前样本量可检测下限 ≈ 降 {mde:.0%}" if mde is not None
+                   else "样本量过小，任何降幅都不显著（无结论）")
+        anchor_row = (f"  [{verdict}] 锚点密度（合并泊松检验）：{rate_b:.2f} → {rate_a:.2f}"
+                      f"（hits {hb}→{ha} / chars {xb}→{xa}，p={p:.3f}，α={args.alpha_anchor}；{mde_txt}）")
+    # 打印顺序：composite 领衔，锚点其次，其余随后；逐角色锚点只作诊断
     print(rows[0])
     print(anchor_row)
+    if cb is not None and ca is not None:
+        pb, pa = anchor_per_char(before), anchor_per_char(after)
+        diag = []
+        for char in sorted(set(pb) & set(pa)):
+            hb_, xb_ = pb[char]
+            ha_, xa_ = pa[char]
+            diag.append(f"{char} {hb_ / xb_ * 100:.2f}→{ha_ / xa_ * 100:.2f}"
+                        f"（hits {hb_}→{ha_}）")
+        if diag:
+            print("      逐角色诊断（小计数，不参与判定）：" + "｜".join(diag))
     for row in rows[1:]:
         print(row)
 

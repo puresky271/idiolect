@@ -460,8 +460,12 @@ def rana_register_score(text: str, lang: str = "cn") -> dict:
     }
 
 
-def anchor_density(texts: Iterable[str]) -> float:
-    """每 100 字的锚点词数。用它对标 fidelity 的「长度」维度做交叉验证。"""
+def anchor_hits_chars(texts: Iterable[str]) -> tuple[int, int]:
+    """锚点命中数与总字数（原始计数）。
+
+    计数必须单独可取（2026-09-13 复审 N7）：hits 是小整数（实测每角色 2~19 次
+    /21 条），只暴露密度比值会让下游误以为它是连续精确量——泊松检验需要原始计数。
+    """
     import re as _re
 
     global _ANCHOR_RX
@@ -474,6 +478,12 @@ def anchor_density(texts: Iterable[str]) -> float:
             continue
         chars += len(t)
         hits += len(_ANCHOR_RX.findall(t))
+    return hits, chars
+
+
+def anchor_density(texts: Iterable[str]) -> float:
+    """每 100 字的锚点词数。用它对标 fidelity 的「长度」维度做交叉验证。"""
+    hits, chars = anchor_hits_chars(texts)
     return (hits / chars * 100) if chars else 0.0
 
 

@@ -169,6 +169,8 @@ def score_arm(char: str, replies: list[str], gold: dict) -> dict:
     out["anchor_density"] = comp["anchor_density"]
     out["anchor_ref"] = comp["anchor_ref"]
     out["anchor_score"] = comp["anchor_score"]
+    # 原始计数也要落盘：accept_check 的泊松检验按计数算，只存密度比值会丢精度
+    out["anchor_hits"], out["anchor_chars"] = S.anchor_hits_chars(replies)
     out["fidelity"] = fid["fidelity"]
     out["rmse"] = fid["rmse"]
     out["worst_dims"] = sorted(

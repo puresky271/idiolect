@@ -221,7 +221,7 @@ py -X utf8 tools/distill/export_profiles.py
 
 **验证状态（2026-09-13）。** 本仓库的所有脚本都做过两级冒烟：58 个脚本逐个跑 `--help`（查 import 与语法），其中 15 个需要语料或派生产物的脚本用真实金标准语料**实跑**过一遍，全部退出码 0。
 
-实跑通过：`analyze_corpus`、`verbal_tics`、`tic_profile`、`char_topic_vocab`、`export_targets`、`verify_triggers`、`export_scene_targets`、`export_profiles`、`scene_char_baseline`、`scene_stats`、`tic_by_scene`、`validate_scenes`、`audit_corpus_quality`、`probe_registry --list`、`power_calc`。另外在**新克隆的仓库**里跑通了 `pytest tests`（237 项）、`offline_smoke`（1 skipped）与探针 dry-run（35 条记录，system 段 12368~24501 字符，无需语料）。
+实跑通过：`analyze_corpus`、`verbal_tics`、`tic_profile`、`char_topic_vocab`、`export_targets`、`verify_triggers`、`export_scene_targets`、`export_profiles`、`scene_char_baseline`、`scene_stats`、`tic_by_scene`、`validate_scenes`、`audit_corpus_quality`、`probe_registry --list`、`power_calc`。另外在**新克隆的仓库**里跑通了 `pytest tests`（238 项）、`offline_smoke`（1 skipped）与探针 dry-run（35 条记录，system 段 12368~24501 字符，无需语料）。
 
 仍未验证的两项，都因为需要外部资源：
 

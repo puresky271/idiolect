@@ -14,8 +14,9 @@
      （曾有过两个真相来源、同一份产物差 3.2 分的教训，2026-09-13 复审 N3）。
   3. **holdout 消费**：scene_char_baseline 的语料加载可按 split 过滤，
      holdout 为零时是显式报错而不是写出空基线。
-  4. **多指标门禁**：accept_check 对 before/after 两臂逐指标独立判定，
-     任一退化即整体 FAIL；缺产物是明确报错，不是静默通过。
+  4. **多指标门禁**：accept_check 对 before/after 两臂逐指标独立判定，任一退化即整体 FAIL；
+     锚点密度走合并泊松精确检验（小计数不许用固定百分比门槛，N6/N7 两轮教训），
+     噪声级波动不误报、可检测下限照打；缺产物是明确报错，不是静默通过。
   5. **A/B 盲评**：ab_blind 的 worksheet 确定性、不泄漏臂名、key 映射自洽、
      tally 数学正确。
 
@@ -278,11 +279,13 @@ class SceneDistillBaselineTests(unittest.TestCase):
 
 
 # ── W3 门禁的合成产物：after 臂在 hard_v 上退化 ──
-def _summary(composite: float, hard_v: float, anchor: float = 2.0) -> dict:
+def _summary(composite: float, hard_v: float, hits: int = 40, chars: int = 1000) -> dict:
+    """合成 summary。hits/chars 是 accept_check 泊松检验的输入（计数，不是密度）。"""
     return {"label": "x", "arm": "a", "runs": 6, "patch": "none",
             "summary": {"乐奈": {"n_bubbles": 12, "n_replies": 6, "composite": composite,
                                  "fidelity": 80.0, "hard_v_rate": hard_v,
-                                 "anchor_density": anchor,
+                                 "anchor_density": round(hits / chars * 100, 2),
+                                 "anchor_hits": hits, "anchor_chars": chars,
                                  "hard_any_rate": 0.1, "concrete_anchor_rate": 0.5}}}
 
 DISTILL_OK = [{"char": "乐奈", "scene": "comfort", "n": 12, "distill": 0.6,
@@ -359,41 +362,61 @@ class AcceptCheckTests(unittest.TestCase):
 
     def test_anchor_density_regression_fails_despite_saturated_composite(self):
         """饱和契约（2026-09-13 复审）：composite 锚点项封顶后内容维度失聪
-        （实测 3/5 角色 anchor_score ≈ 100），此时锚点密度**原值**的退化
-        必须仍被抓——这是饱和设计下内容回归的唯一看守。"""
+        （实测 3/5 角色 anchor_score ≈ 100），此时锚点密度**合并计数**的真实退化
+        必须仍被抓——大计数下 −30% 是显著事件。"""
         with tempfile.TemporaryDirectory() as tmp:
-            env = self._setup(tmp, _summary(86.9, 0.0, anchor=4.0),
-                              _summary(86.9, 0.0, anchor=3.0),
+            env = self._setup(tmp, _summary(86.9, 0.0, hits=400, chars=10000),
+                              _summary(86.9, 0.0, hits=280, chars=10000),
                               PROBE_ROWS, PROBE_ROWS)
             r = self._run(env)
-            self.assertEqual(r.returncode, 1, "composite 饱和不动时，锚点密度 −25% 必须 FAIL")
+            self.assertEqual(r.returncode, 1, "composite 饱和不动时，锚点合并计数 −30% 必须 FAIL")
             self.assertIn("锚点", r.stdout)
 
-    def test_anchor_density_small_drift_passes(self):
+    def test_anchor_noise_wobble_passes(self):
+        """N7 空比较守护：小计数下的噪声级波动（20→16，−20% 但远未显著）
+        不得报 FAIL——固定百分比门槛曾把这类噪声推到 ~95% 误报。"""
         with tempfile.TemporaryDirectory() as tmp:
-            env = self._setup(tmp, _summary(80.0, 0.0, anchor=4.0),
-                              _summary(80.0, 0.0, anchor=3.9),
+            env = self._setup(tmp, _summary(80.0, 0.0, hits=20, chars=800),
+                              _summary(80.0, 0.0, hits=16, chars=800),
                               PROBE_ROWS, PROBE_ROWS)
             r = self._run(env)
-            self.assertEqual(r.returncode, 0, r.stdout[-400:])
+            self.assertEqual(r.returncode, 0, f"噪声级波动不得 FAIL：\n{r.stdout}")
+            self.assertIn("可检测下限", r.stdout, "必须把当前样本量的功效边界印出来")
 
-    def test_anchor_metric_is_per_char_worst_not_batch_mean(self):
-        """N6 契约：同样的 −25% 退化，落在低量级角色（素世）上也必须 FAIL——
-        跨角色均值曾把它稀释成 −3.4% 漏检；逐角色取最差才与「任一退化即 FAIL」一致。"""
-        anchors_before = {"爱音": 1.6, "灯": 1.8, "立希": 2.0, "素世": 1.4, "乐奈": 3.4}
-        anchors_after = {**anchors_before, "素世": 1.05}   # 素世 −25%，其余不动
-        mk = lambda anchors: {"label": "x", "arm": "a", "runs": 6, "patch": "none",
-                              "summary": {c: {"n_bubbles": 12, "n_replies": 6, "composite": 85.0,
-                                              "fidelity": 80.0, "hard_v_rate": 0.0,
-                                              "anchor_density": a,
-                                              "hard_any_rate": 0.1, "concrete_anchor_rate": 0.5}
-                                          for c, a in anchors.items()}}
+    def test_single_char_regression_below_mde_passes_with_diagnostics(self):
+        """N6/N7 合力后的诚实边界：单角色 −25% 在 21 条/角色的计数下**任何**机械
+        门槛都抓不准（逐角色取最差 = 取噪声极值）。契约是：整体 PASS、
+        逐角色数字照打（人读诊断）、可检测下限照打（无结论要明说）。"""
+        def mk(anchors: dict) -> dict:
+            return {"label": "x", "arm": "a", "runs": 6, "patch": "none",
+                    "summary": {c: {"n_bubbles": 12, "n_replies": 6, "composite": 85.0,
+                                    "fidelity": 80.0, "hard_v_rate": 0.0,
+                                    "anchor_density": round(h / x * 100, 2),
+                                    "anchor_hits": h, "anchor_chars": x,
+                                    "hard_any_rate": 0.1, "concrete_anchor_rate": 0.5}
+                                for c, (h, x) in anchors.items()}}
+        before = mk({"爱音": (3, 500), "灯": (10, 500), "立希": (5, 400),
+                     "素世": (14, 500), "乐奈": (19, 400)})
+        after = mk({"爱音": (3, 500), "灯": (10, 500), "立希": (5, 400),
+                    "素世": (10, 500), "乐奈": (19, 400)})   # 只有素世 ~−25%
         with tempfile.TemporaryDirectory() as tmp:
-            env = self._setup(tmp, mk(anchors_before), mk(anchors_after),
-                              PROBE_ROWS, PROBE_ROWS)
+            env = self._setup(tmp, before, after, PROBE_ROWS, PROBE_ROWS)
             r = self._run(env)
-            self.assertEqual(r.returncode, 1, "低量级角色的 −25% 退化不得被批量均值稀释掉")
-            self.assertIn("素世", r.stdout, "FAIL 行必须点名最差角色")
+            self.assertEqual(r.returncode, 0, f"单角色小计数退化低于可检测下限，应 PASS：\n{r.stdout}")
+            self.assertIn("素世", r.stdout, "逐角色诊断必须照打（退化靠人读）")
+
+    def test_anchor_missing_counts_skips_and_fails(self):
+        """旧批次 summary 没有 anchor_hits/chars → SKIP 且整体 FAIL（缺证据不算通过）。"""
+        legacy = {"label": "x", "arm": "a", "runs": 6, "patch": "none",
+                  "summary": {"乐奈": {"n_bubbles": 12, "n_replies": 6, "composite": 80.0,
+                                      "fidelity": 80.0, "hard_v_rate": 0.0,
+                                      "anchor_density": 2.0,
+                                      "hard_any_rate": 0.1, "concrete_anchor_rate": 0.5}}}
+        with tempfile.TemporaryDirectory() as tmp:
+            env = self._setup(tmp, legacy, legacy, PROBE_ROWS, PROBE_ROWS)
+            r = self._run(env)
+            self.assertEqual(r.returncode, 1, "缺计数的产物必须 SKIP→FAIL")
+            self.assertIn("probe_runner", r.stdout, "报错要指路重跑 probe_runner")
 
     def test_missing_artifacts_rc2(self):
         with tempfile.TemporaryDirectory() as tmp:
