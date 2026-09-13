@@ -1,4 +1,4 @@
-<p align="right">
+<p align="center">
   <strong>English</strong> · <a href="./README.ja.md">日本語</a> · <a href="./README.md">简体中文</a>
 </p>
 
@@ -6,9 +6,32 @@
   <img src="./assets/readme/hero.png" width="100%" alt="idiolect: make an AI character speak in character, and prove it got closer. The illustration shows the five members of MyGO!!!!! — Anon, Tomori, Taki, Soyo and Rana.">
 </p>
 
-~~Rikki, why are you holding a guitar — is it because the author was too lazy to re-render the image?~~
+<h1 align="center">idiolect</h1>
 
-**Make an AI character speak in character, and prove it got closer — with numbers.**
+<p align="center">
+  <strong>Make an AI character speak in character, and prove it got closer — with numbers.</strong>
+</p>
+
+<p align="center">
+  <sub>~~Rikki, why are you holding a guitar — is it because the author was too lazy to re-render the image?~~</sub>
+</p>
+
+<p align="center">
+  <a href="https://github.com/puresky271/idiolect/actions/workflows/ci.yml"><img src="https://github.com/puresky271/idiolect/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/runtime%20deps-0-brightgreen" alt="runtime dependencies: 0">
+</p>
+
+<p align="center">
+  <a href="#-what-you-actually-get">What you get</a> ·
+  <a href="#-quick-start">Quick start</a> ·
+  <a href="#-real-output">Real output</a> ·
+  <a href="#-four-layers-how-the-prompt-is-assembled">Four layers</a> ·
+  <a href="#-docs">Docs</a>
+</p>
+
+---
 
 Folks, as vendors keep pushing models harder on coding and agents, AI roleplay is getting harder and harder to keep a straight face through. This repository is one author's write-up of what actually worked: **a methodology for evaluating AI character-dialogue systems, plus a field log of prompt-engineering pitfalls**, with a reusable constraint framework on top. If you are building AI characters, I hope it saves you some of the pain.
 
@@ -16,13 +39,14 @@ If you let a general model play a character, the replies drift into one customer
 
 The running example is the five members of **BanG Dream! It's MyGO!!!!!**. Note that **the method itself is show-agnostic** and transfers to any character; we solve exactly one thing — proving a reply sounds in character — and make it standalone and reproducible.
 
+> [!IMPORTANT]
 > **Let us get rights and licensing straight first.**
 > **Code** (`idiolect/`, `tools/`, `docs/`, `tests/`) is MIT — use it freely ([`LICENSE`](LICENSE)).
 > **The characters and the work are not ours**: MyGO!!!!! characters, settings, story and music belong to **Bushiroad / Craft Egg and the relevant rights holders**. This is an **unofficial fan-made technical project**, not affiliated with, authorised by, or endorsed by them.
 > **The repository contains no original script text** (no game script, dialogue or lyrics) and no audio; `data/` holds aggregate statistics only, and the sample illustration is fan usage, not official artwork.
-> Details in [`NOTICE.md`](NOTICE.md) and the [Copyright, licence and disclaimer](#copyright-licence-and-disclaimer) section below.
+> Details in [`NOTICE.md`](NOTICE.md) and the [Copyright, licence and disclaimer](#-copyright-licence-and-disclaimer) section below.
 
-## What you actually get
+## 📦 What you actually get
 
 | You get | Concretely |
 |---|---|
@@ -31,9 +55,9 @@ The running example is the five members of **BanG Dream! It's MyGO!!!!!**. Note 
 | **Four mechanical gates plus a prompt-diff gate** | Prompt edits should not rest on vibes: one `offline_smoke.py` run covers assembly, scene coverage, trigger matrix, content red lines, data shape, the gates and a zero-write check |
 | **Tooling that transfers to another work** | 58 scripts: acquisition and cleaning, corpus splitting, scene discovery, tic distillation, length-target export, probing and scoring. The method is not tied to one show — point it at another cast and re-run |
 | **Ready-made character data (aggregates only)** | 26 scenes (13 general + 13 character-specific), 130 character × scene length targets, 114 per-scene tic cells, style profiles for five characters |
-| **Ten methodology documents** | Where the corpus comes from, how each feature class is computed and landed, how to evaluate, and the pitfalls already paid for |
+| **Nine methodology documents** | Where the corpus comes from, how each feature class is computed and landed, how to evaluate, and the pitfalls already paid for |
 
-## Quick start
+## 🚀 Quick start
 
 **First, get it — pick one of four routes:**
 
@@ -74,7 +98,7 @@ from idiolect.assemble import build_messages
 messages = build_messages("乐奈", "你今天又想去哪找猫")   # ready to send to the model
 ```
 
-## Sample analysis of the example cast
+## 🔍 Sample analysis of the example cast
 
 Using the MyGO!!!!! five as the example:
 
@@ -90,7 +114,7 @@ Of these, every median, sentence count and punctuation share can be looked up in
 
 The gap widens per scene too: in a confession scene, for instance, Rana says 7 characters and Soyo 17. That is exactly why the constraints have to be "this character in this situation", not one shared average.
 
-## Why it exists
+## ❓ Why it exists
 
 A model playing a character makes the same four mistakes, and none of them require the model to fail — they are what the training objective produces:
 
@@ -108,7 +132,7 @@ If the same paragraph of comfort comes out, the characters are the same characte
 
 Full method: [`docs/00-methodology.md`](docs/00-methodology.md) (Chinese).
 
-## Real output
+## 📊 Real output
 
 This table is one real probe run, not a design target. A probe sends each character a batch of messages; we collect the replies and score them item by item:
 
@@ -141,9 +165,10 @@ Let us see what happens with the same inputs when the four layers are replaced b
 
 The two columns come from different places: the **four layers** column is from the `repo_standalone` batch above and can be reproduced; the **empty system** column is one manual side-run (the raw record of those two generic-assistant replies) whose probe artifacts are not shipped, so treat it as a qualitative illustration only.
 
-This cell is tiny and proves nothing on its own, but it shows one thing: **a probe must assemble its own prompt** — the shipped fixtures have an empty system field, so without `--assemble` you are measuring a bare model with no character prompt at all.
+> [!WARNING]
+> This cell is tiny and proves nothing on its own, but it shows one thing: **a probe must assemble its own prompt** — the shipped fixtures have an empty system field, so without `--assemble` you are measuring a bare model with no character prompt at all.
 
-## Four layers: how the prompt is assembled
+## 🧩 Four layers: how the prompt is assembled
 
 Everything measured lands in four layers, in a fixed order — stable parts first (cache-friendly), per-turn parts last:
 
@@ -170,7 +195,7 @@ messages = build_workspace_messages(
 )
 ```
 
-## The five characters' prompts are complete and readable
+## 📖 The five characters' prompts are complete and readable
 
 This is not "here is a method, go configure your own cast". **All four layers for all five members ship with the repository**: the long canon profile, the voice manifest, the speech-scale numbers and the scene guidance. Nothing is truncated, nothing is elided, and you need neither an API key nor a corpus to read them.
 
@@ -196,7 +221,7 @@ Three artifacts per dump: `prompt_<char>_<phase>_<label>.txt` (layered, for read
 
 The text of every layer is in the repository and readable verbatim: `canon` and `voice` live in `idiolect/characters/*/` (`canon.py` / `voice.py`), the speech-scale numbers come from [`data/style_profiles.json`](data/style_profiles.json) and the 130 character × scene cells in `idiolect/scene_length_targets.py`, and the scene guidance comes from `idiolect/general_scenes.py` plus each package's `turn_logic/scenes.py`. To see what a prompt edit changed, dump `--phase before` and `--phase after` and diff them.
 
-## Run the tooling
+## 🛠️ Run the tooling
 
 The quick-start section above used the installed package; the repository also ships the full toolchain (requires a clone):
 
@@ -246,7 +271,7 @@ py -X utf8 tools/distill/export_profiles.py --check  # verify shipped profiles a
 
 Probes also run without a corpus: the scoring profile ships with the repository (`data/style_profiles.json`), and the startup log prints which source it used.
 
-## Another cast: the skills that chain the pipeline
+## 🎭 Another cast: the skills that chain the pipeline
 
 The numbers above are for these five. **The method itself is not tied to one work** — to run it on your own characters, the repository ships five skills that chain corpus acquisition → distillation → role packages → evaluation (an agent that understands Claude Code skills loads them automatically; a human can read them as an operations manual):
 
@@ -260,11 +285,13 @@ The numbers above are for these five. **The method itself is not tied to one wor
 
 The short version: **everything the corpus can tell you is automatic** (scene system, length targets, style profiles, tics, vocabularies); **the canon profile, the voice manifest and the scene copy you have to write yourself** — the corpus is a snapshot of event stories, everyday props are simply absent from it, and no amount of statistics will tell you who the character is. `idiolect-pipeline` carries the automatic-versus-authored table.
 
-## On limits and caveats
+## ⚠️ On limits and caveats
 
-**No original script text is shipped.** The repository contains aggregate numbers only: length distributions, sentence counts, punctuation rates, tic frequencies, per-scene baselines (130 character-scene cells), and scoring profiles. Example-sentence fields were stripped before publication, and both the health check and the unit tests guard that line. Character and franchise rights belong to Bushiroad, Craft Egg, and related rights holders; this project is unaffiliated. See [`NOTICE.md`](NOTICE.md).
+> [!CAUTION]
+> **No original script text is shipped.** The repository contains aggregate numbers only: length distributions, sentence counts, punctuation rates, tic frequencies, per-scene baselines (130 character-scene cells), and scoring profiles. Example-sentence fields were stripped before publication, and both the health check and the unit tests guard that line. Character and franchise rights belong to Bushiroad, Craft Egg, and related rights holders; this project is unaffiliated. See [`NOTICE.md`](NOTICE.md).
 
-**Scores are relative.** Scene fit, fidelity, and composite compare before/after inside one batch. They do not travel across batches, models, fixtures, or clocks.
+> [!NOTE]
+> **Scores are relative.** Scene fit, fidelity, and composite compare before/after inside one batch. They do not travel across batches, models, fixtures, or clocks.
 
 **Known and unsolved:**
 
@@ -276,7 +303,7 @@ The short version: **everything the corpus can tell you is automatic** (scene sy
 
 **The corpus is a snapshot.** New official stories keep appearing, so a re-fetch yields different distributions. Every derived statistic records the script that generated it, so it can be rebuilt.
 
-## Docs
+## 📚 Docs
 
 The methodology documents are written in Chinese. Each file stands alone; if you are not sure where to start, open [`docs/README.md`](docs/README.md) — it splits the nine documents into three reading paths by intent and carries a short glossary (turn / scene / the four layers / probe / fixture / arm / gate).
 
@@ -292,7 +319,7 @@ The methodology documents are written in Chinese. Each file stands alone; if you
 | [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | Building turn_logic modules and voice_check post-processing: wiring, gates, acceptance |
 | [`docs/08-context-workspace.md`](docs/08-context-workspace.md) | The context workspace: what surrounds the four layers in a real chat system |
 
-## Copyright, licence and disclaimer
+## ⚖️ Copyright, licence and disclaimer
 
 ### Code: MIT
 
@@ -310,7 +337,7 @@ The character names, settings, world, story and music of *BanG Dream! It's MyGO!
 
 | | |
 |---|---|
-| **In** | Assembly and post-processing code; corpus, distillation and scoring scripts; six **aggregate statistics** files under `data/` (length quantiles, sentence counts, punctuation rates, tic frequencies, per-scene baselines, scoring profiles); ten methodology documents |
+| **In** | Assembly and post-processing code; corpus, distillation and scoring scripts; six **aggregate statistics** files under `data/` (length quantiles, sentence counts, punctuation rates, tic frequencies, per-scene baselines, scoring profiles); nine methodology documents |
 | **Not in** | Original game script, dialogue, lyrics, audio or game assets; any fine-tuned model weights; any sentence-level corpus |
 
 The longest string in `data/` is a 56-character note field; the example-sentence fields of `scene_char_baseline.json` and `scene_stats.json` were stripped by `--no-exemplars` before publishing. Two checks guard that line: `tests/test_tooling_contracts.py::test_shipped_profiles_have_no_text` and the "数据.无原作文本" item in `offline_smoke.py`.

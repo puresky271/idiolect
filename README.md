@@ -1,4 +1,4 @@
-<p align="right">
+<p align="center">
   <a href="./README.en.md">English</a> · <a href="./README.ja.md">日本語</a> · <strong>简体中文</strong>
 </p>
 
@@ -6,9 +6,32 @@
   <img src="./assets/readme/hero.png" width="100%" alt="idiolect：让 AI 说话像角色，并且能证明它变像了。配图是《BanG Dream! It's MyGO!!!!!》五名成员——爱音、灯、立希、素世、乐奈——的插画。">
 </p>
 
-~~Rikki，为什么你抱着吉他，是因为作者太懒不想再重跑一张图吗~~
+<h1 align="center">idiolect（个人语型）</h1>
 
-**让 AI 扮演角色时说话像本人，并且能用数字证明确实更像了。**
+<p align="center">
+  <strong>让 AI 扮演角色时说话像本人，并且能用数字证明确实更像了。</strong>
+</p>
+
+<p align="center">
+  <sub>~~Rikki，为什么你抱着吉他，是因为作者太懒不想再重跑一张图吗~~</sub>
+</p>
+
+<p align="center">
+  <a href="https://github.com/puresky271/idiolect/actions/workflows/ci.yml"><img src="https://github.com/puresky271/idiolect/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/runtime%20deps-0-brightgreen" alt="runtime dependencies: 0">
+</p>
+
+<p align="center">
+  <a href="#-拿到手能做什么">拿到手能做什么</a> ·
+  <a href="#-快速跑起来">快速跑起来</a> ·
+  <a href="#-真实输出">真实输出</a> ·
+  <a href="#-四层装配prompt-是怎么拼的">四层装配</a> ·
+  <a href="#-文档">文档</a>
+</p>
+
+---
 
 孩子们，随着现在的厂商越来越追求model在coding和agent方面的能力，我们的AI RP真是越来越难绷了啊，本仓库是基于作者的部分经验总结出来的一份“AI 角色扮演对话系统的评测方法学 + prompt 工程踩坑实录”，外加一套可复用的约束框架，希望能帮到想做AI角色的同好们。
 
@@ -16,13 +39,14 @@
 
 为了让方法看得见摸得着，全程用《BanG Dream! It's MyGO!!!!!》的五名成员做**示例角色**。请注意**方法本身和具体作品无关**，换成任何角色都成立；我们只解决一件事——怎么证明「说话像」，并把它做成独立、可复现的一套。
 
+> [!IMPORTANT]
 > **让我们先说清楚权利与许可**
 > **代码**（`idiolect/`、`tools/`、`docs/`、`tests/`）以 MIT 发布，随便用（[`LICENSE`](LICENSE)）。
 > **角色与作品不属于本仓库**：MyGO!!!!! 的角色、设定、剧情与音乐的权利属于 **Bushiroad / Craft Egg 及相关权利方**。这是一个**非官方同人技术项目**，与权利方无关联、未获授权或背书。
 > **仓库不含任何原作文本**（剧本、台词、歌词）与音频，`data/` 只有统计出来的聚合数字；示例插画是同人性质的使用，不是官方素材。
-> 细节见 [`NOTICE.md`](NOTICE.md) 与文末的[版权、许可与免责](#版权许可与免责)。
+> 细节见 [`NOTICE.md`](NOTICE.md) 与文末的[版权、许可与免责](#-版权许可与免责)。
 
-## 拿到手能做什么
+## 📦 拿到手能做什么
 
 | 你能拿到                        | 具体是什么                                                                                                                          |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -33,7 +57,7 @@
 | **现成的角色数据（只有聚合量）**          | 26 个场景（13 通用 + 13 角色专属）、130 个「角色 × 场景」长度目标、114 格场景口癖、五个角色的风格画像                                                                 |
 | **九篇方法论文档**                 | 语料怎么来、五类特征怎么算怎么落地、怎么评测、踩过哪些坑，各自独立可读                                                                                            |
 
-## 快速跑起来
+## 🚀 快速跑起来
 
 **先拿到手——四条路，选一条：**
 
@@ -74,7 +98,7 @@ from idiolect.assemble import build_messages
 messages = build_messages("乐奈", "你今天又想去哪找猫")   # 直接发给模型的 messages 数组
 ```
 
-## 示例角色的样本分析：
+## 🔍 示例角色的样本分析：
 
 以 MyGO!!!!! 这五个人为例：
 
@@ -90,7 +114,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")   # 直接发
 
 同一场景下差异还会放大：例如乐奈在「被表白」场景说 7 个字，素世在同一场景说 17 个字。所以这就是为什么约束必须是「这个角色 × 这个场合」的，不能是「所有人共用一个平均数」。
 
-## 为什么需要它
+## ❓ 为什么需要它
 
 模型扮演角色时稳定地犯四个毛病——不需要模型出错，这些是训练目标的正常产物：
 
@@ -108,7 +132,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")   # 直接发
 
 完整方法见 [`docs/00-methodology.md`](docs/00-methodology.md)。
 
-## 真实输出
+## 📊 真实输出
 
 下面这张表是一次真实探针（probe）的结果，不是设计目标。探针 = 给五个角色各发一批话，我们把回复收下来逐项打分：
 
@@ -142,9 +166,10 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 
 两列的出处不同：**四层那一列**来自上面的 `repo_standalone` 批次，可以自己复现；**空 system 那一列**是当时手工跑的一次对照（那两条通用助手腔回复的原样记录），没有随仓库发布探针产物，所以只能当定性示例。
 
-这一格样本量小、不构成证据，但说明：**探针必须自己装配 prompt**——仓库自带的夹具 system 是空的，不加 `--assemble` 参数，测到的是「没有任何角色 prompt 的裸模型」。
+> [!WARNING]
+> 这一格样本量小、不构成证据，但说明：**探针必须自己装配 prompt**——仓库自带的夹具 system 是空的，不加 `--assemble` 参数，测到的是「没有任何角色 prompt 的裸模型」。
 
-## 四层装配：prompt 是怎么拼的
+## 🧩 四层装配：prompt 是怎么拼的
 
 量出来的东西落在四层里，顺序固定。稳定的放前面（方便缓存命中），每轮变化的放后面：
 
@@ -171,7 +196,7 @@ messages = build_workspace_messages(
 )
 ```
 
-## 五个角色的 prompt 是完整可查的
+## 📖 五个角色的 prompt 是完整可查的
 
 这不是「给你一套方法，角色自己配」。**五名成员的四层 prompt 全部随仓库发布**：canon 长档案、语气 manifest、说话尺度、场景指引，一个字都不少，没有截断、没有省略、也不需要密钥或语料就能看。
 
@@ -197,7 +222,7 @@ py -X utf8 tools/gates/dump_prompt.py --all --matrix      # 5 角色 × 4 句话
 
 四层的正文都在仓库里可以逐字读到：`canon` 与 `voice` 在 `idiolect/characters/*/`（canon.py / voice.py），说话尺度的数字来自 [`data/style_profiles.json`](data/style_profiles.json) 与 `idiolect/scene_length_targets.py` 的 130 个「角色 × 场景」格，场景指引来自 `idiolect/general_scenes.py` 与各角色包的 `turn_logic/scenes.py`。改 prompt 想看差在哪，用 `--phase before/after` 各存一份直接 diff。
 
-## 把整套工具跑一遍
+## 🛠️ 把整套工具跑一遍
 
 上面快速启动部分用的是装好的包；这一节是仓库自带的工具链（需要克隆仓库）：
 
@@ -247,7 +272,7 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 
 没有语料也能跑探针：评分用的画像随仓库发布（`data/style_profiles.json`），启动日志会打印画像来源。
 
-## 换成别的角色：skill 串起全流程
+## 🎭 换成别的角色：skill 串起全流程
 
 上面那套数字是五个人的。**方法本身不绑作品**——你要拿它跑自己的角色，仓库里带了五个 skill 把「找语料 → 蒸馏 → 建角色包 → 评测」串成一条管道（Claude Code / 兼容 skill 的 agent 会自己加载；人也可以当操作手册读）：
 
@@ -261,11 +286,13 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 
 一句话区分：**能从语料算出来的都是自动的**（场景体系、长度目标、风格画像、口癖、词表），**canon 长档案、语气 manifest 和场景正文必须你自己写**——语料是活动剧情的快照，日常道具天然缺席，凭统计写不出「这个人是谁」。`idiolect-pipeline` 里有一张自动／人写的对照表。
 
-## 关于边界与提醒
+## ⚠️ 关于边界与提醒
 
-**不分发原作文本。** 仓库里只有聚合数字：字数分布、句数、标点出现率、口癖频次、场景基线（130 个「角色 × 场景」组合）、评分画像。发布前已剥离基线文件里的例句字段，体检脚本和单测各有一道检查盯着这条线。角色与作品的权利属于 Bushiroad / Craft Egg 及相关权利方，本项目与权利方无关，见 [`NOTICE.md`](NOTICE.md)。
+> [!CAUTION]
+> **不分发原作文本。** 仓库里只有聚合数字：字数分布、句数、标点出现率、口癖频次、场景基线（130 个「角色 × 场景」组合）、评分画像。发布前已剥离基线文件里的例句字段，体检脚本和单测各有一道检查盯着这条线。角色与作品的权利属于 Bushiroad / Craft Egg 及相关权利方，本项目与权利方无关，见 [`NOTICE.md`](NOTICE.md)。
 
-**分数是相对量。** 贴合分、fidelity、composite 都用于同批次 before/after 比较，换模型、换夹具、换时钟之后跨批次不可比。
+> [!NOTE]
+> **分数是相对量。** 贴合分、fidelity、composite 都用于同批次 before/after 比较，换模型、换夹具、换时钟之后跨批次不可比。
 
 **已知没解决的：**
 
@@ -277,7 +304,7 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 
 **语料是快照。** 官方会持续上新剧情，重抓得到的分布与原批次不同。所有派生统计都标着生成脚本，可以重算。
 
-## 文档
+## 📚 文档
 
 不确定从哪篇看起，先翻 [`docs/README.md`](docs/README.md)：它按「你想做什么」分三条路，另有一张名词表（回合 / 场景 / 四层 / 探针 / 夹具 / 臂 / 门禁…）。
 
@@ -293,7 +320,7 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 | [`docs/07-turn-logic-and-postprocessing.md`](docs/07-turn-logic-and-postprocessing.md) | turn_logic 模块与 voice_check 后处理的搭建流程、接线与验收 |
 | [`docs/08-context-workspace.md`](docs/08-context-workspace.md)                         | 上下文工作区：四层在真实聊天系统里的前后文                     |
 
-## 版权、许可与免责
+## ⚖️ 版权、许可与免责
 
 ### 代码：MIT
 
