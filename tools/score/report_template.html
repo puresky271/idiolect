@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>idiolect · 评测证据</title>
+<style>
+:root{font:16px/1.6 system-ui,sans-serif;color:#243444;background:#f6f5f1}*{box-sizing:border-box}body{margin:0}main{max-width:1160px;margin:auto;padding:36px 24px}header{border-bottom:2px solid #243444;margin-bottom:24px}h1{font-size:34px;letter-spacing:-1px;margin:4px 0}h2{font-size:20px;margin-top:32px}.eyebrow{color:#46766b;font-weight:650;letter-spacing:2px}p{margin:10px 0 20px}.muted{color:#5b6870}.controls{display:flex;gap:16px;flex-wrap:wrap;align-items:end}label{display:flex;flex-direction:column;gap:5px;font-weight:600}select,input,button{font:inherit;border:1px solid #a7b1ad;border-radius:6px;padding:8px;background:white;color:inherit}button{cursor:pointer}button:hover{background:#e2eee8}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #287d68;outline-offset:2px}.notice{border-left:4px solid #b8802b;padding:10px 16px;background:#fff4dd}.stats{display:flex;gap:26px;flex-wrap:wrap;margin:24px 0}.stats strong{font-size:28px;display:block}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;text-align:left;font-variant-numeric:tabular-nums}th{background:#e9ece5}th,td{padding:10px;border-bottom:1px solid #d8ddd5;vertical-align:top}caption{text-align:left;color:#5b6870;padding:8px 0}meter{display:block;width:100%;min-width:90px;height:12px;accent-color:#287d68}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.65 ui-monospace,monospace}details{border-bottom:1px solid #d8ddd5;padding:12px 0}summary{cursor:pointer}.reply{white-space:pre-wrap;overflow-wrap:anywhere;background:white;padding:16px;border-left:3px solid #56796e}.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}.pager{display:flex;gap:12px;align-items:center;margin:16px 0}.small{font-size:13px}footer{margin-top:40px;border-top:1px solid #c8cec7;padding-top:14px}@media(max-width:650px){main{padding:22px 14px}h1{font-size:28px}.pair{grid-template-columns:1fr}.controls label{width:100%}.stats{gap:16px}.stats strong{font-size:24px}th,td{padding:8px}}
+</style>
+<main><header><div class="eyebrow">IDIOLECT / EVIDENCE READER</div><h1>从分数回到具体回复</h1><p class="muted">检查同一角色、同一场景的表现。分数用于定位问题，不能独立证明角色还原度。</p></header>
+<div class="controls"><label>批次<select id="batch"></select></label><label>角色<select id="character"></select></label><label>场景<select id="scene"></select></label><label>搜索回复或输入<input id="query" type="search" placeholder="输入关键词"></label><button id="reset">重置筛选</button></div>
+<p id="notice" class="notice"></p><div id="stats" class="stats" aria-live="polite"></div>
+<details><summary>实验条件与来源文件</summary><pre id="metadata"></pre></details>
+<section><h2>批次条件对照</h2><label>参考批次<select id="reference"></select></label><p id="comparison-note" class="muted"></p><div class="table-wrap"><table><thead><tr><th>检查项</th><th>状态</th><th>当前 / 参考</th></tr></thead><tbody id="comparison"></tbody></table></div></section>
+<h2>角色概览 · 整批指标</h2><p class="muted small">此表保留整批指标，不随下面的关键词与场景筛选重算。缺测显示“—”；批次之间不自动推断改善。</p><div class="table-wrap"><table><thead><tr><th>角色</th><th>回复数</th><th>Composite</th><th>Fidelity</th><th>锚点得分</th><th>硬规则违规率</th></tr></thead><tbody id="overview"></tbody></table></div>
+<h2>场景诊断</h2><p class="muted small">按 excess 从高到低排列。点击场景查看回复；条形显示 distill（0–1），样本数仍需单独判断。</p><div class="table-wrap"><table><thead><tr><th>角色 / 场景</th><th>n</th><th>Distill</th><th>Excess</th><th>长度：输出 / 基线</th></tr></thead><tbody id="scores"></tbody></table></div>
+<h2>逐条证据</h2><div id="replies"></div><div class="pager"><button id="previous">上一页</button><span id="page"></span><button id="next">下一页</button></div>
+<h2>同格重复情况</h2><p id="repeat-note" class="muted"></p><div class="table-wrap"><table><thead><tr><th>角色 / 夹具</th><th>有效回复</th><th>不同回复</th><th>同一回复最多出现</th></tr></thead><tbody id="repetition"></tbody></table></div>
+<footer class="muted small">本文件内嵌本次导出的数据，不联网、不重新计算评分。分享前请检查输入和回复是否适合公开。原始统计口径以项目评测文档为准。</footer></main>
+<script type="application/json" id="data">__BATCH_DATA__</script>
+<script>
+'use strict';
+const batches=JSON.parse(document.getElementById('data').textContent);
+const $=id=>document.getElementById(id), state={page:0}, limit=40;
+const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=String(text);return n};
+const number=(x,d=2)=>typeof x==='number'&&Number.isFinite(x)?x.toFixed(d):'—';
+function options(el,values,all){el.replaceChildren();if(all)el.append(new Option('全部',''));values.forEach(v=>el.append(new Option(v,v)))}
+options($('batch'),batches.map(b=>b.label));
+options($('reference'),batches.map(b=>b.label),true);$('reference').options[0].textContent='选择参考批次';
+function current(){return batches.find(b=>b.label===$('batch').value)||batches[0]}
+function populate(){const b=current();options($('character'),[...new Set(b.rows.map(r=>r.char))],true);options($('scene'),[...new Set(b.rows.map(r=>r.scene||r.scenario))],true)}
+function filters(r){return (!$('character').value||r.char===$('character').value)&&(!$('scene').value||(r.scene||r.scenario)===$('scene').value)}
+function render(){const b=current(),meta=b.summary.metadata,query=$('query').value.toLocaleLowerCase();
+const rows=b.rows.filter(r=>filters(r)&&[r.user_text,r.reply,r.reply_raw].some(x=>String(x||'').toLocaleLowerCase().includes(query)));
+const valid=rows.filter(r=>r.reply&&!r.error),errors=rows.filter(r=>r.error),empty=rows.filter(r=>!r.reply&&!r.error);
+$('notice').textContent=meta?'已记录实验条件；仍需确认比较批次的模型、采样、夹具和基线是否一致。':'历史批次缺少完整实验条件：模型与时钟等信息未知，不能据此确认跨批次可比性。';
+$('stats').replaceChildren();for(const [label,count] of [['筛选结果',rows.length],['有效回复',valid.length],['错误记录',errors.length],['空白 / 未生成',empty.length]]){const x=node('div',label);x.prepend(node('strong',count));$('stats').append(x)}
+$('metadata').textContent=JSON.stringify({sources:b.sources,metadata:meta||'未知'},null,2);
+$('repetition').replaceChildren();const rep=b.repetition;
+$('repeat-note').textContent=rep?`统计类别：${rep.category||'全部'}。同格不同回复 ${rep.distinct}/${rep.valid}；排除错误 ${rep.errors}、空白 ${rep.empty}。以下单格统计不随关键词重算。`:b.repetition_status==='stale'?'重复审计与当前回复文件指纹不符，请重新运行 _repeat_rate 后导出。':'重复审计缺测：运行 _repeat_rate 后重新导出。';
+for(const c of rep?.cells||[]){const original=b.rows.find(r=>r.char===c.char&&r.scenario===c.scenario);if(!filters({...c,scene:original?.scene}))continue;const tr=node('tr');[c.char+' / '+c.scenario,c.n,c.distinct,c.most_repeated].forEach(v=>tr.append(node('td',v)));$('repetition').append(tr)}
+$('comparison').replaceChildren();const comparison=b.comparisons[$('reference').value]||[];
+const unknown=comparison.filter(x=>x.status==='unknown').length,different=comparison.filter(x=>x.status==='different').length;
+$('comparison-note').textContent=comparison.length?`不同 ${different} 项，未知 ${unknown} 项。字段一致不代表模型端点、统计功效或质量已经验证；装配与代码差异可能正是实验变量。`:'请选择另一个已导出的批次。单批次无法提供条件对照。';
+for(const row of comparison){const tr=node('tr'),cell=node('td'),detail=node('details');detail.append(node('summary','展开字段值'),node('pre',JSON.stringify({当前:row.left??'未知',参考:row.right??'未知'},null,2)));cell.append(detail);tr.append(node('td',row.title),node('td',({same:'一致',different:'不同',unknown:'未知'})[row.status]),cell);$('comparison').append(tr)}
+$('overview').replaceChildren();for(const [char,s] of Object.entries(b.summary.summary||{})){const tr=node('tr');[char,s.n_replies??'—',number(s.composite),number(s.fidelity),number(s.anchor_score),typeof s.hard_v_rate==='number'?number(s.hard_v_rate*100)+'%':'—'].forEach(v=>tr.append(node('td',v)));$('overview').append(tr)}
+if(!$('overview').children.length){const tr=node('tr'),td=node('td','无汇总评分；请先运行探针评分。');td.colSpan=6;tr.append(td);$('overview').append(tr)}
+$('scores').replaceChildren();const scores=b.scores.filter(filters).slice().sort((a,b)=>(b.excess??-Infinity)-(a.excess??-Infinity));
+for(const s of scores){const tr=node('tr'),td=node('td'),button=node('button',s.char+' / '+s.scene);button.onclick=()=>{$('character').value=s.char;$('scene').value=s.scene;state.page=0;render();$('replies').scrollIntoView({block:'start'})};td.append(button);tr.append(td,node('td',s.n??'—'));const score=node('td',number(s.distill,3));if(typeof s.distill==='number'&&s.distill>=0&&s.distill<=1){const meter=node('meter');meter.min=0;meter.max=1;meter.value=s.distill;meter.setAttribute('aria-label','场景贴合度 '+number(s.distill,3));score.append(meter)}tr.append(score,node('td',number(s.excess,3)),node('td',number(s.out_med)+' / '+number(s.base_med)));$('scores').append(tr)}
+if(!scores.length){const tr=node('tr'),td=node('td','没有对应场景评分。运行 scene_distill 后重新导出；缺测不等于零分。');td.colSpan=5;tr.append(td);$('scores').append(tr)}
+state.page=Math.max(0,Math.min(state.page,Math.ceil(rows.length/limit)-1));$('replies').replaceChildren();
+rows.slice(state.page*limit,(state.page+1)*limit).forEach(r=>{const d=node('details');d.append(node('summary',r.char+' · '+(r.scene||r.scenario)+' · '+(r.error?'错误':r.reply?'有效':'空白 / 未生成')+' · '+String(r.reply||r.error||'').slice(0,65)));d.append(node('p','输入：'+(r.user_text??'旧记录未保存输入')));const pair=node('div');pair.className='pair';for(const [title,body] of [['模型原文',r.reply_raw??'未记录'],['清洗后',r.reply]]){const block=node('div');block.append(node('strong',title));const text=node('div',body);text.className='reply';block.append(text);pair.append(block)}d.append(pair);d.append(node('pre',JSON.stringify({scenario:r.scenario,error:r.error,prompt_chars:r.prompt_chars,turn_logic_chars:r.turn_logic_chars,messages_sha256:r.messages_sha256??'未知',clean:r.clean},null,2)));$('replies').append(d)});
+if(!rows.length)$('replies').append(node('p','没有匹配记录。请调整筛选或搜索词。'));
+$('page').textContent=rows.length?`${state.page+1} / ${Math.ceil(rows.length/limit)}`:'0 / 0';$('previous').disabled=state.page===0;$('next').disabled=(state.page+1)*limit>=rows.length;
+const params=new URLSearchParams();for(const id of ['batch','character','scene','query','reference'])if($(id).value)params.set(id,$(id).value);history.replaceState(null,'','#'+params.toString());}
+$('reference').onchange=render;
+$('batch').onchange=()=>{populate();state.page=0;render()};for(const id of ['character','scene','query'])$(id).oninput=()=>{state.page=0;render()};$('reset').onclick=()=>{populate();$('query').value='';state.page=0;render()};$('previous').onclick=()=>{state.page--;render()};$('next').onclick=()=>{state.page++;render()};
+const saved=new URLSearchParams(location.hash.slice(1));if(batches.some(b=>b.label===saved.get('batch')))$('batch').value=saved.get('batch');populate();for(const id of ['character','scene','reference'])if([...$(id).options].some(o=>o.value===saved.get(id)))$(id).value=saved.get(id);$('query').value=saved.get('query')||'';render();
+</script></html>

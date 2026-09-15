@@ -484,8 +484,8 @@ class ProbeReportTests(unittest.TestCase):
     def test_child_failure_aggregates_to_nonzero_rc(self):
         """子步骤崩溃不中断编排，但 rc 必须非零——「跑完了」与「全成功」是两回事。
 
-        触发方式：probe 文件存在但 0 有效行 → _repeat_rate 除零崩溃（已记录的坑，
-        见交付报告）；这里钉的是编排器的聚合契约：继续跑完 + rc 1。
+        触发方式：probe 文件存在但 0 有效行 → _repeat_rate 明确返回无数据错误。
+        这里钉住编排器的聚合契约：继续跑完 + rc 1。
         """
         with tempfile.TemporaryDirectory() as tmp:
             report = Path(tmp) / "report"
