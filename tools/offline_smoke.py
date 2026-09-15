@@ -395,6 +395,18 @@ def check_readme_tables(res: Result) -> None:
             f"{n_cells} 格对账（三语 × 两表）；不一致={bad or '无'}", time.time() - t0)
 
 
+def check_doc_test_count_claims(res: Result) -> None:
+    """文档不得固化 pytest 项数；契约持续增长，静态数字一定会漂移。"""
+    hard_count = re.compile(r"\d+\s*(?:项|件|tests?)", re.I)
+    bad: list[str] = []
+    for path in sorted((ROOT / "docs").glob("*.md")):
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if "pytest" in line.lower() and hard_count.search(line):
+                bad.append(f"{path.relative_to(ROOT)}:{lineno}")
+    res.add("文档.pytest 项数", not bad,
+            f"硬编码项数={bad or '无'}；精确数量以现场运行结果为准")
+
+
 def check_cli_safety(res: Result) -> None:
     """会写到**外部数据目录**的脚本必须带 argparse，否则 `--help` 也会真的动手。
 
@@ -450,6 +462,7 @@ def main() -> int:
     check_data(res)
     check_cli_safety(res)
     check_readme_tables(res)
+    check_doc_test_count_claims(res)
     if not args.fast:
         check_gates(res)
         check_tests(res)

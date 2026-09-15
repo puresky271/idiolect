@@ -503,6 +503,11 @@ class ReadmeMetricNamingTests(unittest.TestCase):
 
     READMES = {"README.md": "对照", "README.en.md": "control", "README.ja.md": "対照"}
     LIKENESS = {"README.md": "像不像", "README.en.md": "closest", "README.ja.md": "似ている"}
+    HISTORICAL = {
+        "README.md": "## 📊 历史探针批次（仅作定性示例）",
+        "README.en.md": "## 📊 Historical probe batch (qualitative example only)",
+        "README.ja.md": "## 📊 過去の probe バッチ（定性的な例のみ）",
+    }
 
     def test_headline_metric_is_composite(self):
         for name, control_mark in self.READMES.items():
@@ -518,6 +523,15 @@ class ReadmeMetricNamingTests(unittest.TestCase):
                               "fidelity 列必须标注为对照列")
                 self.assertNotIn(self.LIKENESS[name], fid_cell,
                                  "fidelity 列不得再挂「像不像」的名义——那是误读，已移给 composite")
+
+    def test_headline_table_is_visibly_historical(self):
+        """未发布原始产物的数字必须在读者看到表格前标成历史定性示例。"""
+        for name, marker in self.HISTORICAL.items():
+            text = (ROOT / name).read_text(encoding="utf-8")
+            table = text.find("composite")
+            with self.subTest(readme=name):
+                self.assertGreaterEqual(text.find(marker), 0, f"{name} 缺少显眼的历史批次标识")
+                self.assertLess(text.find(marker), table, f"{name} 必须在旗舰数字表之前披露")
 
 
 class ReadmeNumericParityTests(unittest.TestCase):

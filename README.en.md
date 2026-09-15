@@ -158,7 +158,7 @@ If the same paragraph of comfort comes out, the characters are the same characte
 
 Full method: [`docs/00-methodology.md`](docs/00-methodology.md) (Chinese).
 
-## 📊 Real output
+## 📊 Historical probe batch (qualitative example only)
 
 This table is one real probe run, not a design target. A probe sends each character a batch of messages; we collect the replies and score them item by item:
 

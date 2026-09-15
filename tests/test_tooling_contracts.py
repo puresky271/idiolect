@@ -217,6 +217,15 @@ class SmokeToolTests(unittest.TestCase):
         self.assertEqual(len(row), 1, f"应恰好产出一条检查结果：{[r['name'] for r in res.rows]}")
         self.assertEqual(row[0]["status"], "PASS", row[0]["detail"])
 
+    def test_docs_do_not_freeze_pytest_count(self):
+        """pytest 契约会增长，文档固化项数会在下一次加测试时静默漂移。"""
+        osm = _load(ROOT / "tools" / "offline_smoke.py", "offline_smoke_doc_count_check")
+        res = osm.Result()
+        osm.check_doc_test_count_claims(res)
+        row = [r for r in res.rows if r["name"] == "文档.pytest 项数"]
+        self.assertEqual(len(row), 1, f"应恰好产出一条检查结果：{[r['name'] for r in res.rows]}")
+        self.assertEqual(row[0]["status"], "PASS", row[0]["detail"])
+
     def test_shipped_profiles_have_no_text(self):
         """随仓库发布的画像只能是聚合量，不能带原作文本。"""
         prof = json.loads((ROOT / "data" / "style_profiles.json").read_text(encoding="utf-8"))
