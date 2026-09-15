@@ -9,7 +9,7 @@
 <h1 align="center">idiolect（個人語型）</h1>
 
 <p align="center">
-  <strong>AI にキャラクターらしく喋らせ、しかも「前より近づいた」ことを数字で証明する。</strong>
+  <strong>AI にキャラクターらしく喋らせ、再現可能な評価で「前より近づいたか」を確認する。</strong>
 </p>
 
 <p align="center">
@@ -53,9 +53,32 @@
 | **そのまま使えるアセンブリライブラリ** | `pip install .` のあと `from idiolect.assemble import build_messages` で四層 prompt が返ります。**実行時のサードパーティ依存はゼロ**（openai / numpy / jieba が要るのは probe と蒸留だけ） |
 | **「近づいた」を証明する評価ループ** | probe →（分布適合 / 同一セル内の重複 / 逐字コピー監査）→ マルチアームのプーリング → 検出力の見積もり。このほか、境界越えの拒否と多ターンドリフトの二種の専用 probe、さらに事実整合のゲートがあります。下の表は実際に走らせた 105 件の返答です |
 | **六つの機械ゲート + prompt diff ゲート** | prompt の変更を勘で決めないため。`offline_smoke.py` の一回でアセンブリ・場面カバレッジ・トリガ行列・内容レッドライン・データ形状・ゲート・ゼロ書き込み検査まで通ります |
-| **作品を差し替えられるツール群** | 65 本のスクリプト：取得と洗浄、コーパス分割、場面発見、口癖の蒸留、長さ目標の書き出し、probe と採点。方法は作品に縛られないので、別のキャストに当てて再実行するだけ |
+| **作品を差し替えられるツール群** | 67 本のスクリプト：取得と洗浄、コーパス分割、場面発見、口癖の蒸留、長さ目標の書き出し、probe と採点。方法は作品に縛られないので、別のキャストに当てて再実行するだけ |
 | **そのまま使えるキャラクターデータ（集計値のみ）** | 26 場面（汎用 13 + キャラ固有 13）、130 個の「キャラ × 場面」長さ目標、114 セルの場面別口癖、五人分のスタイルプロファイル |
 | **九本の方法論ドキュメント** | コーパスの出どころ、五種類の特徴の計算と落とし込み方、評価の仕方、すでに払った失敗の記録 |
+
+
+### 持ち運べるキャラクター Skill
+
+[mygo-five-roleplay フォルダー](skills/mygo-five-roleplay/SKILL.md) を丸ごと agent の skills ディレクトリーに配置すると、Claude/Codex が同梱資料を読んで直接会話できます。Python や API key は不要です。メンバーを選ぶか、名前と話題を一緒に伝えてください。「扮演を終了」で通常のアシスタントに戻ります。キャラクター資料は必要なものだけ残し、選択時に読み込めます。
+
+静的な資料はライブラリと同じソースから生成しますが、Python の動的ルーティング、セッション状態、後処理は実行しません。体験だけで品質を保証するものではなく、評価と方法論が引き続き中心です。[導入・再生成の手順](docs/01-quickstart.md#先体验五人-skill)を参照してください。
+
+### デモを見て、評価の根拠を確かめる
+
+[![Claude Code 本来の配色による端末録画：楽奈との会話](assets/readme/roleplay-demo.gif)](assets/readme/roleplay-demo.mp4)
+
+**[動画を再生 / ダウンロード](assets/readme/roleplay-demo.mp4)** · [静止画](assets/readme/roleplay-poster.png) · [会話原文と出典](assets/readme/roleplay-transcript.json)
+
+**25 秒**の動画は、Windows Terminal 上の **Claude Code** を直接録画したものです。元の配色を保ち、**DeepSeek-v4-pro[1m]** による楽奈の実際の返答を示します。前後の待機部分だけをカットし、生成過程は加速していません。Skill と楽奈の資料を明示的に読み込み、入力を開始時のメッセージとして渡しました。Skill の自動検出や複数ターンの安定性を検証する動画ではありません。他の四人も Skill から選択できます。
+
+![オフライン評価ページ：絞り込み、条件の欠落、キャラクター指標](assets/readme/evaluation-overview.png)
+
+概要では過去のバッチに欠けている実験条件も表示します。以下は楽奈の comfort 場面で、モデル原文と整形後の返答を比較できます。古い記録に保存されていない入力は不明のまま表示します。
+
+![楽奈の comfort 場面：診断と整形前後の返答](assets/readme/evaluation-evidence.png)
+
+自分のバッチで `py -X utf8 tools/score/report_html.py --labels <label>` を実行し、生成された `report/evaluation.html` を開くと、絞り込みと根拠の確認ができます。画像は過去の `repo_standalone` バッチで、上のホスト体験とは別の実験です。[評価ガイド](docs/04-evaluation.md)を参照してください。
 
 ## 🚀 クイックスタート
 
@@ -80,8 +103,11 @@ Python 3.11 以上。
 pip install .                                           # 実行時依存ゼロ
 python -m idiolect list                                 # 組み込みキャラの一覧
 python -m idiolect prompt Rana "你今天又想去哪找猫"      # この発話での system prompt 全文
+python -m idiolect showcase "今日は少し耐えられない"          # 五人を横並びで表示（モデル呼び出しなし）
 python -m idiolect chat Rana "你今天又想去哪找猫"        # 実際に一往復（環境変数は下記）
 ```
+
+推奨の順序は、まず Skill で五人の違いを体験し、`py -X utf8 tools/gates/dump_prompt.py --all --matrix` で差分の層を確認し、`py -X utf8 tools/score/probe_report.py --label <label> --scenes crisis,comfort` で証拠に戻ることです。
 
 ツール群まで用意するなら一行で足ります（`.venv` 作成、依存導入、`offline_smoke` 自己診断、一人分の層別字数まで）：
 
@@ -153,7 +179,7 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 | 楽奈 | 21 | 86.9 | 79.9 | 0.0% | 0% | 0.504 |
 
 - 生成条件：`deepseek-flash`、temperature 0.75、max_tokens 420、時計は昼に固定、各セル 3 件で合計 105 件、エラーなし。
-- **composite** が主要指標：スタイル忠実度 0.65 + 内容アンカー 0.35（`docs/04-evaluation.md` §2.1 参照）。fidelity は長さ・文数の分布だけを測る対照列で、単独では「正しいが中身のないアシスタント口調」に水増しされる。愛音が実例：fidelity は首位、composite は最下位（文体は整っているが、具体的な事柄が少ない）。二つが乖離したら composite を信じる。
+- **composite** が主要指標：スタイル忠実度 0.65 + 内容アンカー 0.35（`docs/04-evaluation.md` §2.1 参照）。fidelity は長さ・文数の分布だけを測る対照列で、単独では「正しいが中身のないアシスタント口調」に水増しされる。愛音が実例：fidelity は首位、composite は最下位（文体は整っているが、具体的な事柄が少ない）。二つが乖離したら、アンカー、実際の返答、ブラインド評価を確認してください。composite もアンカー得点が上限に達すると差を捉えにくくなります。
 - **場面適合スコア** = 返答の長さ・文数が「同じキャラ・同じ場面の原作分布」にどれだけ合うか。1.0 で完全一致。この批次の平均は 0.466（35 セル）。**相対量**なので、同じ批次の中で before/after を比べるためだけに使い、モデルや fixture を変えたら跨批次では比較できません。
 - 同じセルの 3 件が互いに重ならない割合は 93/105。prompt 内のテキストを逐字で書き写した割合は 1%（写された 3 字は口癖の「诶……」で、例文ではありません）。
 - 「設定漏れ」は思考タグ・内心の独白・話者エコー・中国語の動作ナレーションの四種類を数えており、この批次はすべて 0 です。
@@ -183,7 +209,7 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 
 この四層が、「測った特徴をどう prompt に入れるか」に対するこのリポジトリの答えの全部です。実際のシステムでは、この前に記憶・世界状態・スケジュールを繋げられます。それらの層はこの方法とは無関係です。
 
-組み上がりは `tools/gates/dump_prompt.py` で層ごとに出力して確認できます。prompt を変える前後は `--phase before/after` で二本保存すると、同じスクリプト・同じ入力・同じ時計で作られるので、そのまま diff できます。
+組み上がりは `tools/gates/dump_prompt.py` で層ごとに出力して確認できます。コード変更の前後では `--phase current` を使い、入力・時計・設定を揃えて別の出力先に保存します。before/after はスイッチの消融比較です。
 
 **実際のシステムで、四層の前後には何があるのか。** 完全なチャットシステムでは、モデルは毎ターン「今何時か、キャラはどこにいるか、さっき何の話をしていたか、ユーザーが先週何を言ったか」も知る必要があります。その上下文は**ワークスペース方式**で組みます。十数路の候補材料をまず全部集め、採点・並べ替え・予算で刈り込み、固定の層順でアセンブリする。四層はその中の persona スロットに入ります。この骨組みも蒸留してあり（`idiolect/workspace.py`、依存ゼロ）、詳細は [`docs/08-context-workspace.md`](docs/08-context-workspace.md)：
 
@@ -221,7 +247,7 @@ py -X utf8 tools/gates/dump_prompt.py --all --matrix      # 5 キャラ × 4 発
 | そよ | 9087 | 2279 | 532 | 479 | 12377 |
 | 楽奈 | 12223 | 1940 | 531 | 509 | 15203 |
 
-四層の本文はどれもリポジトリ内で一字ずつ読めます：`canon` と `voice` は `idiolect/characters/*/`（`canon.py` / `voice.py`）、話す尺度の数字は [`data/style_profiles.json`](data/style_profiles.json) と `idiolect/scene_length_targets.py` の 130 個の「キャラ × 場面」セル、場面の指針は `idiolect/general_scenes.py` と各パッケージの `turn_logic/scenes.py` にあります。prompt を変えた差分を見たいときは `--phase before/after` で二本取って diff してください。
+四層の本文はどれもリポジトリ内で一字ずつ読めます：`canon` と `voice` は `idiolect/characters/*/`（`canon.py` / `voice.py`）、話す尺度の数字は [`data/style_profiles.json`](data/style_profiles.json) と `idiolect/scene_length_targets.py` の 130 個の「キャラ × 場面」セル、場面の指針は `idiolect/general_scenes.py` と各パッケージの `turn_logic/scenes.py` にあります。prompt を変えた差分を見たいときは `--phase current` で変更前後を別ディレクトリーに保存し、diff を確認してください。
 
 ## 🛠️ ツール一式を走らせる
 

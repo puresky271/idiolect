@@ -9,7 +9,7 @@
 <h1 align="center">idiolect（个人语型）</h1>
 
 <p align="center">
-  <strong>让 AI 扮演角色时说话像本人，并且能用数字证明确实更像了。</strong>
+  <strong>让 AI 扮演角色时说话像本人，用可复现评测检查它是否更像。</strong>
 </p>
 
 <p align="center">
@@ -37,7 +37,7 @@
 
 如果你用通用模型扮演角色，说着说着就会变成同一类客服腔：话越来越长、爱说「你的感受我完全能理解」、结尾还要升华一下，稳稳地接住你。这个仓库的做法是：先从角色原来的台词里**量出 ta 说话的习惯**——一句话多长、说几句、爱用什么口头禅、什么场合说什么话——把这些习惯写成 prompt 里的硬约束，再用一套自动检查验证「这次是不是真的更像了」。不做微调，仓库里也没有原作台词，只有统计出来的数字。
 
-为了让方法看得见摸得着，全程用《BanG Dream! It's MyGO!!!!!》的五名成员做**示例角色**。请注意**方法本身和具体作品无关**，换成任何角色都成立；我们只解决一件事——怎么证明「说话像」，并把它做成独立、可复现的一套。
+为了让方法看得见摸得着，全程用《BanG Dream! It's MyGO!!!!!》的五名成员做**示例角色**。请注意**方法可以迁移到其他作品**，但需要重新建立角色资料、语料基线和验证场景；我们只解决一件事——怎么证明「说话像」，并把它做成独立、可复现的一套。
 
 > [!IMPORTANT]
 > **让我们先说清楚权利与许可**
@@ -53,9 +53,34 @@
 | **一个能直接用的装配库**              | `pip install .` 之后 `from idiolect.assemble import build_messages` 就能拿到四层 prompt。**运行时零第三方依赖**（探针与蒸馏才需要 openai / numpy / jieba） |
 | **一套能证明「更像了」的评测**           | 探针 →（分布贴合 / 同格重复 / 逐字复述）三件套 → 多臂池化 → 功效估算；另有越界拒答与多轮漂移两个专项探针，加上事实一致性门禁。下面那张表就是一次真跑的 105 条回复                                                                |
 | **六道机械门禁 + prompt diff 门禁** | 改 prompt 不能只靠手感：`offline_smoke.py` 一条命令跑完装配、场景覆盖、触发矩阵、内容红线、数据形状、门禁与零写校验                                                        |
-| **可换作品的工具链**                | 65 个脚本：抓取清洗、语料切分、场景发现、口癖蒸馏、长度目标导出、探针与评分。方法不绑作品，换角色只需重跑                                                                         |
+| **可换作品的工具链**                | 67 个脚本：抓取清洗、语料切分、场景发现、口癖蒸馏、长度目标导出、探针与评分。方法不绑作品，换角色只需重跑                                                                         |
 | **现成的角色数据（只有聚合量）**          | 26 个场景（13 通用 + 13 角色专属）、130 个「角色 × 场景」长度目标、114 格场景口癖、五个角色的风格画像                                                                 |
 | **九篇方法论文档**                 | 语料怎么来、五类特征怎么算怎么落地、怎么评测、踩过哪些坑，各自独立可读                                                                                            |
+
+
+### 给 Agent 的展示层 Skill
+
+把完整的 [`skills/mygo-five-roleplay/`](skills/mygo-five-roleplay/SKILL.md) 目录交给 Claude/Codex，即可选择五人之一直接对话，不需要 API key 或 Python。角色资料随包携带，按选择加载；也可只保留需要的角色子目录。说“用灯和我聊聊今天的排练”即可开始，说“退出”恢复普通助手。
+
+Skill 的静态资料与库共享来源，但不执行 Python 的动态路由、会话去重或后处理；体验不等于评测通过。评测、蒸馏、门禁仍是主线。安装、重新导出与校验见[快速开始](docs/01-quickstart.md#先体验五人-skill)。
+
+建议展示顺序：先用 Skill 体验同一问题下的五人差异；再运行 `py -X utf8 tools/gates/dump_prompt.py --all --matrix` 查看差异来自哪一层；最后用 `py -X utf8 tools/score/probe_report.py --label <label> --scenes crisis,comfort` 回到可复核的评测结果。
+
+### 看一段演示，再检查证据
+
+[![Claude Code 原生彩色终端实录：乐奈对话](assets/readme/roleplay-demo.gif)](assets/readme/roleplay-demo.mp4)
+
+**[播放 / 下载短片](assets/readme/roleplay-demo.mp4)** · [静态预览](assets/readme/roleplay-poster.png) · [对话原文与来源说明](assets/readme/roleplay-transcript.json)
+
+这段 **25 秒**视频直接录制 Windows Terminal 中的 **Claude Code**，保留原生配色，展示乐奈的一轮真实回复；本次模型为 **DeepSeek-v4-pro[1m]**。仅裁去首尾空闲，生成过程未加速。Skill 与乐奈资料已显式加载，输入作为启动消息提交；此片不验证自动发现 Skill 或多轮稳定性。其余四人仍可在 Skill 中选择。
+
+![离线评测页：批次筛选、缺失条件提示与角色指标](assets/readme/evaluation-overview.png)
+
+评测概览保留历史批次的缺失条件提示。下面展开乐奈的 comfort 场景，可直接比较模型原文与清洗结果；旧记录没保存的输入仍显示未知。
+
+![乐奈 comfort 场景：场景诊断与逐条原始、清洗后回复](assets/readme/evaluation-evidence.png)
+
+在自己的批次上运行 `py -X utf8 tools/score/report_html.py --labels <label>`，打开生成的 `report/evaluation.html` 即可筛选和展开证据。截图来自历史 `repo_standalone` 批次，与上面的宿主体验是不同实验。详见[评测指南](docs/04-evaluation.md)。
 
 ## 🚀 快速跑起来
 
@@ -80,6 +105,7 @@
 pip install .                                           # 运行时零第三方依赖
 python -m idiolect list                                 # 看看有哪几个角色
 python -m idiolect prompt 乐奈 "你今天又想去哪找猫"      # 这句话此刻的完整 system prompt
+python -m idiolect showcase "我今天有点撑不住了"          # 五人并排展示（不调用模型）
 python -m idiolect chat 乐奈 "你今天又想去哪找猫"        # 真聊一轮（见下方环境变量）
 ```
 
@@ -151,7 +177,7 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 | 乐奈  | 21  | 86.9               | 79.9              | 0.0%  | 0%    | 0.504 |
 
 - 生成条件：`deepseek-flash`，temperature 0.75，max_tokens 420，时钟固定在白天，每格 3 条共 105 条，无一条报错。
-- **composite** 是头号指标：风格保真 0.65 + 内容锚点 0.35（口径见 `docs/04-evaluation.md` 第 2.1 节）。fidelity 只量长度/句数分布，留作对照列——单看它会被「正确但空洞的助手腔」刷高。本表最直观的例子是爱音：fidelity 第一、composite 垫底（说得规范，但具体的事说得少）。两个数字背离时，信 composite。
+- **composite** 是头号指标：风格保真 0.65 + 内容锚点 0.35（口径见 `docs/04-evaluation.md` 第 2.1 节）。fidelity 只量长度/句数分布，留作对照列——单看它会被「正确但空洞的助手腔」刷高。本表最直观的例子是爱音：fidelity 第一、composite 垫底（说得规范，但具体的事说得少）。两个数字背离时，检查锚点、具体回复和盲评；composite 也可能因锚点封顶而失去区分力。
 - **场景贴合分** = 回复的长度/句数和「同角色同场景原作分布」的贴合度，1.0 表示完全一致；本批均值 0.466（35 格）。它是**相对量**，只在同批次里做 before/after 对比，换模型换夹具后跨批次不可比。
 - 同格 3 条回复互不重样的比例 93/105；逐字照抄 prompt 里文本的比例 1%（抄的那 3 个字还是口癖「诶……」，不是例句）。
 - 「说漏嘴」统计思考标签、内心旁白、说话人回显、中文动作旁白四类，本批全为 0。
@@ -182,7 +208,7 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 
 这四层就是本仓库对「特征怎么进 prompt」的完整回答。真实系统可以在前面接记忆、世界状态、日程，那些层与本方法无关。
 
-装配结果可以用 `tools/gates/dump_prompt.py` 逐层打出来核对；改 prompt 前后用 `--phase before/after` 各存一份，两臂由同一脚本、同一输入、同一时钟产出，可以直接 diff。
+装配结果可以用 `tools/gates/dump_prompt.py` 逐层打出来核对；代码改动前后均使用 `--phase current`，保持输入、时钟和开关一致，并存入不同报告目录；before/after 模式仅用于开关消融。
 
 **真实系统里，四层的前后是什么？** 在完整的聊天系统里，模型每轮还需要知道「现在几点、角色在哪、刚才聊到哪、用户上周提过什么」。这套上下文是按**工作区模式**组织的：十几路候选材料先全部收集，打分排序、按预算裁剪，再按固定层序装配——四层就在其中的 persona 位。仓库里蒸馏了这套骨架（`idiolect/workspace.py`，零依赖），详见 [`docs/08-context-workspace.md`](docs/08-context-workspace.md)：
 
@@ -220,7 +246,7 @@ py -X utf8 tools/gates/dump_prompt.py --all --matrix      # 5 角色 × 4 句话
 | 素世 | 9087 | 2279 | 532 | 479 | 12377 |
 | 乐奈 | 12223 | 1940 | 531 | 509 | 15203 |
 
-四层的正文都在仓库里可以逐字读到：`canon` 与 `voice` 在 `idiolect/characters/*/`（canon.py / voice.py），说话尺度的数字来自 [`data/style_profiles.json`](data/style_profiles.json) 与 `idiolect/scene_length_targets.py` 的 130 个「角色 × 场景」格，场景指引来自 `idiolect/general_scenes.py` 与各角色包的 `turn_logic/scenes.py`。改 prompt 想看差在哪，用 `--phase before/after` 各存一份直接 diff。
+四层的正文都在仓库里可以逐字读到：`canon` 与 `voice` 在 `idiolect/characters/*/`（canon.py / voice.py），说话尺度的数字来自 [`data/style_profiles.json`](data/style_profiles.json) 与 `idiolect/scene_length_targets.py` 的 130 个「角色 × 场景」格，场景指引来自 `idiolect/general_scenes.py` 与各角色包的 `turn_logic/scenes.py`。改 prompt 想看差在哪，用 `--phase current` 在改动前后分目录保存，再审阅 diff。
 
 ## 🛠️ 把整套工具跑一遍
 

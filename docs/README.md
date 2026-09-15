@@ -6,11 +6,15 @@
 
 | 你想做的事 | 读这几篇 |
 |---|---|
+| **先体验五人对话** | [安装可携带 Skill](01-quickstart.md#先体验五人-skill)，再读 [评测证据](04-evaluation.md) |
+| **查看一次探针的真实输出** | [导出离线证据报告](05-tooling.md#离线浏览证据)，按角色和场景展开原文与清洗结果 |
 | **只想让角色说得像**（把装配库接进自己的系统） | [`01-quickstart.md`](01-quickstart.md) → [`03-features.md`](03-features.md) 第 1 节 → [`08-context-workspace.md`](08-context-workspace.md) 第 3 节 |
 | **要改 prompt / 加场景模块 / 加角色** | [`05-tooling.md`](05-tooling.md) → [`03-features.md`](03-features.md) → [`07-turn-logic-and-postprocessing.md`](07-turn-logic-and-postprocessing.md) → 改完过 [`04-evaluation.md`](04-evaluation.md) 的门禁 |
 | **要重算语料 / 换一部作品** | [`02-corpus.md`](02-corpus.md) → [`03-features.md`](03-features.md) → [`04-evaluation.md`](04-evaluation.md) |
 | **被某个坑卡住了** | [`06-lessons.md`](06-lessons.md)（按主题分组，症状 → 原因 → 约束） |
 | **想先搞清这套方法凭什么成立** | [`00-methodology.md`](00-methodology.md) |
+
+第一次接触项目时，先运行 `py -X utf8 -m idiolect showcase "我今天有点撑不住了"`，再按上表进入对应路径。展示命令只读、无密钥，作用是把“五人体验入口”和后面的证据链接起来。
 
 ## 每篇讲什么
 

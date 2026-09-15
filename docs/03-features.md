@@ -1,6 +1,6 @@
 # 蒸馏出哪些特征，怎么算，落在哪
 
-> 讲什么：五类特征各自的计算脚本、产物与落点，以及写进 prompt 的措辞规范。 ｜ 前置：先读 [`00-methodology.md`](00-methodology.md) 建立全局观。
+> 从特征表定位计算脚本、发布数据与 prompt 落点。修改前检查对应章节的约束，修改后按末尾验证表验收；方法依据见[方法总纲](00-methodology.md)。
 
 **目录**：[1 五类特征一览](#1-五类特征一览) ｜ [2 场景体系](#2-场景体系) ｜ [3 每场景长度目标](#3-每场景长度目标) ｜ [4 口癖、句式、词表](#4-口癖句式词表) ｜ [5 写进 prompt 的措辞规范](#5-写进-prompt-的措辞规范) ｜ [6 触发词纪律](#6-触发词纪律) ｜ [7 改一层要跑什么](#7-改一层要跑什么)
 
@@ -105,13 +105,17 @@
 
 去重与预算：同一场景在同一 session 内只注入一次（`scene_engine._mark_fired`），一轮最多注入 2 个场景（`max_blocks`）。第二轮起不重复注入，是为了避免同一段指引在长会话里反复出现、把语气压成一个方向。
 
+查看尺寸不算一轮真实对话。`assemble.layer_sizes` 在 `scene_engine.isolated_session_state()` 中运行：按需复制去重表和计数/余波表，保留当前状态供观察，退出后丢弃诊断修改。连续查看不会消耗下一次真实装配的场景。真实 `build_messages` 和 `build_system_prompt` 仍正常推进状态。
+
+隔离作用域用于同步诊断，不是跨状态表的原子事务；它不交换或回滚真实表，因此不会抹掉另一线程的更新。不要将该作用域当作后台任务共享的会话，也不要在诊断中启动需要继承真实状态的异步工作。
+
 ## 7. 改一层要跑什么
 
 | 改动 | 至少跑 |
 |---|---|
 | 注入正文（通用场景 / 深模块） | `_gen_scene_check.py`、`_tl_deep_check.py`、`tests/test_scene_turn_logic.py` |
 | 语气 manifest 或 canon | `voice_meta_gate.py`（含四个面的扫描） |
-| 说话尺度或场景目标 | `export_scene_targets.py` 重跑 + `dump_prompt.py --phase before/after` 对比 |
+| 说话尺度或场景目标 | `export_scene_targets.py` 重跑 + `dump_prompt.py --phase current` 在编辑前后分目录对比 |
 | 分类器或场景 key | `validate_scenes.py`、顺序不变量的测试、`offline_smoke.py` |
 | 任何会进 prompt 的改动 | `offline_smoke.py` 全套，然后 `probe_runner.py --assemble --turn-logic` 跑一轮真探针 |
 

@@ -1,0 +1,11 @@
+{
+  "description": "Native Windows Terminal screen recording of an actual Claude Code interactive session, retaining native colors. Only start/end were trimmed; no reconstructed UI or retimed generation. The initial user message was passed as a CLI argument. Skill and Rana reference materials were explicitly loaded through append-system-prompt-file; this is not an automatic Skill discovery test.",
+  "host": "Claude Code",
+  "backend": "DeepSeek-v4-pro[1m]",
+  "duration_seconds": 25,
+  "character": "乐奈",
+  "user": "用乐奈和我聊。外面下雨了，那只猫还在屋檐下面。",
+  "reply": "猫。它比我先知道雨。",
+  "context_sha256": "af19f48f7277847a1be33f51d14f26e86be4ca1e0c5300f1485bb7036691b36b",
+  "limitations": "Single role and single turn; not a role quality benchmark. Other four roles remain available in the Skill."
+}

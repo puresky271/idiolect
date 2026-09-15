@@ -68,7 +68,11 @@ bootstrap.py         # 一条命令装成可跑状态（建 .venv → 装依赖 
 
 **访问角色包只走 `idiolect/registry.py`**（`get_canon_profile` / `get_voice_manifest` / `render_turn_special_block`），不要按角色名堆 if/elif，也不要直接 `import idiolect.characters.<key>.*`。名字表（含日文写法、简繁差异、常见误写）也只有 `registry._ALIASES` 一份，角色包里的 `is_<char>()` 问它，别自带名单。
 
+`layer_sizes` 是不推进真实会话的诊断：使用 `scene_engine.isolated_session_state()`，在 ContextVar 隔离副本中观察 SessionStore/SessionValues。不得通过全局 reset 或事后回滚实现诊断，否则会丢失并发更新。此作用域限定同步使用，不是跨表原子快照；契约见 `tests/test_diagnostic_state.py`。
+
 ## 流水线 skill（`.claude/skills/`）
+
+展示层在 `skills/mygo-five-roleplay/`，包含总 Skill 与五个可选的 `references/<角色>/` 目录。角色资料从 registry/style_target 导出，不手改生成文件：`py -X utf8 tools/export_roleplay_skill.py --out report/roleplay-release`；`--check --out skills/mygo-five-roleplay` 校验发布副本。静态 agent 扮演不等价于 Python 的动态路由、去重及后处理；核心评测流程保持独立。
 
 五个 skill 把「换成别的角色」这件事拆成阶段，每个都带命令与验收条件；agent 会自动加载，人也可以当操作手册读：
 
@@ -81,6 +85,8 @@ bootstrap.py         # 一条命令装成可跑状态（建 .venv → 装依赖 
 | `idiolect-pipeline` | 编排：交接物、每段门禁、自动／人写对照表 |
 
 ## 构建与测试命令
+
+探针结果可用 `py -X utf8 tools/score/report_html.py --labels <批次>` 导出为 `report/evaluation.html`。浏览页只消费既有 JSONL/summary/scene_distill，不重新实现评分；模板在 `tools/score/report_template.html`。缺测与旧批次未知条件不能显示成零或通过。
 
 ```bash
 python bootstrap.py                        # 一条命令：建 .venv + 装依赖 + 自检 + 打印 prompt
@@ -125,7 +131,7 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
 - **评测时钟**：任何读「现在」的代码从 `tools/mock_clock.py` 的 `mock_now()` 取，不要直接 `datetime.now()`。默认固定在 `2026-09-12T15:00:00+09:00`；用真实时钟跑出的批次数字不可与 mock 批次比较。
 - **路径**：只用 `tools/_paths.py`（环境变量：`IDIOLECT_CORPUS_DIR`、`IDIOLECT_REPORT_DIR`、`IDIOLECT_DATA_DIR`）。
 - **产物纪律**：脚本产物写 `report/`；`offline_smoke` 自带零写校验，除 `report/` 外改动任何仓库文件都会 FAIL。
-- **改 prompt 必须留证据**：用 `dump_prompt.py --phase before/after` 留两臂 diff。
+- **改 prompt 必须留证据**：修改前后以相同输入运行 `dump_prompt.py --phase current`，用不同输出目录保存并审查 diff。`before/after` 是关闭动态开关与恢复默认开关的消融对照，不代表两个代码版本。
 - **静默失效比报错危险**：写文件的脚本要有零结果守卫（参考 `build_gold.py`、`export_scene_targets.py`）；读语料的脚本对空文件直接退出。
 - 加一个角色或场景的完整步骤见 `docs/05-tooling.md` 第 9 节（建包 → 注册 `_PACKAGE_NAMES`/`_ALIASES` → 保持 `general_scenes.py` 与 `scene_classifier.py` 的 `_RULES` 顺序一致 → 跑 smoke → 留 diff）。
 

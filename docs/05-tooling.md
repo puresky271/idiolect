@@ -26,7 +26,7 @@ py -X utf8 tools/offline_smoke.py --fast   # 跳过门禁与单测，一秒出�
 py -X utf8 tools/offline_smoke.py --with-llm   # 额外每角色真调一次模型
 ```
 
-它不调 LLM，所以能进 CI。检查项：四层装配齐全、层顺序、层预算、场景覆盖、turn_logic 触发矩阵、角色串味、内容红线扫描、夹具结构、派生统计形状、四道门禁、`tests/`，最后比对仓库文件指纹——除 `report/` 之外的任何文件被改动都会 FAIL。产物是 `report/offline_smoke.md`。
+默认不调用 LLM，适合放入 CI；`--with-llm` 会真实调用模型。检查项：四层装配齐全、层顺序、层预算、场景覆盖、turn_logic 触发矩阵、角色串味、内容红线扫描、夹具结构、派生统计形状、机械门禁、`tests/`，最后比对仓库文件指纹——除 `report/` 之外的任何文件被改动都会 FAIL。产物是 `report/offline_smoke.md`。
 
 ## 3. mock 时钟
 
@@ -41,6 +41,24 @@ py -X utf8 tools/mock_clock.py --real                       # 同上，改用真
 默认 `2026-09-12T15:00:00+09:00`。任何读「现在」的代码都从 `mock_clock.mock_now()` 取，不要直接 `datetime.now()`。探针启动时会打印时钟来源，检测到真实时钟会警告这批数字不可与 mock 批次比较。
 
 ## 4. 全量 prompt dump
+
+### 并排查看五人
+
+```bash
+py -X utf8 -m idiolect showcase "我今天有点撑不住了"
+```
+
+`showcase` 是只读的体验前置：并排显示五人的场景命中、四层字符预算和非原作文本的风格提示。它不调用模型、不产生评测分数；展示结果与证据链的关系是“先定位差异，再 dump，再 probe”。
+
+### 查看单轮分层正文
+
+```powershell
+py -X utf8 -m idiolect prompt 乐奈 "你今天又想去哪找猫" --layers canon,voice,style_target,turn_logic
+```
+
+CLI 分层视图只装配一次，正文与完整输出同源。未知或空层名返回错误；同时指定 `--no-turn-logic` 时，动态层不会输出，即使 `--layers` 中包含它。
+
+### 导出审计文件
 
 ```bash
 # 单角色一句话
@@ -60,9 +78,20 @@ py -X utf8 tools/gates/dump_prompt.py --char 灯 --msg "我一直在哭" --layer
 py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --case general.comfort
 ```
 
-产物三份：`prompt_<char>_<phase>_<label>.json`（最终 messages 数组，与探针喂给模型的对象逐字节相同）、`.txt`（分层审计版）、`.layers.json`（各层字符数）。另有一份 `prompt_dump_index_<phase>.json` 汇总本次所有 dump，用于两臂对比。
+产物三份：`prompt_<char>_<phase>_<label>.json`（诊断 messages 数组）、`.txt`（分层审计版）、`.layers.json`（各层字符数），另有 `prompt_dump_index_<phase>.json`。dump 与 probe 共用四层实现，均替换夹具最后一条 user；dump 在隔离会话中运行。同源不等于任意请求相同：探针可能选用其他夹具或补丁，精确复核仍需比较实际请求指纹。
 
-`--phase before` 把深模块与通用场景层的 env 回退开关全部置 0，得到「改动前行为」的那一臂。
+`--phase before` 会关闭深模块与通用场景开关，`after` 会清除这些开关的覆盖值。这是开关消融，不是 Git 改动前后的自动快照。验证代码修改时，必须在编辑前后分别保存同配置、同输入、同时间的产物，不能用两个不同 phase 代替同条件对比。
+
+代码改动门禁使用 `--phase current`，保持现有开关不变：
+
+```powershell
+$env:IDIOLECT_REPORT_DIR = "report/before_change"
+py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase current
+# 完成修改后，保持相同输入、时钟和运行时开关
+$env:IDIOLECT_REPORT_DIR = "report/after_change"
+py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase current
+Remove-Item Env:\IDIOLECT_REPORT_DIR
+```
 
 ## 5. 探针
 
@@ -81,13 +110,23 @@ py -X utf8 tools/probe/probe_runner.py --label repo_standalone --assemble --turn
 参数要点：
 
 - `--assemble`：按本轮 user 现场装配四层 system。占位夹具的 system 为空，**不加这个参数测到的是没有角色 prompt 的模型**。装配结果若短于 1000 字符，脚本直接报错退出。
-- `--turn-logic`：注入生产 turn_logic 块。没有它，探针测不到动态层。
+- `--turn-logic`：向外部夹具追加本轮场景指引。`--assemble` 本身已包含动态层，两者一起使用不会二次追加；`turn_logic_chars` 记录本次装配的动态正文长度。
 - `--registry`：用统一场景注册表（含语料反推的夹具），每格带 scene key，评分才能按场景聚合。
 - `--runs N`：每格生成次数。分布级指标需要 N ≥ 3，正常评测用 6。
 - `--patch`：实验臂（`targets` 等），把数值目标块插到 persona card 末尾。生产现状用 `none`。
 - `--thinking off|on`：关掉思考链换取可复现与低成本。注意开思考时大预算下仍会出现空 content 的样本，这类样本要计为无效而不是拒答。
 
 夹具来源顺序：`fixtures/` 里最新的 `messages_<char>*.json`，再退到 `_offline_smoke_out/`。要换成自己的运行时 dump，把文件放进 `fixtures/` 即可。
+
+### 追踪一次运行
+
+新探针在 `probe_<label>_summary.json` 的 `metadata` 中保存模型、temperature、max_tokens、thinking、附加参数、时钟说明、装配开关，以及夹具、场景计划、评分画像、场景基线和探针脚本的指纹。`schema_version` 表示记录格式；历史报告缺少该字段时，应显示“实验条件未知”，不要从文件名猜测或补填。
+
+逐条 JSONL 保存 `user_text` 与 `messages_sha256`。指纹按 UTF-8、键排序、紧凑 JSON 计算，对应当次请求的 messages；它用于比对，不是完整请求备份，也不能据此恢复 history。
+
+`counts` 分开记录 total、successful、errors、empty_content、not_generated。empty_content 是 errors 的子集；干跑计入 not_generated，不能当成成功生成。文件不保存 API key；分享报告前仍需检查用户输入与输出内容。
+
+比较实验时先核对模型、参数、时钟、夹具与评分基线，再解释指标差异。指纹一致只证明对应输入一致，不能证明两个模型端点等价；当前记录尚不是完整依赖锁定或所有运行时配置的快照。
 
 另有两个专项探针（`--label` 产物可直接被 `oob_check` / `evidence_check` 的 `--label` 扫描，详见 `docs/04-evaluation.md` 第 13、14 节）：
 
@@ -97,6 +136,22 @@ py -X utf8 tools/probe/multiturn_probe.py --label mt1 --gate        # 多轮漂�
 ```
 
 ## 6. 评分四件套
+
+### 离线浏览证据
+
+```powershell
+py -X utf8 tools/score/report_html.py --labels repo_standalone
+```
+
+打开 `report/evaluation.html`，可筛选角色、场景与关键词，点击场景进入逐条回复，展开查看模型原文、清洗后文本及请求诊断。文件内嵌数据，不需要服务器或网络。多个批次用逗号分隔，页面可以切换批次；不会自动把跨批次分数当作改善证据。
+
+导出器读取 `probe_<label>.jsonl`、可选的 `probe_<label>_summary.json` 与 `scene_distill_<label>.json`。它不执行评分；缺少指标时显示缺测，旧批次元数据缺失时显示未知。场景指标不随关键词重算，角色概览明确保留整批口径。筛选记录数与有效/错误/空白计数按当前筛选更新。
+
+报告可能包含用户输入与回复，分享前需检查内容；默认只生成本地文件。当前浏览页不替代复述审计、功效检查和盲评，也不提供自动 A/B 可比性判定。
+
+导出多个批次后可选择“参考批次”，逐项对照模型、采样、时钟、夹具与基线等条件。状态分为一致、不同、未知；双方缺字段仍是未知，显式 false 或数值零则保留为有效记录。装配/代码差异可能是实验变量，不应机械判为实验失败。所有已记录字段一致也不能证明端点、功效和质量已经验证。
+
+### 运行评分
 
 ```bash
 py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,comfort --cat 通用场景
@@ -108,7 +163,7 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 |---|---|---|
 | 分布级评分 | `scene_distill.py` | `scene_distill.md` / `scene_distill_<label>.json` |
 | 逐场景对照 | `scene_feedback.py` | `scene_feedback_<scene>.md` |
-| 同格重复度 | `_repeat_rate.py` | 控制台 + 报告 |
+| 同格重复度 | `_repeat_rate.py` | 控制台 + `repeat_<label>.json`（有效回复计数与源指纹） |
 | 逐字复述审计 | `_copy_audit.py` | 控制台 + 报告 |
 
 第五项**多臂池化**（`_pool_arms.py`）不在默认四步里，只有同时给了 `--off-labels` / `--on-labels` 两个臂才跑；单独调用见下。

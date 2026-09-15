@@ -4,7 +4,7 @@
 
 **目录**：[1 turn_logic](#1-turn_logic) ｜ [2 后处理（voice_check）](#2-后处理voice_check) ｜ [3 加东西的清单](#3-加东西的清单) ｜ [4 反思](#4-反思)
 
-前面几篇讲的是「静态特征怎么落进 prompt」。这一篇讲两个动态部件：**turn_logic**（这一轮该做什么）和 **voice_check**（回复出门前的那道处理）。
+输入侧的 turn_logic 决定本轮追加哪些场景指引；输出侧的 voice_check 处理生成后的文本。修改时分别保留装配证据与清洗前后文本，避免把清洗带来的变化误认为模型进步。
 
 ## 1. turn_logic
 
@@ -78,7 +78,7 @@ SceneModule(...)  →  角色包 turn_logic/__init__.py 的模块列表
 
 1. `tools/gates/dump_turn_logic_gate.py --phase after`：触发矩阵（该命中的命中、不该命中的不命中）、归属标记（新模块的标题必须出现）、角色串味（素世的块不得出现在乐奈的渲染里）；
 2. `tools/gates/_tl_deep_check.py`：正文规范（无可照抄例句、正反例标记齐全）；
-3. `tools/gates/dump_prompt.py --phase before/after`：两臂对照，确认无关场景零漂移；
+3. `tools/gates/dump_prompt.py --phase current`：编辑前后分目录保存，同配置对照，确认无关场景零漂移；
 4. `tools/offline_smoke.py`：全量体检。
 
 ### 1.4 什么时候**不该**加模块

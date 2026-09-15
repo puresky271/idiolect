@@ -9,7 +9,7 @@
 <h1 align="center">idiolect</h1>
 
 <p align="center">
-  <strong>Make an AI character speak in character, and prove it got closer — with numbers.</strong>
+  <strong>Make an AI character speak in character, and evaluate the result with reproducible evidence.</strong>
 </p>
 
 <p align="center">
@@ -53,9 +53,32 @@ The running example is the five members of **BanG Dream! It's MyGO!!!!!**. Note 
 | **A drop-in assembly library** | `pip install .` then `from idiolect.assemble import build_messages` returns the four-layer prompt. **Zero third-party runtime dependencies** (openai / numpy / jieba are only needed for probing and distillation) |
 | **An evaluation loop that proves "closer"** | Probe → (distribution fit / within-cell repetition / verbatim-copy audit) → multi-arm pooling → power estimate. Two dedicated probes cover boundary refusal and multi-turn drift, and an evidence gate checks fact consistency. The table below is one real run of 105 replies |
 | **Six mechanical gates plus a prompt-diff gate** | Prompt edits should not rest on vibes: one `offline_smoke.py` run covers assembly, scene coverage, trigger matrix, content red lines, data shape, the gates and a zero-write check |
-| **Tooling that transfers to another work** | 65 scripts: acquisition and cleaning, corpus splitting, scene discovery, tic distillation, length-target export, probing and scoring. The method is not tied to one show — point it at another cast and re-run |
+| **Tooling that transfers to another work** | 67 scripts: acquisition and cleaning, corpus splitting, scene discovery, tic distillation, length-target export, probing and scoring. The method is not tied to one show — point it at another cast and re-run |
 | **Ready-made character data (aggregates only)** | 26 scenes (13 general + 13 character-specific), 130 character × scene length targets, 114 per-scene tic cells, style profiles for five characters |
 | **Nine methodology documents** | Where the corpus comes from, how each feature class is computed and landed, how to evaluate, and the pitfalls already paid for |
+
+
+### A portable roleplay Skill
+
+Copy the complete [mygo-five-roleplay folder](skills/mygo-five-roleplay/SKILL.md) into your agent's skills directory. Claude/Codex can read the bundled character materials and respond directly, without Python or an API key. Select a member, or name her together with your topic; say “exit roleplay” to return to the assistant. Character directories are optional and loaded on selection.
+
+These static materials share the library's sources but do not execute its dynamic routing, session state or post-processing. The experience does not certify quality: evaluation and methodology remain central. See the [installation and export guide](docs/01-quickstart.md#先体验五人-skill).
+
+### Watch the demo, then inspect the evidence
+
+[![Native-color Claude Code terminal recording: Rana](assets/readme/roleplay-demo.gif)](assets/readme/roleplay-demo.mp4)
+
+**[Play / download the clip](assets/readme/roleplay-demo.mp4)** · [Static preview](assets/readme/roleplay-poster.png) · [Transcript and provenance](assets/readme/roleplay-transcript.json)
+
+This **25-second** clip records **Claude Code** directly in Windows Terminal, preserving its native colors and showing a real reply from Rana using **DeepSeek-v4-pro[1m]**. Only idle footage at the ends was trimmed; generation was not sped up. The Skill and Rana materials were explicitly loaded, and the input was supplied as the initial message. This does not test automatic Skill discovery or multi-turn stability. The other four members remain available in the Skill.
+
+![Offline evaluation overview: filters, missing conditions and character metrics](assets/readme/evaluation-overview.png)
+
+The overview preserves warnings about missing conditions in historical batches. Below, Rana's comfort scene opens into the original and cleaned replies; inputs absent from old records remain unknown.
+
+![Rana comfort scene: diagnostics and original versus cleaned replies](assets/readme/evaluation-evidence.png)
+
+Run `py -X utf8 tools/score/report_html.py --labels <label>` on your batch and open `report/evaluation.html` to filter and inspect evidence. These screenshots use the historical `repo_standalone` batch, a separate experiment from the host demo above. See the [evaluation guide](docs/04-evaluation.md).
 
 ## 🚀 Quick start
 
@@ -80,8 +103,11 @@ Python 3.11+.
 pip install .                                           # zero runtime dependencies
 python -m idiolect list                                 # the five built-in characters
 python -m idiolect prompt 乐奈 "你今天又想去哪找猫"      # the full system prompt for this message
+python -m idiolect showcase "我今天有点撑不住了"          # side-by-side five-character view (no model call)
 python -m idiolect chat 乐奈 "你今天又想去哪找猫"        # one real chat turn (see env vars below)
 ```
+
+Suggested path: try the Skill first; inspect the difference with `py -X utf8 tools/gates/dump_prompt.py --all --matrix`; then return to evidence with `py -X utf8 tools/score/probe_report.py --label <label> --scenes crisis,comfort`.
 
 To set up the toolchain too, one command is enough (creates `.venv`, installs the requirements, runs the `offline_smoke` self-check, prints one character's per-layer sizes):
 
@@ -151,7 +177,7 @@ py -X utf8 tools/score/probe_report.py --label repo_standalone --scenes crisis,c
 | Rana | 21 | 86.9 | 79.9 | 0.0% | 0% | 0.504 |
 
 - Conditions: `deepseek-flash`, temperature 0.75, max_tokens 420, clock pinned to daytime, 3 samples per cell, 105 replies, zero errors.
-- **composite** is the headline metric: 0.65 style fidelity + 0.35 content anchors (see `docs/04-evaluation.md` §2.1). fidelity only measures length/sentence-count distributions and stays as a control column — on its own it rewards correct-but-empty assistant tone. Anon is the live example: top fidelity, bottom composite (polished phrasing, few concrete details). When the two disagree, trust composite.
+- **composite** is the headline metric: 0.65 style fidelity + 0.35 content anchors (see `docs/04-evaluation.md` §2.1). fidelity only measures length/sentence-count distributions and stays as a control column — on its own it rewards correct-but-empty assistant tone. Anon is the live example: top fidelity, bottom composite (polished phrasing, few concrete details). When they disagree, inspect anchors, actual replies and blind judgments; composite can also lose sensitivity when anchor scores saturate.
 - **Scene fit** measures agreement with the original same-character-same-scene distribution (length, sentence count); 1.0 is full agreement, this batch averages 0.466 over 35 cells. It is a **relative** score for before/after comparison inside one batch — not comparable across models, fixtures, or clocks.
 - Distinct replies within a cell: 93/105. Verbatim reuse of prompt text: 1%, and the 3 copied characters were a verbal tic, not an example sentence.
 - Leak rate covers thinking tags, inner monologue, speaker echo, and Chinese stage directions — all 0 here.
@@ -181,7 +207,7 @@ Everything measured lands in four layers, in a fixed order — stable parts firs
 
 These four layers are this repository's complete answer to "how do measured features reach the prompt". A real system can put memory, world state, and schedules in front of them; those layers are unrelated to the method.
 
-`tools/gates/dump_prompt.py` prints each layer for inspection; `--phase before/after` writes a pair produced by the same script, the same input, and the same clock, so the diff is clean.
+`tools/gates/dump_prompt.py` prints each layer for inspection; use `--phase current` before and after a code change, preserving inputs, clock and flags and saving separate output directories. The before/after modes are switch ablations.
 
 **What surrounds the four layers in a real system?** In a complete chat system the model also needs to know what time it is, where the character is, what was just being discussed, what the user mentioned last week. That context is organised as a **workspace**: a dozen candidate sources are collected, scored, ranked, trimmed to a budget, then assembled in a fixed layer order — and the four layers sit in the `persona` slot. The repository distils that skeleton (`idiolect/workspace.py`, zero dependencies); see [`docs/08-context-workspace.md`](docs/08-context-workspace.md):
 
@@ -219,7 +245,7 @@ Three artifacts per dump: `prompt_<char>_<phase>_<label>.txt` (layered, for read
 | Soyo | 9087 | 2279 | 532 | 479 | 12377 |
 | Rana | 12223 | 1940 | 531 | 509 | 15203 |
 
-The text of every layer is in the repository and readable verbatim: `canon` and `voice` live in `idiolect/characters/*/` (`canon.py` / `voice.py`), the speech-scale numbers come from [`data/style_profiles.json`](data/style_profiles.json) and the 130 character × scene cells in `idiolect/scene_length_targets.py`, and the scene guidance comes from `idiolect/general_scenes.py` plus each package's `turn_logic/scenes.py`. To see what a prompt edit changed, dump `--phase before` and `--phase after` and diff them.
+The text of every layer is in the repository and readable verbatim: `canon` and `voice` live in `idiolect/characters/*/` (`canon.py` / `voice.py`), the speech-scale numbers come from [`data/style_profiles.json`](data/style_profiles.json) and the 130 character × scene cells in `idiolect/scene_length_targets.py`, and the scene guidance comes from `idiolect/general_scenes.py` plus each package's `turn_logic/scenes.py`. To see what a prompt edit changed, use `--phase current` before and after editing, save separate output directories, and inspect the diff.
 
 ## 🛠️ Run the tooling
 

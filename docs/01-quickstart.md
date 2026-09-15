@@ -1,16 +1,35 @@
 # 快速开始
 
-> 讲什么：从零跑通全链路——装包、看四层 prompt、体检、跑一次真探针、换成自己的语料。 ｜ 前置：Python 3.11+；跑探针需要一个 OpenAI 兼容端点。
+> 从五人对话体验开始，或直接进入装配、探针与评测。Skill 无需 Python；代码工具链需要 Python 3.11+，真实探针还需要 OpenAI 兼容端点。
 
 **目录**：[你需要什么](#你需要什么) ｜ [安装](#安装) ｜ [五分钟看明白它在干什么](#五分钟看明白它在干什么) ｜ [验证仓库是健康的](#验证仓库是健康的) ｜ [跑一次真探针](#跑一次真探针) ｜ [用你自己的语料](#用你自己的语料) ｜ [接进你自己的角色系统](#接进你自己的角色系统) ｜ [目录](#目录) ｜ [验证过什么](#验证过什么)
 
 ## 你需要什么
+
+仅体验下面的 Skill 不需要 Python 或独立模型密钥；以下依赖用于代码工具链。
 
 - Python 3.11 或更高。Windows 上统一用 `py -X utf8` 启动，裸 `python` 可能解析到没装依赖的解释器。
 - 想跑探针的话，一个 OpenAI 兼容的 API key（`LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`）。
 - 想重跑语料蒸馏的话，原作语料（本仓库不分发，见 `docs/02-corpus.md`）。
 
 ## 安装
+
+### 先体验五人 Skill
+
+复制整个 `skills/mygo-five-roleplay/`，不要只复制 SKILL.md。可放入项目的 `.claude/skills/`（Claude Code）或 `.agents/skills/`（Codex），也可按宿主的 Skill 安装方式导入完整目录。
+
+启用后说“用灯和我聊聊今天的排练”。已经点名且给出话题时直接进入对话；仅启动 Skill 时先选角。“切换到立希”更换角色，“退出”恢复普通助手。角色目录在 `references/`，可选保留 anon、tomori、taki、soyo、rana；缺包时会提示，不用猜测补造。
+
+角色资料由 registry 与 style_target 导出。修改源后导出到新目录，再审阅并替换发布副本：
+
+```powershell
+py -X utf8 tools/export_roleplay_skill.py --out report/roleplay-release
+py -X utf8 tools/export_roleplay_skill.py --check --out skills/mygo-five-roleplay
+```
+
+导出器拒绝覆盖不同内容；`--check` 不写文件，检测资料漂移。`manifest.json` 包含源包版本及内容指纹，不代表剧情资料覆盖日期。Skill 由宿主 agent 直接扮演，不执行 Python 动态场景/去重/清洗，不能把体验当作同条件探针结果。
+
+### 安装代码工具链
 
 只想用装配库（不碰工具链）的话，装成包最省事——运行时零第三方依赖：
 
@@ -27,15 +46,23 @@ python -m idiolect chat 乐奈 "你今天又想去哪找猫"         # 真聊一
 py -X utf8 -m pip install -r requirements.txt
 ```
 
-只跑装配、门禁、冒烟不需要额外依赖。跑探针要装 `openai`，重算语料统计要装 `requirements-corpus.txt` 里的东西（含句向量模型，比较大）。
+装配库仅依赖 Python 标准库。完整门禁、测试和评分使用 `requirements.txt`；真实探针还需要模型配置。语料聚类与句向量流程使用额外的 `requirements-corpus.txt`，首次运行可能下载模型权重。
 
 ## 五分钟看明白它在干什么
+
+先用展示命令看同一句输入如何进入五人的不同场景与 prompt 预算；这一步不需要 API key：
+
+```bash
+py -X utf8 -m idiolect showcase "我今天有点撑不住了"
+```
+
+它只读装配结果，不代表模型回复，也不把四层字数当作角色质量分数。要看完整层内容，再用 `dump_prompt.py`；要判断输出是否更像，再跑探针和评分。
 
 ```bash
 # 1. 看某个人此刻的完整 prompt（四层，逐层字符数都打出来）
 py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --msg "你今天又想去哪找猫"
 
-# 2. 看「明天几点上课」这一轮，五个人的 prompt 差在哪
+# 2. 查看五人在日常、日程、安慰、闲聊场景的装配矩阵
 py -X utf8 tools/gates/dump_prompt.py --all --matrix
 ```
 
@@ -90,7 +117,7 @@ py -X utf8 tools/distill/scene_char_baseline.py
 py -X utf8 tools/distill/export_profiles.py
 ```
 
-前三个产出写进 `data/`，会成为 prompt 里的数字与评分基线；第四个产出探针用的画像。语料缺失时探针退回读随仓库发布的画像，`[probe] gold 画像来源 = ...` 那行会说明用的是哪条路径。
+这些命令的写入位置不同：`export_targets.py` 默认写 `report/style_targets.json`，`export_scene_targets.py` 写 `idiolect/scene_length_targets.py`，`scene_char_baseline.py` 默认写 `report/scene_char_baseline.json`，`export_profiles.py` 写 `data/style_profiles.json`。从报告发布到 `data/` 前需剥离例句并检查数据形状，见[工具手册](05-tooling.md#8-语料与蒸馏)。语料缺失时探针退回读随仓库发布的画像，启动日志会标明来源。
 
 ## 接进你自己的角色系统
 
@@ -101,7 +128,7 @@ from idiolect.assemble import build_messages
 messages = build_messages("乐奈", "你今天又想去哪找猫")
 ```
 
-`build_system_prompt` 返回四层拼好的 system 段，`build_messages` 再补 history 与本轮 user。真实系统可以在它前面接记忆、世界状态、日程，那些层与本仓库的方法无关，本仓库只负责「这个人怎么说话」。
+`build_system_prompt` 返回四层拼好的 system 段，`build_messages` 再补 history 与本轮 user。需要接入记忆、当前状态或日程时，可使用[上下文工作区](08-context-workspace.md)；数据由宿主提供，仓库没有附带母项目的记忆数据库或世界模拟服务。
 
 ## 目录
 
@@ -119,6 +146,10 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 | `report/` | 所有产物（gitignored） |
 
 ## 验证过什么
+
+运行 `py -X utf8 tools/offline_smoke.py` 获取当前结果。Skill 可用 `py -X utf8 tools/export_roleplay_skill.py --check --out skills/mygo-five-roleplay` 核对发布资料；浏览页还需打开 HTML 检查筛选、展开与手机布局。测试通过不能替代真实模型的角色质量评估。
+
+以下是早期发布验证记录，用于说明覆盖面，不代表当前测试数量或性能承诺：
 
 - `pytest tests`：238 项通过，1 项跳过（需要语料）。
 - `tools/offline_smoke.py`：装配、场景覆盖、触发矩阵、内容红线、派生统计、四道门禁、README 字数表、零写校验全部通过。

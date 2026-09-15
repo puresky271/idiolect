@@ -1,12 +1,12 @@
 # 评测：怎么知道它变像了
 
-> 讲什么：评测的参照系、三件套指标、池化与功效、两道门禁、夹具与时钟、常见误读。 ｜ 前置：手上有探针产物（`report/probe_<label>.jsonl`）时读它才有意义。
+> 说明指标的含义、比较条件和验收边界。已有探针时先看错误与有效样本，再看分项和回复；准备实验时先检查夹具、时钟与样本量。
 
 **目录**：[1 参照系](#1-参照系) ｜ [2 三件套指标](#2-三件套指标) ｜ [3 单臂不够，池化才算数](#3-单臂不够池化才算数) ｜ [4 机械门禁](#4-机械门禁) ｜ [5 prompt diff 门禁](#5-prompt-diff-门禁) ｜ [6 夹具设计](#6-夹具设计) ｜ [7 mock 时钟](#7-mock-时钟) ｜ [8 常见误读](#8-常见误读) ｜ [9 发布数据的可重建性](#9-发布数据的可重建性) ｜ [10 样本外验收](#10-样本外验收holdout) ｜ [11 验收门禁](#11-验收门禁任一退化即-fail) ｜ [12 A/B 盲评](#12-ab-盲评) ｜ [13 越界拒答与多轮漂移](#13-越界拒答与多轮漂移2026-09-13) ｜ [14 证据一致性](#14-证据一致性2026-09-13)
 
 ## 1. 参照系
 
-评测里唯一的参照物是 `data/scene_char_baseline.json`：原作里**同一角色**在**同一场景**说过的台词分布，按 `角色|场景` 建键，130 个组合。切分口径是「一个回合 = 一条台词」，不是「一句话」：原作里一次发言可能带多个小句，那算一个回合。
+场景分布评分默认参照 `data/scene_char_baseline.json`：原作里**同一角色**在**同一场景**说过的台词分布，按 `角色|场景` 建键，130 个组合。切分口径是「一个回合 = 一条台词」，不是「一句话」：原作里一次发言可能带多个小句，那算一个回合。
 
 基线里剔除了沉默回合（只有标点或空白的台词）。这个选择有代价，见 `docs/00-methodology.md` 的「已知残余」：灯的 12 点停顿是内容，却被算作沉默。
 
@@ -71,6 +71,8 @@ fidelity 保留为对照列：它与 composite 背离时（fidelity 涨、compos
 
 同一格 6 条回复里有多少条互不相同。这个量专门抓「复读」：长度指标看不出「6 条里 5 条一模一样」。
 
+只统计无错误且非空白的回复。错误与空白分别计数，不进入互异率分母；无有效回复时 ratio 为 null，脚本返回非零并标明无数据。结果保存在 `repeat_<label>.json`，包括单格有效数、不同回复数、最高重复次数与源 JSONL 指纹。浏览页会拒绝使用源指纹不匹配的旧审计。
+
 ### 2.4 `_copy_audit`：逐字复述审计
 
 把注入正文里**示例行**的引号内容抽出来，逐条回复做逐字包含判断，另算最长公共子串（≥4 字算近似复述）。
@@ -100,12 +102,16 @@ fidelity 保留为对照列：它与 composite 背离时（fidelity 涨、compos
 
 改动任何会进最终 prompt 的模块，都必须产出 before / after 两份 dump，用相同输入与相同 mock 时刻：
 
-```bash
-py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase before
-py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase after
+```powershell
+$env:IDIOLECT_REPORT_DIR = "report/before_change"
+py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase current
+# 修改代码后，保留相同的运行时开关、输入和时钟
+$env:IDIOLECT_REPORT_DIR = "report/after_change"
+py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase current
+Remove-Item Env:\IDIOLECT_REPORT_DIR
 ```
 
-`--phase before` 把深模块与通用场景层的 env 开关全部置 0（改动前行为），`after` 用当前代码。两臂由同一脚本、同一输入产出，不允许「改完之后手写一个 before」。
+`current` 不改动运行时开关。旧 `before/after` 分别关闭动态开关和清除覆盖，是开关消融，不能替代同配置的代码前后对比。基线必须在编辑前生成，不允许改完后补造。
 
 审查 diff 时逐项确认：层顺序、块边界是否闭合、触发是否只在该触发的场景里发生、无关场景零漂移、预算未超。
 
