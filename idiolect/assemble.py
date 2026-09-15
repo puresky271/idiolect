@@ -117,9 +117,13 @@ def layer_sizes(
     与装配同源：走同一条 `_build_layers` 路径，报告的永远是装配值本身，
     不再有「诊断自己重算一遍」的分叉隐患。
     """
-    layers = _build_layers(
-        char, user_text, session_id=session_id, include_turn_logic=include_turn_logic,
-        is_developer=is_developer, now=now)
+    from .scene_engine import isolated_session_state
+
+    # 诊断可观察当前会话，但不得消费真实动态模块的去重或计数状态。
+    with isolated_session_state():
+        layers = _build_layers(
+            char, user_text, session_id=session_id, include_turn_logic=include_turn_logic,
+            is_developer=is_developer, now=now)
     return {key: len(layers.get(key, "")) for key in LAYER_ORDER}
 
 

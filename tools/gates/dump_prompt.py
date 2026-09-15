@@ -6,8 +6,8 @@ canon + 语气 manifest + 场景化长度目标 + turn_logic。方法论上这�
 
 三件产物（都在 `report/`，可用 `IDIOLECT_REPORT_DIR` 改）：
 
-  · `prompt_<char>_<label>.json` —— **最终 messages 数组**（分析首选；
-    与探针喂给模型的对象逐字节相同）
+  · `prompt_<char>_<label>.json` —— 诊断 messages 数组；与探针比较前核对
+    夹具、输入、时间、开关和补丁。共享四层实现不代表任意配置下请求都相同。
   · `prompt_<char>_<label>.txt`  —— 全文审计版（分层小标题 + 逐层字符数）
   · `prompt_<char>_<label>.layers.json` —— 各层字符数（用于 prompt diff 门禁）
 
@@ -19,15 +19,15 @@ canon + 语气 manifest + 场景化长度目标 + turn_logic。方法论上这�
     # 五个人同一句话（对比同一场景下五套约束的差异）
     py -X utf8 tools/gates/dump_prompt.py --all --msg "明天几点上课" --label schedule
 
-    # prompt diff 门禁：改动前后各跑一次，用同一 --label 的前后缀区分
+    # 开关消融：关闭与启用动态模块的两臂
     py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase before
     py -X utf8 tools/gates/dump_prompt.py --all --matrix --phase after
 
     # 只看某一层 / 关掉某一层（排查该层是不是在撑 prompt）
     py -X utf8 tools/gates/dump_prompt.py --char 灯 --msg "我一直在哭" --layers canon,voice
 
-`--phase before` 会把深模块与通用场景层的 env 回退开关全部置 0（改动前行为），
-`after` 用当前代码：两臂同一脚本、同一输入、同一 mock 时刻，可以直接对 diff。
+`--phase before` 关闭动态开关，`after` 清除覆盖。代码修改前后对比使用
+`--phase current` 保留配置，并在修改前后分别导出到不同 IDIOLECT_REPORT_DIR。
 """
 from __future__ import annotations
 
@@ -90,20 +90,15 @@ def _enable_flags() -> None:
 
 def assemble(char: str, msg: str, session_id: str, want: tuple[str, ...]):
     """按指定层装配；返回 (system, layers dict)。"""
-    from idiolect.registry import get_canon_profile, get_voice_manifest, render_turn_special_block
+    from idiolect.assemble import _build_layers
+    from idiolect.scene_engine import isolated_session_state
     from idiolect.scene_classifier import classify
-    from idiolect.style_target import build_style_target_block
 
     now = MOCK.mock_now()
     scene = classify(msg, char) if msg else ""
-    pieces = {
-        "canon": (get_canon_profile(char) or "").strip(),
-        "voice": (get_voice_manifest(char) or "").strip(),
-        "style_target": build_style_target_block(char, scene),
-        "turn_logic": render_turn_special_block(
-            char, msg, session_id=session_id, is_developer=False, mode="chat", now_jst=now) or "",
-    }
-    pieces = {k: v.strip() for k, v in pieces.items()}
+    with isolated_session_state():
+        built = _build_layers(char, msg, session_id=session_id, now=now)
+    pieces = {k: built.get(k, "") for k in LAYERS}
     kept = {k: v for k, v in pieces.items() if k in want and v}
     return "\n\n".join(kept[k] for k in LAYERS if k in kept), pieces, scene
 
@@ -113,15 +108,20 @@ def write_dump(char: str, label: str, msg: str, phase: str, want: tuple[str, ...
     """落盘一份 dump，返回摘要 dict。"""
     session_id = f"dump:{phase}:{label}:{char}"
     system, pieces, scene = assemble(char, msg, session_id, want)
-    hist: list[dict] = []
+    messages = [{"role": "system", "content": system}]
     fixture = ROOT / "fixtures" / f"messages_{char}.json"
     if fixture.exists():
-        try:
-            rows = json.loads(fixture.read_text(encoding="utf-8"))
-            hist = [r for r in rows[1:] if isinstance(r, dict) and r.get("role") != "system"]
-        except Exception:  # noqa: BLE001
-            hist = []
-    messages = [{"role": "system", "content": system}] + hist + [{"role": "user", "content": msg}]
+        rows = json.loads(fixture.read_text(encoding="utf-8"))
+        if not isinstance(rows, list) or not rows or any(not isinstance(r, dict) for r in rows):
+            raise ValueError(f"夹具必须是非空 messages 数组：{fixture}")
+        if rows[0].get("role") != "system":
+            raise ValueError(f"夹具首条必须是 system：{fixture}")
+        messages.extend(rows[1:])
+    user_indices = [i for i, row in enumerate(messages) if row.get("role") == "user"]
+    if user_indices:
+        messages[user_indices[-1]] = {**messages[user_indices[-1]], "content": msg}
+    else:
+        messages.append({"role": "user", "content": msg})
 
     tag = f"{CHARKEY[char]}_{phase}_{label}"
     REPORT.mkdir(parents=True, exist_ok=True)
@@ -143,7 +143,7 @@ def write_dump(char: str, label: str, msg: str, phase: str, want: tuple[str, ...
         body = pieces.get(key, "")
         flag = "" if key in want else "（本次未装配）"
         lines += [f"{'=' * 72}", f"## {key}{flag} · {len(body)} 字符", "=" * 72, body or "(空)", ""]
-    lines += ["=" * 72, "## messages 数组（逐字节等于探针喂给模型的对象）", "=" * 72,
+    lines += ["=" * 72, "## messages 数组（本次诊断快照，需核对探针配置与夹具）", "=" * 72,
               json.dumps(messages, ensure_ascii=False, indent=2)]
     (REPORT / f"prompt_{tag}.txt").write_text("\n".join(lines), encoding="utf-8")
 
@@ -163,8 +163,8 @@ def main() -> int:
     ap.add_argument("--matrix", action="store_true",
                     help=f"用内置场景矩阵（默认 {len(DEFAULT_MATRIX)} 条，会命中不同层）")
     ap.add_argument("--label", default="", help="产物后缀（禁用作对比标签）")
-    ap.add_argument("--phase", choices=("before", "after"), default="after",
-                    help="before = 深模块/通用场景层 env 回退开关全关（改动前行为）")
+    ap.add_argument("--phase", choices=("before", "after", "current"), default="after",
+                    help="current 保留当前开关；before 关闭动态开关；after 清除覆盖（兼容旧默认）")
     ap.add_argument("--layers", default=",".join(LAYERS),
                     help=f"只装配这些层（逗号分隔，可选 {','.join(LAYERS)}）")
     ap.add_argument("--mock-now", default="", help="覆盖 mock 时刻（ISO 8601）")
@@ -176,7 +176,7 @@ def main() -> int:
         os.environ[MOCK.ENV_VAR] = args.mock_now
     if args.phase == "before":
         _disable_flags()
-    else:
+    elif args.phase == "after":
         _enable_flags()
 
     want = tuple(x for x in args.layers.split(",") if x)

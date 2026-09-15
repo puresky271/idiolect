@@ -27,6 +27,9 @@ import os
 import re
 import threading
 from collections import OrderedDict
+from contextlib import contextmanager
+from contextvars import ContextVar
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
@@ -82,7 +85,37 @@ def env_enabled(raw: str | None) -> bool:
 
 
 # ── per-session 去重表（带 LRU 上限）─────────────────────────────────
-class SessionStore:
+_diagnostic_state: ContextVar[dict | None] = ContextVar('idiolect_diagnostic_state', default=None)
+
+
+@contextmanager
+def isolated_session_state():
+    """同步诊断作用域：按需复制已访问的状态表，退出时丢弃副本。
+
+    不交换或回滚全局表，因此不会覆盖其他线程的真实更新。
+    嵌套诊断继承外层副本，但修改不回传；不是跨表原子快照。
+    """
+    parent = _diagnostic_state.get()
+    copies = {store: deepcopy(value) for store, value in parent.items()} if parent else {}
+    token = _diagnostic_state.set(copies)
+    try:
+        yield
+    finally:
+        _diagnostic_state.reset(token)
+
+
+class _SessionState:
+    @property
+    def _buckets(self):
+        copies = _diagnostic_state.get()
+        if copies is None:
+            return self._live_buckets
+        if self not in copies:
+            copies[self] = deepcopy(self._live_buckets)
+        return copies[self]
+
+
+class SessionStore(_SessionState):
     """session → {key} 的去重表。
 
     旧实现是裸 `dict[str, set[str]]`、只增不减：常驻进程里 session 不淘汰
@@ -92,7 +125,7 @@ class SessionStore:
 
     def __init__(self, max_sessions: int = 4096) -> None:
         self._max_sessions = max(1, int(max_sessions))
-        self._buckets: OrderedDict[str, set[str]] = OrderedDict()
+        self._live_buckets: OrderedDict[str, set[str]] = OrderedDict()
         self._lock = threading.Lock()
 
     def mark(self, session_id: str, key: str) -> bool:
@@ -124,10 +157,11 @@ class SessionStore:
                 self._buckets.pop(session_id, None)
 
     def __len__(self) -> int:
-        return len(self._buckets)
+        with self._lock:
+            return len(self._buckets)
 
 
-class SessionValues:
+class SessionValues(_SessionState):
     """session → 值字典 的 LRU 表（SessionStore 的值版兄弟）。
 
     SessionStore 管「这个 session 注入过哪些块」的集合状态；另一些深模块要
@@ -141,7 +175,7 @@ class SessionValues:
 
     def __init__(self, max_sessions: int = 4096) -> None:
         self._max_sessions = max(1, int(max_sessions))
-        self._buckets: OrderedDict[str, dict] = OrderedDict()
+        self._live_buckets: OrderedDict[str, dict] = OrderedDict()
         self._lock = threading.Lock()
 
     def get_or_create(self, session_id: str, factory: Callable[[], dict]) -> dict:
@@ -183,7 +217,8 @@ class SessionValues:
                 self._buckets.pop(session_id, None)
 
     def __len__(self) -> int:
-        return len(self._buckets)
+        with self._lock:
+            return len(self._buckets)
 
 
 _fired = SessionStore()                     # session -> {scene_key}

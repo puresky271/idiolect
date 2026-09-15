@@ -31,6 +31,7 @@ for _p in (_ROOT, _ROOT / "tools",
 from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -58,6 +59,12 @@ FIXTURES = ROOT / "fixtures"          # 本仓库自带的占位夹具（优先�
 SMOKE_OUT = ROOT / "_offline_smoke_out"  # 兼容：外部真实运行时 dump 也可以放这里
 CHARS = ["爱音", "灯", "立希", "素世", "乐奈"]
 CHARKEY = {"爱音": "anon", "灯": "tomori", "立希": "taki", "素世": "soyo", "乐奈": "rana"}
+
+
+def _json_sha256(value) -> str:
+    """指纹基于稳定 JSON；不把密钥或环境变量整表写进报告。"""
+    body = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+    return hashlib.sha256(body.encode('utf-8')).hexdigest()
 
 
 def newest_messages(char: str) -> Path:
@@ -234,8 +241,7 @@ def main() -> int:
                          "（canon + voice + 场景化长度目标 + turn_logic 四层全上）。"
                          "自带占位夹具时需要它；外部真实 dump 不需要。")
     ap.add_argument("--turn-logic", action="store_true",
-                    help="把**生产 turn_logic**（场景模块 block）按夹具的 user_text 注入 system prompt。"
-                         "没有它，probe 永远测不到 turn_logic 的效果——这是本框架此前的盲区。")
+                    help="向外部夹具追加本轮场景指引；--assemble 已包含动态层，组合使用不会重复追加。")
     args = ap.parse_args()
 
     only = [c for c in args.chars.split(",") if c]
@@ -290,6 +296,7 @@ def main() -> int:
     print(f"[probe] turn_logic 注入 = {args.turn_logic}", flush=True)
 
     records: list[dict] = []
+    fixture_hashes: dict[str, str] = {}
     per_char_replies: dict[str, list[str]] = defaultdict(list)
 
     if args.registry:
@@ -315,6 +322,7 @@ def main() -> int:
         if only and char not in only:
             continue
         fixture = load_fixture(char)
+        fixture_hashes[char] = _json_sha256(fixture)
         ui = find_last_user_idx(fixture)
         base_sys = fixture[0]["content"]
         # targets_scene 的补丁**逐场景**重算（见下方循环），这里不预计算——
@@ -335,11 +343,14 @@ def main() -> int:
             # 2026-09-13 修：此前 1 和 3 是并列的两个 if/else，装配结果被
             # `msgs[0]["content"] = patched_sys` 原地覆盖，--assemble 静默变成空操作
             # （占位夹具的 system 为空 → 模型收到空 system，回复退化成通用助手腔）。
+            tl_text = ""
             if args.assemble:
-                from idiolect.assemble import build_system_prompt
-                sys_text = build_system_prompt(
+                from idiolect.assemble import LAYER_ORDER, _build_layers
+                layers = _build_layers(
                     char, sc["text"], session_id=f"probe:{args.label}:{char}:{sc['id']}",
                     now=MOCK.mock_now())
+                sys_text = "\n\n".join(layers[key] for key in LAYER_ORDER if key in layers)
+                tl_text = layers.get("turn_logic", "")
             elif args.patch == "targets_scene":
                 # targets_scene 需要「本轮场景」才知道注入哪套基线 → 逐场景重新算
                 sys_text = PP.apply_patch(
@@ -366,8 +377,8 @@ def main() -> int:
             # ── 生产 turn_logic 注入 ──────────────────────────────
             # 逐场景算一次即可（同场景 N 次 run 的 block 内容相同）；
             # session_id 按 (label,char,scenario) 唯一，避免跨场景共享去重状态。
-            tl_text = ""
-            if args.turn_logic:
+            # --assemble 的正文与层尺寸来自同一次求值，避免去重状态被再次消费。
+            if args.turn_logic and not args.assemble:
                 try:
                     import idiolect.registry as RP
                     tl_text = RP.render_turn_special_block(
@@ -403,6 +414,8 @@ def main() -> int:
                     "error": err, "sec": sec,
                     "prompt_chars": len(msgs[0]["content"]),
                     "turn_logic_chars": len(tl_text),
+                    "user_text": sc["text"],
+                    "messages_sha256": _json_sha256(msgs),
                 }
                 records.append(rec)
                 if cleaned and not err:
@@ -417,10 +430,33 @@ def main() -> int:
 
     # 聚合评分
     summary = {char: score_arm(char, replies, gold[char]) for char, replies in per_char_replies.items()}
+    metadata = {
+        "schema_version": 1,
+        "model": model,
+        "temperature": args.temperature,
+        "max_tokens": args.max_tokens,
+        "thinking": args.thinking,
+        "extra_body": extra_body,
+        "dry_run": args.dry_run,
+        "clock": {"mocked": MOCK.is_mocked(), "description": MOCK.describe()},
+        "assembly": {"assemble": args.assemble, "turn_logic": args.turn_logic, "patch": args.patch},
+        "fixture_sha256": fixture_hashes,
+        "scenarios_sha256": _json_sha256({c: s for c, s in plan.items() if not only or c in only}),
+        "scoring_profiles_sha256": _json_sha256(gold),
+        "scene_baseline_sha256": hashlib.sha256((DATA / "scene_char_baseline.json").read_bytes()).hexdigest(),
+        "probe_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "counts": {
+            "total": len(records),
+            "successful": sum(bool(r["reply"]) and not r["error"] for r in records),
+            "errors": sum(bool(r["error"]) for r in records),
+            "empty_content": sum(r["error"] == "EMPTY_CONTENT" for r in records),
+            "not_generated": len(records) if args.dry_run else 0,
+        },
+    }
     (REPORT / f"probe_{args.label}_summary.json").write_text(
         json.dumps({"label": args.label, "arm": args.arm_name, "runs": args.runs,
                     "patch": args.patch, "thinking": args.thinking, "max_tokens": args.max_tokens,
-                    "summary": summary},
+                    "summary": summary, "metadata": metadata},
                    ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
