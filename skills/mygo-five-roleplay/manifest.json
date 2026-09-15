@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "idiolect_version": "0.1.0",
+  "roles": [
+    {
+      "name": "爱音",
+      "key": "anon",
+      "directory": "references/anon"
+    },
+    {
+      "name": "灯",
+      "key": "tomori",
+      "directory": "references/tomori"
+    },
+    {
+      "name": "立希",
+      "key": "taki",
+      "directory": "references/taki"
+    },
+    {
+      "name": "素世",
+      "key": "soyo",
+      "directory": "references/soyo"
+    },
+    {
+      "name": "乐奈",
+      "key": "rana",
+      "directory": "references/rana"
+    }
+  ],
+  "mode": "agent-declarative",
+  "runtime_equivalence": false,
+  "sha256": {
+    "LICENSE": "187096e8416324fd7f711e21ca5d3c8913f1a6a154d8c2452defbcde08c45161",
+    "NOTICE.md": "f5060af5370b7957496d89aba31bd68262ad43eaca5e79a94fa580d013a0e30f",
+    "SKILL.md": "0614cf4ecb17758b73e40d4b029b2d44f9efd90794ab034b3fd98a8418a33fb5",
+    "references/anon/persona.md": "bc822926009a9a27f552b7eaf2ba7a60429575f33e61b60c36ae7c545143b4fc",
+    "references/anon/targets.md": "40f2071f58762a6a058ab2faa84efe223761a4daaca4070f31969f8dadd75631",
+    "references/rana/persona.md": "48f0e571bada94c7a77da9568ebc8289859fc67afaf326ca20735555106c8f56",
+    "references/rana/targets.md": "c1435d593bb8b5254b67e4c3f87082b17ce73edb19cfb529d537608101e1f6c2",
+    "references/soyo/persona.md": "6923f8e84058c9e81fd85f78a6f2de215936641e2e77ed3ee0bc4e4207b27398",
+    "references/soyo/targets.md": "2d461e8c106b2225facac2bfb0e390e56d963c8a42b2b8fabd373de7f0923f5b",
+    "references/taki/persona.md": "82b212b130bba9da62ae418913af6d559576d257cebca3fbcb82e070f17e7bf9",
+    "references/taki/targets.md": "176867842d2a6627a7fd7f3dd3133306a7e2b2ff7610b473d9006908acb7637f",
+    "references/tomori/persona.md": "b63b4b95e2a0e426f4c1b7f28d12732ecdfeb31cb6a4324b8e28429bd4afdb4e",
+    "references/tomori/targets.md": "11e37de052417e4abb8203171f742b9348c821e960affcc8b540d77986ecb557"
+  }
+}
