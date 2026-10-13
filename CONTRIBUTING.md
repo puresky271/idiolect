@@ -14,10 +14,10 @@
 
 ## 准备环境
 
-需要 Python 3.11+。Windows 上一律用 `py -X utf8`（裸 `python` 可能解析到没装依赖的解释器）；所有命令在仓库根目录执行。
+需要 Python 3.11+。Windows 上一律用 `py -X utf8`（裸 `python`、`pip`、`ruff` 可能解析到没装依赖的解释器或别的环境）；macOS / Linux 把下文的 `py -X utf8` 换成 `python3 -X utf8`。所有命令在仓库根目录执行。
 
 ```bash
-python bootstrap.py                         # 建 .venv、装依赖、跑自检、打印一份 prompt
+py -X utf8 bootstrap.py                     # 建 .venv、装依赖、跑自检、打印一份 prompt
 py -X utf8 -m pip install -r requirements.txt
 py -X utf8 -m pip install -e ".[lint]"      # 钉死版本的 ruff，与 CI 一致
 ```
@@ -29,7 +29,7 @@ py -X utf8 -m pip install -e ".[lint]"      # 钉死版本的 ruff，与 CI 一�
 ```bash
 py -X utf8 tools/offline_smoke.py           # 总闸：装配、红线、数据、评测合同、四种能力模式、同链自测、门禁、单测、零写校验
 py -X utf8 -m pytest tests/                 # 单测（smoke 也会跑；单独跑便于看细节）
-ruff check .                                # 代码风格：pyflakes + 机械格式
+py -X utf8 -m ruff check .                  # 代码风格：pyflakes + 机械格式
 py -X utf8 tools/gates/style_gate.py        # 注释风格：中文 docstring / 注释格式 / 繁体字 / 纯英文注释
 ```
 
@@ -120,9 +120,9 @@ Remove-Item Env:\IDIOLECT_REPORT_DIR
 ## English summary
 
 - Read `AGENTS.md` first. idiolect evaluates and assembles text for character replies; it is not a world simulator, memory store, or multimodal ingestion engine.
-- Before every PR, run `py -X utf8 tools/offline_smoke.py`, `py -X utf8 -m pytest tests/`, `ruff check .` (install with `pip install -e ".[lint]"`) and `py -X utf8 tools/gates/style_gate.py`. CI must be green.
+- Before every PR, run `py -X utf8 tools/offline_smoke.py`, `py -X utf8 -m pytest tests/`, `py -X utf8 -m ruff check .` (install with `py -X utf8 -m pip install -e ".[lint]"`; on macOS/Linux use `python3 -X utf8` instead of `py -X utf8`) and `py -X utf8 tools/gates/style_gate.py`. CI must be green.
 - Any change that can alter the final prompt needs before/after dumps (`tools/gates/dump_prompt.py --all --matrix --phase current` and `tools/gates/dump_workspace.py --contract`), with the baseline generated before editing.
-- Evaluation code: write contract tests first; evaluator-only expectations never enter model messages; missing, empty, error, and dry-run results never count as a pass; new capabilities need a registry entry plus at least one mutant and one healthy control, and `python -m idiolect selftest` must stay clean.
+- Evaluation code: write contract tests first; evaluator-only expectations never enter model messages; missing, empty, error, and dry-run results never count as a pass; new capabilities need a registry entry plus at least one mutant and one healthy control, and `py -X utf8 -m idiolect selftest` must stay clean.
 - Comments and docstrings are written in Simplified Chinese; the runtime package keeps zero third-party dependencies.
 - Never commit original script text, secrets, or real user conversations. Host data enters only through redacted, permission-declared explicit snapshots.
 - Keep the three READMEs in sync (number tokens must match exactly), and update `CHANGELOG.md` for user-facing changes.
