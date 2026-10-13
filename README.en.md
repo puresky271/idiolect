@@ -464,6 +464,8 @@ The methodology documents are written in Chinese, and each file stands alone. If
 | [`docs/10-long-context-stress.md`](docs/10-long-context-stress.md) | Optional capability: long-context stress — pre-registered design, generators and measurement |
 | [`docs/11-upgrade-guide.md`](docs/11-upgrade-guide.md) | Upgrade and migration, versioning policy, plugin development rules, evaluation boundaries, roadmap |
 
+Want to contribute? Pre-submit checks, the prompt-evidence rules, the style gates and the release process are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## ⚖️ Copyright, licence and disclaimer
 
 ### Code: MIT

@@ -26,7 +26,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 | `style_target` | 说话尺度：字数/句数/句末/自称的可检验数字，命中场景时换成该场景的数字 | 每轮 |
 | `turn_logic` | 本轮场景/主题指引，只在命中时注入 | 每轮 |
 
-文档在 `docs/`（索引与阅读路径见 `docs/README.md`）：`00-methodology.md`（方法总纲）、`01-quickstart.md`、`02-corpus.md`（语料）、`03-features.md`（特征）、`04-evaluation.md`（风格轴指标口径）、`05-tooling.md`（工具手册，最实用）、`06-lessons.md`（踩坑清单）、`07-turn-logic-and-postprocessing.md`、`08-context-workspace.md`（四层与证据块在真实系统里的前后文）、`09-evidence-grounding.md`（证据合同与 grounding 评测）、`10-long-context-stress.md`（长上下文压力）、`11-upgrade-guide.md`（升级、迁移、版本策略、插件规范、路线图）。变更记录见根目录 `CHANGELOG.md`。
+文档在 `docs/`（索引与阅读路径见 `docs/README.md`）：`00-methodology.md`（方法总纲）、`01-quickstart.md`、`02-corpus.md`（语料）、`03-features.md`（特征）、`04-evaluation.md`（风格轴指标口径）、`05-tooling.md`（工具手册，最实用）、`06-lessons.md`（踩坑清单）、`07-turn-logic-and-postprocessing.md`、`08-context-workspace.md`（四层与证据块在真实系统里的前后文）、`09-evidence-grounding.md`（证据合同与 grounding 评测）、`10-long-context-stress.md`（长上下文压力）、`11-upgrade-guide.md`（升级、迁移、版本策略、插件规范、路线图）。变更记录见根目录 `CHANGELOG.md`；贡献流程（提交前检查、prompt 证据、风格门禁、发布）见 `CONTRIBUTING.md`。
 
 ## 技术栈与运行环境
 
