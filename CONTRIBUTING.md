@@ -114,7 +114,7 @@ Remove-Item Env:\IDIOLECT_REPORT_DIR
 
 ## 报告问题
 
-- Bug：请附上命令、完整输出、idiolect 版本（`python -c "import idiolect; print(idiolect.__version__)"`）、操作系统与 Python 版本、是否设置了 `IDIOLECT_MOCK_NOW`；评测相关的请附上 `report/experiments/<实验>/manifest.json`（它不含密钥）。
+- Bug：请附上命令、完整输出、idiolect 版本（`py -X utf8 -c "import idiolect; print(idiolect.__version__)"`）、操作系统与 Python 版本、是否设置了 `IDIOLECT_MOCK_NOW`；评测相关的请附上 `report/experiments/<实验>/manifest.json`（它不含密钥）。
 - 安全问题（例如合同或 adapter 放行了不该进入 prompt 的数据）：请不要在公开 issue 里贴可复现的利用细节，先通过仓库维护者的私信或 GitHub 的私密安全报告渠道联系。
 
 ## English summary
