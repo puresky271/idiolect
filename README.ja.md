@@ -466,6 +466,8 @@ py -X utf8 tools/distill/export_profiles.py --check  # 公開済みプロファ�
 | [`docs/10-long-context-stress.md`](docs/10-long-context-stress.md) | オプション機能：長文脈ストレスの事前登録設計、生成器と計量 |
 | [`docs/11-upgrade-guide.md`](docs/11-upgrade-guide.md) | アップグレードと移行、バージョン方針、プラグイン開発の規約、評価の境界、ロードマップ |
 
+コントリビュートしたい方へ：提出前のチェック、prompt 変更時の証拠ルール、スタイルゲート、リリース手順は [`CONTRIBUTING.md`](CONTRIBUTING.md) にあります。
+
 ## ⚖️ 著作権・ライセンス・免責
 
 ### コード：MIT

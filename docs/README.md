@@ -69,6 +69,7 @@
 - **命令一律 `py -X utf8`**（Windows 上裸 `python` 可能解析到没装依赖的解释器）。文档里出现 `$env:VAR = "..."` 的是 PowerShell 写法，POSIX shell 用 `export VAR=...`。
 - **产物写 `report/`**（gitignored）；`data/` 是随仓库发布的派生统计，别往里写临时产物。
 - **数字都是相对量**：贴合分、fidelity 只在同一批次内做 before/after 比较，换模型、换夹具、换时钟后跨批次不可比；两批能不能比由 manifest 的可比性规则判定。
+- **参与贡献**：提交前检查、prompt 证据纪律、风格门禁与发布流程见根目录 [`CONTRIBUTING.md`](../CONTRIBUTING.md)。
 - **代码与注释风格**：`ruff check .` 与 `tools/gates/style_gate.py` 都要过（CI 的 lint job）；注释与 docstring 用简体中文。
 - **改 prompt 必须留证据**：先 dump 基线，改完再 dump，逐场景审 diff（见 [05](05-tooling.md) 第 4 节）。
 - **文档纪律**：新增、移动或删除 `docs/` 下的文件，必须同步改本索引，并在 [AGENTS.md](../AGENTS.md) 的文档清单里登记。

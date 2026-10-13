@@ -464,6 +464,8 @@ py -X utf8 tools/distill/export_profiles.py --check  # 校验已发布画像与�
 | [`docs/10-long-context-stress.md`](docs/10-long-context-stress.md) | 可选能力：长上下文压力的预注册设计、生成器与计量 |
 | [`docs/11-upgrade-guide.md`](docs/11-upgrade-guide.md) | 升级与迁移、版本策略、插件开发规范、评测边界、路线图 |
 
+想参与贡献？提交前检查、改 prompt 的证据纪律、风格门禁与发布流程见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+
 ## ⚖️ 版权、许可与免责
 
 ### 代码：MIT
