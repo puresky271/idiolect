@@ -58,6 +58,11 @@ def load_tools() -> SimpleNamespace | None:
         import oob_check  # type: ignore[import-not-found]
         import reply_clean  # type: ignore[import-not-found]
         import style_features  # type: ignore[import-not-found]
+
+        # 只导入成功还不够：style_features 在第一次用 cn 分词时才导入 jieba。
+        # 先真跑一次，依赖缺失就当作 tools 不在场，而不是评分到一半崩掉
+        style_features.turn_features("测试一下。", "cn")
+        reply_clean.clean_reply("测试一下。")
     except Exception:  # noqa: BLE001 - tools 不完整就当作不在场
         return None
     return SimpleNamespace(root=str(tools), oob=oob_check, evidence=evidence_check,

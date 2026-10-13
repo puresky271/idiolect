@@ -176,6 +176,25 @@ class StyleAxisTests(unittest.TestCase):
         self.assertTrue(any("缺评分模块" in n for n in res["gate"]["notes"]))
         self.assertEqual(res["gate"]["verdict"], "PASS")   # length_cap 仍有有效判定
 
+    def test_tools_present_but_dependency_missing_degrades_instead_of_crashing(self):
+        import sys
+
+        from idiolect.evals import style_axis
+
+        style_axis.load_tools.cache_clear()
+        try:
+            # 模拟仓库 tools/ 在场、但 jieba 没装：分词首次导入 jieba 时失败
+            with mock.patch.dict(sys.modules, {"jieba": None}):
+                features = sys.modules.get("style_features")
+                if features is not None:              # 清掉分词器缓存，迫使它重新导入 jieba
+                    features._jieba = None
+                self.assertIsNone(style_axis.load_tools())
+                res = _run("language-only", "language-only.healthy", "")
+        finally:
+            style_axis.load_tools.cache_clear()
+        self.assertEqual(res["gate"]["verdict"], "PASS")
+        self.assertIn("style.sentence_cap", res["aggregate"]["coverage"]["scorer_unavailable"])
+
     def test_length_cap_uses_the_same_number_written_into_the_prompt(self):
         from idiolect.scene_classifier import classify
         from idiolect.style_target import build_style_target_block, style_caps
