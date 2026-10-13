@@ -88,7 +88,6 @@ def apply_tilde_qe(text: str) -> tuple[str, int]:
     """
     if not text:
         return text, 0
-    out: list[str] = []
     fixed = 0
 
     # 按行处理、各行独立判定 ?/! 总数

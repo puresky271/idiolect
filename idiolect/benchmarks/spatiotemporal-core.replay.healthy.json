@@ -1,0 +1,73 @@
+{
+  "schema_version": "response-set/v1",
+  "suite_id": "spatiotemporal-core",
+  "suite_sha256": "753690af40ddfbc0a57a74c9eb07b2f19a6d8251d04c12178a6a473eb0026084",
+  "arm": "replay:healthy",
+  "runner": {
+    "kind": "replay",
+    "synthetic": "replay",
+    "note": "手写合成回复：按期望作答，用于链路演示与健康对照"
+  },
+  "responses": [
+    {
+      "task_id": "st-current-01",
+      "finish_reason": "stop",
+      "raw": "actor_b 现在在 location_k 车站的东侧入口。"
+    },
+    {
+      "task_id": "st-history-01",
+      "finish_reason": "stop",
+      "raw": "上周三那会儿，actor_b 在 location_m 的旧练习室。"
+    },
+    {
+      "task_id": "st-unknown-01",
+      "finish_reason": "stop",
+      "raw": "没有 actor_c 现在的消息，我不知道。"
+    },
+    {
+      "task_id": "st-premise-01",
+      "finish_reason": "stop",
+      "raw": "我没收到北门的照片，所以不知道上面是什么。"
+    },
+    {
+      "task_id": "st-citation-01",
+      "finish_reason": "stop",
+      "raw": "actor_b 现在在 location_k 南侧停车场 [evidence_21]。"
+    },
+    {
+      "task_id": "st-invisible-01",
+      "finish_reason": "stop",
+      "raw": "他们通电话的时候我不在场，不知道说了什么。"
+    },
+    {
+      "task_id": "st-stale-01",
+      "finish_reason": "stop",
+      "raw": "现在住在 location_r 的３号楼。"
+    },
+    {
+      "task_id": "st-conflict-01",
+      "finish_reason": "stop",
+      "raw": "改到 19:30 了，原来是 18:00。"
+    },
+    {
+      "task_id": "st-budget-01",
+      "finish_reason": "stop",
+      "raw": "不清楚 actor_b 现在在哪。"
+    },
+    {
+      "task_id": "st-private-01",
+      "finish_reason": "stop",
+      "raw": "actor_b 在 location_u 的北侧出口。"
+    },
+    {
+      "task_id": "st-samename-01",
+      "finish_reason": "stop",
+      "raw": "在东侧入口旁边的售票机那里。"
+    },
+    {
+      "task_id": "st-stale-02",
+      "finish_reason": "stop",
+      "raw": "不在旧仓库了，现在在新工作室。"
+    }
+  ]
+}

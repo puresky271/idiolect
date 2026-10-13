@@ -6,9 +6,13 @@
 # windows 只跑 3.12 —— 仓库在 Windows 上开发，留一个 Windows 探针防止平台专属回归，
 # 不为它付三倍的 runner 时间。
 #
-# wheel 单独一个 job：验证角色包 data/*.json 真的进了发行物（package-data 配置
-# 一旦漏掉，装完的包会在 importlib.resources 处大声报错——但那要等用户装完才发现，
-# 这里提前到每次 push）。
+# wheel 单独一个 job：验证角色包 data/*.json 与评测内置数据真的进了发行物（package-data
+# 配置一旦漏掉，装完的包会在 importlib.resources 处大声报错——但那要等用户装完才发现，
+# 这里提前到每次 push）。随后在仓库之外的干净 venv 里 `--no-deps` 安装 wheel，验证
+# 运行时零第三方依赖、离线评测四种能力模式与同链自测在没有 tools/ 的环境里照样可跑。
+#
+# lint 单独一个 job：ruff（钉死版本，与 pyproject 的 lint extra 一致）查代码正确性与机械格式，
+# tools/gates/style_gate.py 查注释风格（中文 docstring、注释格式、繁体字、纯英文注释）。
 
 name: CI
 
@@ -70,7 +74,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip build
           python -m build --wheel
-      - name: 校验角色包数据进了 wheel
+      - name: 校验角色包数据与评测内置数据进了 wheel
         run: |
           python - <<'EOF'
           import glob
@@ -84,8 +88,51 @@ jobs:
               "characters/anon/data/fashion.json",
               "characters/anon/data/social_media.json",
               "characters/tomori/data/marine_life.json",
+              "benchmarks/spatiotemporal-core.json",
+              "benchmarks/spatiotemporal-core.replay.healthy.json",
+              "benchmarks/language-only.json",
+              "benchmarks/mygo-five-showcase.json",
+              "benchmarks/long-context-smoke.plan.json",
+              "benchmarks/snapshot.example.json",
+              "evals/inspect_template.html",
           ]
           missing = [n for n in need if not any(name.endswith(n) for name in names)]
-          assert not missing, f"角色包 JSON 缺席 wheel（package-data 配置漂了）：{missing}"
-          print(f"wheel 数据校验 OK：{len(names)} 个文件，4 个 JSON 全在")
+          assert not missing, f"包数据缺席 wheel（package-data 配置漂了）：{missing}"
+          print(f"wheel 数据校验 OK：{len(names)} 个文件，{len(need)} 项包数据全在")
           EOF
+      - name: 干净 venv 安装 wheel（--no-deps）并跑离线评测
+        shell: bash
+        run: |
+          python -m venv /tmp/wheelenv
+          /tmp/wheelenv/bin/python -m pip install --no-deps dist/*.whl
+          cd /tmp            # 离开仓库：确认不依赖 tools/ 与源码树
+          export PYTHONUTF8=1 IDIOLECT_REPORT_DIR=/tmp/idiolect-report
+          PY=/tmp/wheelenv/bin/python
+          $PY -c "import sys, idiolect.evals, idiolect.workspace; bad=[m for m in ('openai','numpy','jieba','requests') if m in sys.modules]; assert not bad, bad"
+          $PY -m idiolect capabilities
+          $PY -m idiolect contract validate builtin:snapshot.example
+          $PY -m idiolect eval --suite language-only --responses builtin:language-only.healthy
+          $PY -m idiolect eval --suite spatiotemporal-core --responses builtin:spatiotemporal-core.healthy --capabilities spatiotemporal --html
+          $PY -m idiolect eval --suite long-context-smoke --responses builtin:long-context-smoke.healthy --capabilities long-context-stress
+          $PY -m idiolect eval --suite long-context-smoke --responses builtin:long-context-smoke.healthy --capabilities long-context-stress,spatiotemporal
+          # 负对照：带缺陷的回放必须让门禁非零退出
+          if $PY -m idiolect eval --suite spatiotemporal-core --responses builtin:spatiotemporal-core.defects --capabilities spatiotemporal --no-save; then
+            echo "缺陷回放竟然通过了门禁" && exit 1
+          fi
+          $PY -m idiolect selftest
+
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安装 ruff（钉死版本）
+        run: python -m pip install "ruff==0.14.14"
+      - name: 代码风格（ruff：pyflakes + 机械格式）
+        run: ruff check --output-format github .
+      - name: 注释风格（中文 docstring / 注释格式 / 繁体字 / 纯英文注释）
+        run: python -X utf8 tools/gates/style_gate.py

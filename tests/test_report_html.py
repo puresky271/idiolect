@@ -35,6 +35,22 @@ class ReportHtmlTests(unittest.TestCase):
         self.assertEqual(rows['dry_run']['status'],'same')
         self.assertEqual(rows['fixture_sha256']['status'],'unknown')
 
+    def test_comparability_requires_v2_metadata_and_preregistered_intervention(self):
+        legacy={'summary':{'metadata':{'schema_version':1,'model':'m'}}}
+        self.assertEqual(report.comparability(legacy,legacy)['status'],'incomparable')
+        base={'schema_version':2,'intervention':['prompt'],'code':{'revision':'r1'},'model':'m',
+              'temperature':0.75,'max_tokens':420,'thinking':'off','extra_body':{},'dry_run':False,
+              'clock':{'mocked':True},'assembly':{'assemble':True},'fixture_sha256':{'a':'1'},
+              'scenarios_sha256':'s','scoring_profiles_sha256':'p','scene_baseline_sha256':'b',
+              'probe_source_sha256':'x'}
+        a={'summary':{'metadata':base}}
+        b={'summary':{'metadata':{**base,'code':{'revision':'r2'},'probe_source_sha256':'y'}}}
+        self.assertEqual(report.comparability(a,b)['status'],'comparable')
+        c={'summary':{'metadata':{**base,'model':'other'}}}
+        self.assertEqual(report.comparability(a,c)['status'],'blocked')
+        d={'summary':{'metadata':{**base,'intervention':['model']}}}
+        self.assertEqual(report.comparability(a,d)['status'],'blocked')
+
     def test_legacy_batch_and_script_escape(self):
         with tempfile.TemporaryDirectory() as temp:
             path=Path(temp)

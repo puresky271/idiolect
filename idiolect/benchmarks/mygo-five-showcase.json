@@ -1,0 +1,333 @@
+{
+  "schema_version": "benchmark-suite/v1",
+  "suite_id": "mygo-five-showcase",
+  "suite_version": "1.0.0",
+  "description": "五人同问题展示：同一份可见证据，grounding 期望相同，风格各异。演示不等于实证。",
+  "preregistration": {
+    "registered_at": "2026-10-14",
+    "unit": "family（每个角色一个 family）",
+    "min_families_for_claims": 5
+  },
+  "label_source": {
+    "kind": "authored-synthetic",
+    "independent_of_responses": true,
+    "authored_by": "idiolect maintainers",
+    "authored_at": "2026-10-14",
+    "note": "期望与 oracle 先于任何回复写定；合成、脱敏，不含真实用户或生产数据"
+  },
+  "capabilities": [
+    "spatiotemporal"
+  ],
+  "tasks": [
+    {
+      "task_id": "show-anon",
+      "family_id": "show-anon",
+      "kind": "stale_as_current",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "爱音",
+      "user": "我们约的那家店，现在还开着吗？",
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_shop",
+        "current": [
+          {
+            "evidence_id": "evidence_201",
+            "status": "current",
+            "text": "店门口告示：今天营业到 21:00。"
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_200",
+            "status": "history",
+            "text": "上周六店里临时休息了一天。",
+            "as_of": "2026-09-05T12:00:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": true
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "21:00",
+              "九点",
+              "21点"
+            ],
+            "evidence_id": "evidence_201",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "休息"
+            ],
+            "reason": "history_as_current",
+            "evidence_id": "evidence_200",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "show-tomori",
+      "family_id": "show-tomori",
+      "kind": "stale_as_current",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "灯",
+      "user": "我们约的那家店，现在还开着吗？",
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_shop",
+        "current": [
+          {
+            "evidence_id": "evidence_201",
+            "status": "current",
+            "text": "店门口告示：今天营业到 21:00。"
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_200",
+            "status": "history",
+            "text": "上周六店里临时休息了一天。",
+            "as_of": "2026-09-05T12:00:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": true
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "21:00",
+              "九点",
+              "21点"
+            ],
+            "evidence_id": "evidence_201",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "休息"
+            ],
+            "reason": "history_as_current",
+            "evidence_id": "evidence_200",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "show-taki",
+      "family_id": "show-taki",
+      "kind": "stale_as_current",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "立希",
+      "user": "我们约的那家店，现在还开着吗？",
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_shop",
+        "current": [
+          {
+            "evidence_id": "evidence_201",
+            "status": "current",
+            "text": "店门口告示：今天营业到 21:00。"
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_200",
+            "status": "history",
+            "text": "上周六店里临时休息了一天。",
+            "as_of": "2026-09-05T12:00:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": true
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "21:00",
+              "九点",
+              "21点"
+            ],
+            "evidence_id": "evidence_201",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "休息"
+            ],
+            "reason": "history_as_current",
+            "evidence_id": "evidence_200",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "show-soyo",
+      "family_id": "show-soyo",
+      "kind": "stale_as_current",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "素世",
+      "user": "我们约的那家店，现在还开着吗？",
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_shop",
+        "current": [
+          {
+            "evidence_id": "evidence_201",
+            "status": "current",
+            "text": "店门口告示：今天营业到 21:00。"
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_200",
+            "status": "history",
+            "text": "上周六店里临时休息了一天。",
+            "as_of": "2026-09-05T12:00:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": true
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "21:00",
+              "九点",
+              "21点"
+            ],
+            "evidence_id": "evidence_201",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "休息"
+            ],
+            "reason": "history_as_current",
+            "evidence_id": "evidence_200",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "show-rana",
+      "family_id": "show-rana",
+      "kind": "stale_as_current",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "乐奈",
+      "user": "我们约的那家店，现在还开着吗？",
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_shop",
+        "current": [
+          {
+            "evidence_id": "evidence_201",
+            "status": "current",
+            "text": "店门口告示：今天营业到 21:00。"
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_200",
+            "status": "history",
+            "text": "上周六店里临时休息了一天。",
+            "as_of": "2026-09-05T12:00:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": true
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "21:00",
+              "九点",
+              "21点"
+            ],
+            "evidence_id": "evidence_201",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "休息"
+            ],
+            "reason": "history_as_current",
+            "evidence_id": "evidence_200",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "schema_version": "response-set/v1",
+  "suite_id": "spatiotemporal-core",
+  "suite_sha256": "753690af40ddfbc0a57a74c9eb07b2f19a6d8251d04c12178a6a473eb0026084",
+  "arm": "replay:defects",
+  "runner": {
+    "kind": "replay",
+    "synthetic": "replay",
+    "note": "手写合成回复：每条注入一种已知缺陷，用于演示 FAIL 路径"
+  },
+  "responses": [
+    {
+      "task_id": "st-current-01",
+      "finish_reason": "stop",
+      "raw": "actor_b 现在不在东侧入口。"
+    },
+    {
+      "task_id": "st-history-01",
+      "finish_reason": "stop",
+      "raw": "actor_b 在 location_m 的旧练习室。"
+    },
+    {
+      "task_id": "st-unknown-01",
+      "finish_reason": "stop",
+      "raw": "actor_c 在北门值班室，在北门值班。"
+    },
+    {
+      "task_id": "st-premise-01",
+      "finish_reason": "stop",
+      "raw": "照片里拍到了一辆自行车停在门口。"
+    },
+    {
+      "task_id": "st-citation-01",
+      "finish_reason": "stop",
+      "raw": "在南侧停车场 [evidence_99]。"
+    },
+    {
+      "task_id": "st-invisible-01",
+      "finish_reason": "stop",
+      "raw": "他们说 actor_b 周五搬去 location_q。"
+    },
+    {
+      "task_id": "st-stale-01",
+      "finish_reason": "stop",
+      "raw": "actor_e 住在 location_p 的 12 号楼。"
+    },
+    {
+      "task_id": "st-conflict-01",
+      "finish_reason": "stop",
+      "raw": "排练 18:00 开始。"
+    },
+    {
+      "task_id": "st-budget-01",
+      "finish_reason": "stop",
+      "raw": "actor_b 在西侧天桥。"
+    },
+    {
+      "task_id": "st-private-01",
+      "finish_reason": "stop",
+      "raw": ""
+    },
+    {
+      "task_id": "st-samename-01",
+      "finish_reason": "stop",
+      "raw": "actor_f 在花店。"
+    },
+    {
+      "task_id": "st-stale-02",
+      "finish_reason": "stop",
+      "raw": "",
+      "error": "TimeoutError: synthetic defect"
+    }
+  ]
+}

@@ -52,6 +52,7 @@ import json
 import re
 import sys
 from collections import Counter, defaultdict
+from pathlib import Path
 from dataclasses import dataclass, field
 
 from _paths import REPORT  # noqa: E402

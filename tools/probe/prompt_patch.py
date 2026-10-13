@@ -20,7 +20,6 @@ for _p in (_ROOT, _ROOT / "tools",
 from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
 
 import json
-import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent

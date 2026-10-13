@@ -94,18 +94,21 @@ def render_turn_special_block(character: str, user_text: str, **kwargs: Any) -> 
 
 
 def get_voice_manifest(character: str) -> str:
+    """角色的语气 manifest 正文；角色未注册时返回空串。"""
     package = get_role_package(character)
     getter = getattr(package, "get_voice_manifest", None) if package else None
     return str(getter() if getter else "")
 
 
 def get_canon_profile(character: str) -> str:
+    """角色的 canon 长档案正文；角色未注册时返回空串。"""
     package = get_role_package(character)
     getter = getattr(package, "get_canon_profile", None) if package else None
     return str(getter() if getter else "")
 
 
 def get_canon_facts(character: str) -> dict:
+    """角色包明文写死的可检验事实（担当、学校等）；未注册时返回空字典。"""
     package = get_role_package(character)
     getter = getattr(package, "get_canon_facts", None) if package else None
     result = getter() if getter else {}

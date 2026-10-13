@@ -8,6 +8,8 @@
 
 方法：从原作台词里蒸馏可检验的风格特征（长度、句数、口癖、称呼、场景分类），把它们落成 system prompt，再用探针与机械门禁验证效果。**不做微调，不分发原作文本**——仓库只发布派生统计量（`data/` 下的聚合 JSON）。
 
+v0.1.2 起还有与风格轴并列、彼此独立的 **grounding 轴**：证据合同（`idiolect/evidence_contract.py`）约束「这一轮模型能看到什么」，`idiolect/evals/` 判定回答是否受可见证据约束、这项评测本身是否可判。时空（`spatiotemporal`）与长上下文压力（`long-context-stress`）是**显式启用**的可选能力，不启用时默认的语言/风格工作流不需要任何时空 schema。idiolect 不是世界模拟器、记忆数据库或多模态获取引擎：宿主系统的上下文只能以已脱敏、带权限声明的显式快照进来。
+
 核心入口：
 
 ```python
@@ -24,7 +26,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 | `style_target` | 说话尺度：字数/句数/句末/自称的可检验数字，命中场景时换成该场景的数字 | 每轮 |
 | `turn_logic` | 本轮场景/主题指引，只在命中时注入 | 每轮 |
 
-文档在 `docs/`（索引与阅读路径见 `docs/README.md`）：`00-methodology.md`（方法总纲）、`01-quickstart.md`、`02-corpus.md`（语料）、`03-features.md`（特征）、`04-evaluation.md`（指标口径）、`05-tooling.md`（工具手册，最实用）、`06-lessons.md`（踩坑清单）、`07-turn-logic-and-postprocessing.md`、`08-context-workspace.md`（四层在真实系统里的前后文）。
+文档在 `docs/`（索引与阅读路径见 `docs/README.md`）：`00-methodology.md`（方法总纲）、`01-quickstart.md`、`02-corpus.md`（语料）、`03-features.md`（特征）、`04-evaluation.md`（风格轴指标口径）、`05-tooling.md`（工具手册，最实用）、`06-lessons.md`（踩坑清单）、`07-turn-logic-and-postprocessing.md`、`08-context-workspace.md`（四层与证据块在真实系统里的前后文）、`09-evidence-grounding.md`（证据合同与 grounding 评测）、`10-long-context-stress.md`（长上下文压力）、`11-upgrade-guide.md`（升级、迁移、版本策略、插件规范、路线图）。变更记录见根目录 `CHANGELOG.md`。
 
 ## 技术栈与运行环境
 
@@ -40,7 +42,13 @@ idiolect/            # 运行时包：把特征写成 prompt 约束
   registry.py        #   角色名 → 角色包的唯一分发点（含别名归一化）
   scene_classifier.py / scene_engine.py / general_scenes.py   # 场景分类与动态注入；scene_engine 另托管 turn_logic 共享脚手架（SessionStore 去重表 / SessionValues 值状态表 / env 假值表 / 深模块执行器）
   style_target.py / scene_length_targets.py                   # 长度/句数目标块
-  workspace.py       #   上下文工作区（12 层装配 + 事实选择器），四层之外的骨架
+  workspace.py       #   上下文工作区（12 层装配 + 事实选择器 + 可选证据层与装配 trace），四层之外的骨架
+  evidence_contract.py # 证据合同 evidence-context/v1：严格校验、安全渲染、旧无版本写法的兼容层
+  adapters/          #   显式快照 adapter（explicit-snapshot/v1 → 证据合同）；不开数据库、不推导时态
+  capabilities.py    #   评测能力注册表：style（默认）/ spatiotemporal / long-context-stress
+  evals/             #   评测子包（标准库）：任务 schema、grounding 与风格双轴、门禁、manifest 与可比性、
+                     #     同链变异自测、长上下文生成器与计量、runner、离线 inspect 报告、CLI 子命令
+  benchmarks/        #   内置 suite / 合成回放 / 长上下文计划 / 快照样例（package data，随 wheel 发布）
   facts.py / tone.py / _text_rng.py   # 事实选择器 / 语气分类 / 文本定种 RNG（后处理随机步骤的确定性）
   characters/<key>/  #   五个角色包（anon/tomori/taki/soyo/rana）：
                      #     api.py（对外窄入口）、canon.py、voice.py、
@@ -52,7 +60,8 @@ tools/               # 工具链，按职责分子目录
   mock_clock.py      #   评测时钟
   secrets_loader.py  #   密钥加载
   distill/           #   从语料统计派生量（export_targets / tic_profile / scene_char_baseline …）
-  gates/             #   机械门禁（voice_meta_gate、_tl_deep_check、oob_check、evidence_check、accept_check 验收门禁 …）
+  gates/             #   机械门禁（voice_meta_gate、_tl_deep_check、oob_check、evidence_check、accept_check 验收门禁、
+                     #     style_gate 注释风格、dump_prompt / dump_workspace 的 prompt 证据 …）
   probe/             #   探针（probe_runner、oob_probe 越界、multiturn_probe 多轮漂移、prompt_patch …）
   score/             #   评分（probe_report、scene_distill、_copy_audit、power_calc、ab_blind 盲评 …）
   corpus/            #   语料抓取与构建（需要 IDIOLECT_CORPUS_DIR）
@@ -63,7 +72,7 @@ report/              # 所有工具产物的默认输出目录
 tests/               # pytest 单测
 bootstrap.py         # 一条命令装成可跑状态（建 .venv → 装依赖 → 自检 → 打印一份 prompt）
 .claude/skills/      # 给 agent 的流水线 skill（见下）
-.github/workflows/   # CI（离线 smoke 矩阵 + wheel 包数据校验）
+.github/workflows/   # CI（离线 smoke 矩阵 + wheel 包数据与无依赖安装验收 + lint：ruff 与 style_gate）
 ```
 
 **访问角色包只走 `idiolect/registry.py`**（`get_canon_profile` / `get_voice_manifest` / `render_turn_special_block`），不要按角色名堆 if/elif，也不要直接 `import idiolect.characters.<key>.*`。名字表（含日文写法、简繁差异、常见误写）也只有 `registry._ALIASES` 一份，角色包里的 `is_<char>()` 问它，别自带名单。
@@ -106,6 +115,16 @@ py -X utf8 -m pytest tests/
 py -X utf8 tools/gates/dump_prompt.py --char 乐奈 --msg "你今天又想去哪找猫"
 py -X utf8 tools/gates/dump_prompt.py --all --matrix
 
+# 评测（离线、零密钥；装了包就能跑。四种模式与口径见 docs/09）
+py -X utf8 -m idiolect capabilities
+py -X utf8 -m idiolect eval --suite spatiotemporal-core --responses builtin:spatiotemporal-core.healthy --capabilities spatiotemporal --html
+py -X utf8 -m idiolect selftest                                       # 同链变异体 + 健康反控制
+py -X utf8 tools/gates/dump_workspace.py --contract                   # workspace / 证据路径的 prompt 证据
+
+# 代码与注释风格（CI 的 lint job）
+ruff check .                                                          # pip install "idiolect[lint]"
+py -X utf8 tools/gates/style_gate.py
+
 # 跑探针（需要 LLM_API_KEY / LLM_BASE_URL / LLM_MODEL）
 py -X utf8 tools/probe/make_fixtures.py
 py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --registry --runs 3
@@ -127,17 +146,18 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
 
 ## 代码与协作约定
 
-- **注释与文档用简体中文**；模块 docstring 通常先写「这是什么、为什么」。
+- **注释与文档用简体中文**；模块 docstring 先写「这是什么、为什么」。`tools/gates/style_gate.py` 机械检查：每个模块有中文 docstring，`idiolect/`（角色包正文除外）的公开类与函数有中文 docstring，注释以 `# ` 开头，不写繁体专用字与纯英文说明性注释；`ruff check .` 查代码正确性与机械格式（规则集见 `pyproject.toml`）。
 - **评测时钟**：任何读「现在」的代码从 `tools/mock_clock.py` 的 `mock_now()` 取，不要直接 `datetime.now()`。默认固定在 `2026-09-12T15:00:00+09:00`；用真实时钟跑出的批次数字不可与 mock 批次比较。
 - **路径**：只用 `tools/_paths.py`（环境变量：`IDIOLECT_CORPUS_DIR`、`IDIOLECT_REPORT_DIR`、`IDIOLECT_DATA_DIR`）。
 - **产物纪律**：脚本产物写 `report/`；`offline_smoke` 自带零写校验，除 `report/` 外改动任何仓库文件都会 FAIL。
-- **改 prompt 必须留证据**：修改前后以相同输入运行 `dump_prompt.py --phase current`，用不同输出目录保存并审查 diff。`before/after` 是关闭动态开关与恢复默认开关的消融对照，不代表两个代码版本。
+- **改 prompt 必须留证据**：修改前后以相同输入运行 `dump_prompt.py --phase current`，用不同输出目录保存并审查 diff。`before/after` 是关闭动态开关与恢复默认开关的消融对照，不代表两个代码版本。改动 workspace / 证据路径时同样用 `dump_workspace.py` 留前后证据（`legacy.*` 必须零漂移）。
+- **评估侧与模型侧隔离**：评测任务的 `expect` / `oracle`（期望、隐藏值、gold）永远不进 messages；证据合同只渲染白名单元数据。新增评分部件必须给出 applicability / status / reason / 分子分母，空回复、报错、干跑不得判 pass，并通过 `idiolect selftest`。
 - **静默失效比报错危险**：写文件的脚本要有零结果守卫（参考 `build_gold.py`、`export_scene_targets.py`）；读语料的脚本对空文件直接退出。
-- 加一个角色或场景的完整步骤见 `docs/05-tooling.md` 第 9 节（建包 → 注册 `_PACKAGE_NAMES`/`_ALIASES` → 保持 `general_scenes.py` 与 `scene_classifier.py` 的 `_RULES` 顺序一致 → 跑 smoke → 留 diff）。
+- 加一个角色或场景的完整步骤见 `docs/05-tooling.md` 第 10 节（建包 → 注册 `_PACKAGE_NAMES`/`_ALIASES` → 保持 `general_scenes.py` 与 `scene_classifier.py` 的 `_RULES` 顺序一致 → 跑 smoke → 留 diff）。
 
 ## 测试策略
 
-- `tests/` 下是 pytest（`unittest` 风格类），分八类契约测试，每条断言对应真实踩过的坑：
+- `tests/` 下是 pytest（`unittest` 风格类），按主题分组的契约测试，每条断言对应真实踩过的坑：
   - `test_tooling_contracts.py`：mock 时钟、装配完整性、`--assemble` 不被覆盖、元叙述门禁覆盖面、README 字数表与实测一致；
   - `test_scene_turn_logic.py` / `test_soyo_rana_deep_turn_logic.py`：触发器命中正确且不过宽、per-session 去重、角色隔离与 env 回退开关、触发词有语料实证；
   - `test_workspace.py`：上下文层序固定、pinned 层不被预算裁掉、执行包贴最后一条 user、事实选择器的阈值与双预算；
@@ -146,6 +166,9 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
   - `test_score_golden.py`：评分链 golden 文件（scene_distill / _pool_arms 全量输出、probe_report 编排契约；golden 由测试内的合成输入离线复现，失配先确认是预期改动再重新生成，不要手改）；
   - `test_eval_gates.py`：评测链路修复契约（composite 必须能分出助手腔、anchor_ref 单一来源（场景基线派生，画像不导出 anchor_density）、holdout 的 split 过滤与零结果守卫、`--baseline` 换参照物、accept_check 任一退化即 FAIL（锚点密度走合并泊松精确检验、打印可检测下限、噪声级波动不误报）、ab_blind 盲评确定性与不泄臂名、三语 README 旗舰表以 composite 领衔且三语数字多重集合一致）；
   - `test_oob_evidence_gates.py`：越界与证据契约（2026-09-13 Ditto 方法论移植，特征正则来自母项目：OOB 输出审计的 ground truth 判别力与高危档语义、NSFW 两特征的 armed 机制与拒绝守卫（2026-09-13 误报审查：正确拒绝不得误判为配合）、evidence_check 的 fact/address 两档与否定守卫、证据表必须能投影回 canon/voice SSOT、多轮漂移的泊松判定（塌方 FAIL／平稳 PASS／欠功效「无结论」）、越界夹具注册表形状、两个探针 dry-run 全链路）。
+  - `test_evidence_contract.py` / `test_snapshot_adapter.py`：证据合同的严格解析（缺 status 不补 current、悬空/重复引用、时间、可见性、私有路径与评估字段）、安全渲染、旧写法兼容；快照 adapter 的脱敏/权限/拒收与不推导时态；
+  - `test_grounding_eval.py` / `test_long_context.py`：四种能力模式、空白≠拒答、干跑不能通过、未知≠否定、开放改写走 needs_review、人工标签与 judge 归因、引用适用性、预算摘除归因；长上下文生成确定性、因子隔离、计量诚实、family 配对；
+  - `test_manifest_compare.py` / `test_mutation_selftest.py` / `test_eval_cli.py`：manifest 不含密钥、非干预变化阻止比较、缺字段不可比、产物被改 fail closed；同链变异体全检出、等价体不误判、反控制零误报、金丝雀抓空洞门禁、算子认证；CLI 退出码、付费 opt-in、报告转义、内置回放与 suite 指纹绑定。
 - 新增约束时**先写契约测试再改实现**；触发词必须能拿出语料实证（`tools/distill/verify_triggers.py`）。
 - `tools/offline_smoke.py` 是总闸，会跑门禁与单测，适合当作提交前检查。
 
@@ -153,6 +176,7 @@ py -X utf8 tools/distill/export_profiles.py --check   # 校验已发布画像与
 
 - **不分发原作文本**。`data/` 只能是聚合统计（字数分布、频次、分位数）；基线文件发布前必须剥掉例句（`--no-exemplars`）。`offline_smoke` 与单测各有一道检查盯着这条线。
 - **角色可见文本里不许有元叙述**。「语料」「实测」「中位」「频次」「基线」这类词进了 prompt，模型会顺着谈自己的设定。`tools/gates/voice_meta_gate.py` 扫 canon / voice / style_target / turn_logic 四个面，改任何 prompt 文本后必须过这道门禁。
+- **宿主数据只经显式快照**：adapter 不自动打开生产数据库、记忆账本、聊天历史或密钥，不启动服务、不推进世界状态；快照必须声明已脱敏与权限，current/history/unknown 由宿主投影。
 - **密钥不入库**：探针按 进程环境变量 → 仓库根 `.env` → `.streamlit/secrets.toml` 的顺序取 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`（见 `tools/secrets_loader.py`）。
 - 角色与作品权利属于 Bushiroad / Craft Egg 及相关权利方，本项目与权利方无关，见 `NOTICE.md`；代码以 MIT 发布。
 - 指标（蒸馏分、fidelity、composite）是**相对量**，只用于同批次 before/after 比较；换模型、换夹具、换时钟后跨批次不可比。

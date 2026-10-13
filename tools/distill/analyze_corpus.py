@@ -112,9 +112,10 @@ def main() -> int:
         all_profiles[lang] = profiles
 
         # ---- 标点语气指纹
-        lines.append(f"\n### 标点 / 语气指纹（出现率 = 含该标点的回合占比）\n")
+        lines.append("\n### 标点 / 语气指纹（出现率 = 含该标点的回合占比）\n")
         heads = ["…", "！", "？", "、", "，", "—", "～", "。"]
-        lines.append(f"{'角色':<6}" + "".join(f"{h:>8}" for h in heads) + f"{'一人称':>9}{'称呼':>8}{'filler':>8}{'笑':>7}")
+        lines.append(f"{'角色':<6}" + "".join(f"{h:>8}" for h in heads)
+                     + f"{'一人称':>9}{'称呼':>8}{'filler':>8}{'笑':>7}")
         lines.append("-" * 100)
         for ch in CHARS:
             if ch not in profiles:
@@ -128,7 +129,7 @@ def main() -> int:
             lines.append(row)
 
         # ---- 长度分布（直方图）
-        lines.append(f"\n### 回合字数分布\n")
+        lines.append("\n### 回合字数分布\n")
         lines.append(f"{'角色':<6}{'0-5':>7}{'6-10':>7}{'11-20':>7}{'21-35':>7}{'36-50':>7}{'51+':>7}   直方图(中位)")
         lines.append("-" * 78)
         bins = [(0, 5), (6, 10), (11, 20), (21, 35), (36, 50), (51, 10**9)]
@@ -148,9 +149,8 @@ def main() -> int:
             lines.append(row)
 
         # ---- 词级签名
-        lines.append(f"\n### 各角色特有措辞（log-odds top 14，对全体语料）\n")
+        lines.append("\n### 各角色特有措辞（log-odds top 14，对全体语料）\n")
         toks = {ch: [t for t in corpus[ch] if t.strip()] for ch in CHARS}
-        background = [t for ch in CHARS for t in toks[ch]]
         for ch in CHARS:
             if ch not in profiles:
                 continue
@@ -160,7 +160,7 @@ def main() -> int:
             lines.append(f"- **{name[ch]}**: {words}")
 
         # ---- 感动词 / 终助词明细（这是最能区分五人「声音」的一组）
-        lines.append(f"\n### 感动词（フィラー）与句末助词的实际用词\n")
+        lines.append("\n### 感动词（フィラー）与句末助词的实际用词\n")
         for ch in CHARS:
             if ch not in profiles:
                 continue
@@ -174,11 +174,12 @@ def main() -> int:
                 tail_top = []
             lines.append(f"- **{name[ch]}** 感动词: " + "、".join(f"{w}({c})" for w, c in inter.most_common(8)))
             if tail_top:
-                lines.append(f"  句末助词: " + "、".join(f"{w}({c})" for w, c in tail_top))
-            lines.append(f"  句末助词率: {profiles[ch]['sent_final_jp_per_turn']['mean']:.2f}/回合" + (f"   长音符率 {profiles[ch]['long_vowel_rate'] * 100:.0f}%" if lang == "jp" else ""))
+                lines.append("  句末助词: " + "、".join(f"{w}({c})" for w, c in tail_top))
+            lines.append(f"  句末助词率: {profiles[ch]['sent_final_jp_per_turn']['mean']:.2f}/回合"
+                         + (f"   长音符率 {profiles[ch]['long_vowel_rate'] * 100:.0f}%" if lang == "jp" else ""))
 
         # ---- 两两区分度
-        lines.append(f"\n### 两两区分度（|Δ中位字数| / 标点出现率差 之和，越大越好区分）\n")
+        lines.append("\n### 两两区分度（|Δ中位字数| / 标点出现率差 之和，越大越好区分）\n")
         keys = ["…", "！", "？", "，"]
         lines.append(f"{'':<8}" + "".join(f"{name[c2]:>8}" for c2 in CHARS))
         for a in CHARS:

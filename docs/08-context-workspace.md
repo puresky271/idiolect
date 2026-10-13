@@ -1,8 +1,8 @@
 # 上下文工作区：四层在真实系统里的前后文
 
-> 讲什么：四层之外的上下文骨架——12 层固定层序、预算裁剪、事实选择器的打分模型。 ｜ 前置：[`03-features.md`](03-features.md)；配套代码 [`idiolect/workspace.py`](../idiolect/workspace.py)。
+> 讲什么：四层之外的上下文骨架——12 层固定层序、预算裁剪、事实选择器的打分模型、证据块与装配 trace。 ｜ 前置：[`03-features.md`](03-features.md)；配套代码 [`idiolect/workspace.py`](../idiolect/workspace.py)。
 
-**目录**：[1 工作区模式是什么](#1-工作区模式是什么) ｜ [2 一轮对话的完整装配结构](#2-一轮对话的完整装配结构) ｜ [3 本仓库的实现](#3-本仓库的实现) ｜ [4 事实工作区的打分模型](#4-事实工作区的打分模型) ｜ [5 与评测闭环的关系](#5-与评测闭环的关系)
+**目录**：[1 工作区模式是什么](#1-工作区模式是什么) ｜ [2 一轮对话的完整装配结构](#2-一轮对话的完整装配结构) ｜ [3 本仓库的实现](#3-本仓库的实现) ｜ [4 事实工作区的打分模型](#4-事实工作区的打分模型) ｜ [5 与评测闭环的关系](#5-与评测闭环的关系) ｜ [6 证据块与装配 trace](#6-证据块与装配-trace)
 
 本章提供上下文装配骨架，不附带长期记忆数据库、日程生成器或世界模拟服务。接入方负责提供有来源和权限边界的材料；不能把演示事实当作真实会话记忆。
 
@@ -82,6 +82,7 @@ messages = build_workspace_messages(
 ```
 
 - **`select_facts`**：事实选择器（第 4 节的打分模型，词面通道部分）。
+- **`evidence_context` / `trace`**（v0.1.2）：可选地把版本化证据合同渲染成 `on_demand_evidence` 层；可选地把层序、各层字数、被预算摘除的层写进 `trace`。两者都不传时输出与旧版逐字节一致（第 6 节）。
 
 ## 4. 事实工作区的打分模型
 
@@ -127,7 +128,42 @@ memory_recall 0.8 > gossip -0.2`。memory_recall 曾是 0.2，真实聊天日志
 
 工作区让「该看的材料」也变成可评测对象：候选集固定 → 选择结果确定 →
 注入内容可 diff。改打分参数与改四层同纪律：先 dump 基线、改后再 dump、
-逐场景审 diff（见 `docs/04-evaluation.md` 与 `docs/05-tooling.md`）。
+逐场景审 diff（见 `docs/04-evaluation.md` 与 `docs/05-tooling.md`）。四层之外的这条
+路径用 `tools/gates/dump_workspace.py` 留证据：它固定一组输入（外部块、历史、执行包、
+预算尾裁、自定义层、证据块），逐例落盘完整 messages。
+
+## 6. 证据块与装配 trace
+
+`build_workspace_messages(..., evidence_context=...)` 只在调用方**显式**传入时挂证据层，
+普通角色 prompt 不会被塞进时空块。接受三种输入：`TemporalEvidenceContext` 对象、
+`evidence-context/v1` 合同字典（严格校验）、旧的无版本字典（兼容层，发弃用警告）。
+合同的字段、校验规则与渲染白名单见 [`09-evidence-grounding.md`](09-evidence-grounding.md) 第 2 节。
+
+```python
+from idiolect.workspace import build_workspace_messages
+trace = {}
+messages = build_workspace_messages(
+    "乐奈", "她现在在哪？",
+    evidence_context={"schema_version": "evidence-context/v1", "observer_id": "actor_a",
+                      "as_of": "2026-09-12T15:00:00+09:00",
+                      "current": [{"evidence_id": "evidence_17", "status": "current",
+                                   "text": "actor_b 在车站东侧入口。"}],
+                      "history": [], "unknown": []},
+    trace=trace,
+)
+# trace == {"max_chars": 0, "layers": [{"key": "persona", ...}, {"key": "on_demand_evidence", ...}],
+#           "trimmed": [], "system_chars": ..., "history_messages": 0,
+#           "packet_on_current_user": False, "evidence_layer": "on_demand_evidence"}
+```
+
+要点：
+
+- 证据层默认**不 pinned**：总预算不够时它会被整块尾裁。这是有意的——评测侧会把
+  「装配丢了证据」记在 prompt 边界，而不是算成「模型没用证据」。确实需要保住时传
+  `evidence_pinned=True`；
+- 证据块渲染只输出白名单元数据；期望答案、隐藏值、gold 不属于合同，永远不在这里；
+- `trace` 只读不改：它记录的是本次装配实际发生了什么，长上下文计量
+  （[`10-long-context-stress.md`](10-long-context-stress.md)）直接消费它。
 
 ---
 

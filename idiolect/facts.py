@@ -12,6 +12,7 @@ _FACTS_PATH = Path(__file__).resolve().parents[1] / "data" / "character_facts.js
 
 
 def get_facts(character: str) -> dict:
+    """读取该角色随包发布的可检验事实表；文件缺失视为无事实。"""
     try:
         raw = json.loads(_FACTS_PATH.read_text(encoding="utf-8"))
     except FileNotFoundError:  # 文件缺失即视为无事实；JSON 损坏必须报错，不许静默当空

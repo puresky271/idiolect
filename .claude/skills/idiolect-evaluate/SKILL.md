@@ -77,7 +77,23 @@ prompt diff 门禁逐项确认：层顺序、块边界、触发范围、**无关
 - 换了模型 / 夹具 / 时钟 → 跨批次不可比。
 - 分数涨了但回复更难读 → **读至少 6 条回复并和原作同场景并排看**，分数只负责筛嫌疑。
 - 「长度偏差」只用来找嫌疑人：灯的输出比参照长 5 倍，一半原因是她的省略号也计字数。
+- 两批的 manifest 判 `blocked` / `incomparable` → 不池化、不说「改善」；先补齐预注册干预或重跑。
+
+## 6. 第二条轴：grounding（显式启用）
+
+风格分高不代表回答受证据约束。需要查「当前/历史/未知、引用、错误前提、不可见信息」时：
+
+```bash
+py -X utf8 -m idiolect selftest                         # 先确认评测链自己能翻转判决、不误报
+py -X utf8 -m idiolect eval --suite <suite> --responses <回复集> --capabilities spatiotemporal --html
+py -X utf8 -m idiolect compare report/experiments/<A> report/experiments/<B>
+```
+
+- 默认只评风格；`spatiotemporal` / `long-context-stress` 不启用时 grounding 为 not_applicable，不阻塞。
+- 退出码：0 PASS / 1 FAIL / 3 INCONCLUSIVE（needs_review 未标注）。空回复、报错、干跑永远不算通过。
+- 内置回放是合成的，只验证链路；真实模型批次用 `idiolect run --yes --max-calls N`，先 `--dry-run` 看估算。
+- family 数低于预注册下限时 PASS 只表示「未检出违规」。
 
 ---
 
-相关：[`docs/04-evaluation.md`](../../../docs/04-evaluation.md)（指标口径与常见误读）｜[`docs/06-lessons.md`](../../../docs/06-lessons.md) 的 C 组（评测方法踩过的坑）
+相关：[`docs/04-evaluation.md`](../../../docs/04-evaluation.md)（指标口径与常见误读）｜[`docs/09-evidence-grounding.md`](../../../docs/09-evidence-grounding.md)（grounding 轴）｜[`docs/06-lessons.md`](../../../docs/06-lessons.md) 的 C 组（评测方法踩过的坑）

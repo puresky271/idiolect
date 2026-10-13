@@ -28,7 +28,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from .opener import strip_redundant_ack
+from .opener import strip_redundant_ack  # noqa: F401 - 包级公开入口
 from .punctuation import downgrade_exclaims, normalize_ellipsis
 from .thresholds import (  # noqa: F401  （re-export，兼容旧导入路径）
     EXCLAIM_MAX_PER_TURN,

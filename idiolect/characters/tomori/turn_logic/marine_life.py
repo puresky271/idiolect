@@ -338,7 +338,6 @@ _RELATION_HINT_GUEST = (
 def _relation_hint(is_developer: bool) -> str:
     return _RELATION_HINT_DEV if is_developer else _RELATION_HINT_GUEST
 def _render_tier0(intent: dict, is_developer: bool = False) -> str:
-    relation = _relation_hint(is_developer)
     venue = intent.get("venue")
     parts: list[str] = []
     head = "（话题：海洋生物（泛指））"
@@ -625,7 +624,6 @@ def _render_tier2_dedup(intent: dict, is_developer: bool = False) -> str:
 def _render_tier1_dedup(intent: dict, is_developer: bool = False) -> str:
     relation = _relation_hint(is_developer)
     cat = intent["category"]
-    cat_data = _taxonomy().get(cat, {})
 
     head = f"（话题：海洋生物 → 类别『{cat}』·**这次聊天里已经涉猎过**）"
     body = (
@@ -781,13 +779,13 @@ if __name__ == "__main__":
     t0a = build_marine_special_block("水族馆好玩", session_id="dedup_a")
     t0b = build_marine_special_block("水族馆好玩", session_id="dedup_a")
     assert t0a == t0b and "这次聊天" not in t0a, "T0 should not dedup"
-    print(f"[PASS] T0 no dedup")
+    print("[PASS] T0 no dedup")
 
     # reset 后恢复 full
     reset_session_dedup("dedup_a")
     s_after_reset = build_marine_special_block("洪堡企鹅", session_id="dedup_a")
     assert "这次聊天里已经讲过" not in s_after_reset, "reset failed"
-    print(f"[PASS] reset clears dedup")
+    print("[PASS] reset clears dedup")
 
     # ─── 心里的共振测试 ──────────────────────────────────────
     print()
@@ -816,24 +814,24 @@ if __name__ == "__main__":
     no_canon = build_marine_special_block("我有个小爱同学，跟水族馆没关系", session_id="canon_c")
     # 注：这条本身命中"水族馆"会走 泛指；只要不出现 底色 锚 tag 即可
     assert "爱音 心里的共振" not in no_canon, "false positive on 小爱同学"
-    print(f"[PASS] '小爱同学' not false-positive")
+    print("[PASS] '小爱同学' not false-positive")
 
     # "小爱音" 命中
     reset_session_dedup()
     canon_xiaoaiyin = build_marine_special_block("小爱音也想去水族馆", session_id="canon_d")
     assert "爱音 心里的共振" in canon_xiaoaiyin, "小爱音 should 触发点 底色"
-    print(f"[PASS] '小爱音' triggers 底色")
+    print("[PASS] '小爱音' triggers 底色")
 
     # 仅水族馆无爱音 → 不进 底色
     reset_session_dedup()
     just_aqua = build_marine_special_block("水族馆人多吗", session_id="canon_e")
     assert "爱音 心里的共振" not in just_aqua, "should not 起作用 底色 without 爱音"
-    print(f"[PASS] only water: not 底色")
+    print("[PASS] only water: not 底色")
 
     # 仅爱音无水族馆相关 → 不进 marine 模块
     no_marine = build_marine_special_block("爱音今天来了吗", session_id="canon_f")
     assert no_marine == "", "should not 起作用 marine module without aquarium signal"
-    print(f"[PASS] only 爱音: marine module not fired")
+    print("[PASS] only 爱音: marine module not fired")
 
     print()
     print("OVERALL:", "PASS" if fail == 0 else f"FAIL ({fail})")

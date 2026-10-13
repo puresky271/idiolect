@@ -78,7 +78,7 @@ def scenes_with_gold() -> dict[str, dict]:
 
 def build_jobs() -> list[tuple[str, str]]:
     """-> [(scene_key, char_cn)]，只覆盖缺口场景。"""
-    stats = scenes_with_gold()
+    scenes_with_gold()  # 保留调用：没有语料时在这里报错退出
     covered = json.loads((REPORT / "scene_coverage.json").read_text(encoding="utf-8"))
     gaps = set(covered["gaps"])
     jobs: list[tuple[str, str]] = []
@@ -151,7 +151,7 @@ def main() -> int:
     (REPORT / "probe_scenes_v2.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     total = sum(len(v) for v in out.values())
     print(f"\n[probe-gen] 生成 {total} 条夹具，覆盖 {len(out)} 场景，失败 {fails}")
-    print(f"-> report/probe_scenes_v2.json")
+    print("-> report/probe_scenes_v2.json")
     return 0
 
 

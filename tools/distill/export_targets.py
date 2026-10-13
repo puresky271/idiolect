@@ -61,7 +61,7 @@ def main() -> int:
 
     print(f"{'角色':<7}{'中位':>6}{'p90':>6}{'句/回合':>9}{'省略号':>8}{'感叹号':>8}{'问号':>7}{'句号':>7}{'一人称':>8}")
     print("-" * 66)
-    for key, t in out["cn"].items():
+    for _key, t in out["cn"].items():
         print(f"{t['name']:<7}{t['median_chars']:>6.0f}{t['p90_chars']:>6.0f}{t['sent_per_turn']:>9.2f}"
               f"{t['ellipsis_rate'] * 100:>7.0f}%{t['exclaim_rate'] * 100:>7.0f}%{t['question_rate'] * 100:>6.0f}%"
               f"{t['period_rate'] * 100:>6.0f}%{t['first_person_rate'] * 100:>7.0f}%")

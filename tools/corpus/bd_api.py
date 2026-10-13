@@ -20,7 +20,6 @@ for _p in (_ROOT, _ROOT / "tools",
         _sys.path.insert(0, str(_p))
 from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
 
-import json
 import time
 from typing import Any, Iterable
 

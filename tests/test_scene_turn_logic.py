@@ -121,7 +121,8 @@ class SoyoRanaVoiceCheckTests(unittest.TestCase):
         from idiolect.characters.soyo.voice_check import clean_reply as soyo_clean
 
         samples = {
-            rana_clean: ["弦断了！！！真的假的！！！", "嗯……雨还在下……不过猫喜欢……", "我我觉得我应该可以去我那边看看。"],
+            rana_clean: ["弦断了！！！真的假的！！！", "嗯……雨还在下……不过猫喜欢……",
+                         "我我觉得我应该可以去我那边看看。"],
             soyo_clean: ["好耶！！！太棒了！！！", "……嗯。……是啊……", "你这样的想法我完全理解你的感受哦。"],
         }
         for fn, items in samples.items():
@@ -1204,5 +1205,3 @@ class AliasContractTests(unittest.TestCase):
             with self.subTest(alias=alias):
                 out = postprocess_reply(alias, "嗯。\n\n猫。屋檐下面。")
                 self.assertFalse(out.get("skipped"), f"{alias} 的后处理被跳过了")
-
-

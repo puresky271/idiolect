@@ -109,7 +109,6 @@ def main() -> int:
     args = ap.parse_args()
 
     corpus = load()
-    all_texts = [t for v in corpus.values() for t in v]
     out: dict = {}
     lines = ["# 五人口癖蒸馏（来自原作台词）\n",
              "> 口癖 = 不承载话题、但一听就知道是谁的短说法。",

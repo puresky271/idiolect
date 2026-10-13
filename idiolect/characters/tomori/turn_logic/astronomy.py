@@ -568,7 +568,6 @@ def _render_tier2_dedup(intent: dict, is_developer: bool = False) -> str:
 def _render_tier1_dedup(intent: dict, is_developer: bool = False) -> str:
     relation = _relation_hint(is_developer)
     cat = intent["category"]
-    cat_data = ASTRO_TAXONOMY.get(cat, {})
 
     head = f"（话题：天文 → 类别『{cat}』·**这次聊天里已经涉猎过**）"
     body = (
@@ -817,7 +816,7 @@ if __name__ == "__main__":
 
     other = build_astronomy_special_block("土星", session_id="d2")
     assert "这次聊天里已经讲过" not in other, "session isolation failed"
-    print(f"[PASS] session isolation")
+    print("[PASS] session isolation")
 
     print()
     print("─── 底色 (天文 + 冰川日菜) tests ───")
@@ -838,11 +837,11 @@ if __name__ == "__main__":
     reset_session_dedup()
     no_hina = build_astronomy_special_block("土星环", session_id="cm3")
     assert "冰川日菜 心里的共振" not in no_hina
-    print(f"[PASS] only astro: no 底色")
+    print("[PASS] only astro: no 底色")
 
     no_astro = build_astronomy_special_block("日菜先輩在哪", session_id="cm4")
     assert no_astro == "", "should not 起作用 astro module without astro signal"
-    print(f"[PASS] only 日菜: astro module not fired")
+    print("[PASS] only 日菜: astro module not fired")
 
     print()
     print("OVERALL:", "PASS" if fail == 0 else f"FAIL ({fail})")

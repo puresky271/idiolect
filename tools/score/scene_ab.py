@@ -149,7 +149,8 @@ def main() -> int:
     for (char, ut), d in per.items():
         if not d["before"] or not d["after"]:
             continue
-        f = lambda arm, k: statistics.fmean([x[k] for x in d[arm]])
+        def f(arm, k, d=d):
+            return statistics.fmean([x[k] for x in d[arm]])
         print(f"{char:<6}{ut[:24]:<26}{f('before','le4'):>6.2f}→{f('after','le4'):<5.2f}"
               f"{f('before','anchor'):>7.2f}→{f('after','anchor'):<6.2f}"
               f"{f('before','len'):>6.1f}→{f('after','len'):<5.1f}")
@@ -160,7 +161,7 @@ def main() -> int:
                    ensure_ascii=False, indent=2), encoding="utf-8")
     (REPORT / "scene_turn_logic_ab.jsonl").write_text(
         "\n".join(json.dumps(r, ensure_ascii=False) for r in rows), encoding="utf-8")
-    print(f"\n-> report/scene_turn_logic_ab.json / .jsonl")
+    print("\n-> report/scene_turn_logic_ab.json / .jsonl")
     return 0
 
 

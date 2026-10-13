@@ -91,7 +91,7 @@ def main() -> int:
     print(f"    激活环境： {activate}")
     print(f"    看 prompt： {py} -X utf8 -m idiolect prompt {args.char} \"{args.msg}\"")
     print(f"    跑体检：   {py} -X utf8 tools/offline_smoke.py")
-    print(f"    换别的角色：读 .claude/skills/idiolect-pipeline/（语料 → 蒸馏 → 角色包 → 评测）")
+    print("    换别的角色：读 .claude/skills/idiolect-pipeline/（语料 → 蒸馏 → 角色包 → 评测）")
     return 0
 
 

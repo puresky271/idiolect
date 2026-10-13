@@ -9,7 +9,19 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from _paths import REPORT
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from _paths import REPORT  # noqa: E402
+from idiolect.evals.report import safe_json_for_script  # noqa: E402
+
+# 字段 → 干预组（与 idiolect.evals.manifest.INTERVENTION_VARIABLES 同名）。
+# 组在两批的 metadata.intervention 里都声明过，字段才允许不同。
+_FIELD_GROUP = {
+    'model': 'model', 'temperature': 'sampling', 'max_tokens': 'sampling', 'thinking': 'sampling',
+    'extra_body': 'sampling', 'clock': 'clock', 'dry_run': None, 'assembly': 'assembly',
+    'fixture_sha256': 'suite', 'scenarios_sha256': 'suite', 'scoring_profiles_sha256': 'scorer',
+    'scene_baseline_sha256': 'scorer', 'probe_source_sha256': 'code',
+}
+_IMPLIES = {'code': {'prompt'}, 'prompt': {'code', 'assembly'}, 'assembly': {'prompt'}}
 
 
 def load_batch(directory: Path, label: str) -> dict:
@@ -32,7 +44,9 @@ def load_batch(directory: Path, label: str) -> dict:
     repetition = json.loads(repeat_path.read_text(encoding='utf-8')) if repeat_path.exists() else None
     repetition_status = 'missing'
     if isinstance(repetition, dict):
-        repetition_status = 'available' if repetition.get('source_sha256') == hashlib.sha256(path.read_bytes()).hexdigest() else 'stale'
+        repetition_status = ('available'
+                             if repetition.get('source_sha256') == hashlib.sha256(path.read_bytes()).hexdigest()
+                             else 'stale')
     if repetition_status != 'available':
         repetition = None
     if not isinstance(summary, dict) or not isinstance(scores, list):
@@ -66,15 +80,48 @@ def compare_conditions(left: dict, right: dict) -> list[dict]:
     return rows
 
 
+def comparability(left: dict, right: dict) -> dict:
+    """批次级可比性：v2 元数据 + 预注册干预。缺字段或旧批次一律 incomparable，不补全。"""
+    a = left.get('summary', {}).get('metadata') or {}
+    b = right.get('summary', {}).get('metadata') or {}
+    if (a.get('schema_version') or 0) < 2 or (b.get('schema_version') or 0) < 2:
+        return {'status': 'incomparable', 'reasons': ['旧批次没有 code / intervention 字段：只能浏览，不能自动比较']}
+    if a.get('intervention') != b.get('intervention'):
+        return {'status': 'blocked',
+                'reasons': [f"两批预注册的干预不同：{a.get('intervention')} vs {b.get('intervention')}"]}
+    allowed = set(a.get('intervention') or [])
+    for var in list(allowed):
+        allowed |= _IMPLIES.get(var, set())
+    reasons, status = [], 'comparable'
+    for row in compare_conditions(left, right):
+        group = _FIELD_GROUP.get(row['field'])
+        if row['status'] == 'unknown':
+            status = 'incomparable' if status == 'comparable' else status
+            reasons.append(f"{row['title']} 未知")
+        elif row['status'] == 'different' and group not in allowed:
+            status = 'blocked'
+            reasons.append(f"{row['title']} 不同但不在预注册干预里")
+    if a.get('dry_run') or b.get('dry_run'):
+        status = 'blocked'
+        reasons.append('干跑批次不能参与比较')
+    same_code = (a.get('code') or {}).get('revision') == (b.get('code') or {}).get('revision')
+    if not same_code and not allowed & {'code', 'prompt'}:
+        status = 'blocked'
+        reasons.append('代码 revision 不同但没有声明 code / prompt 干预')
+    return {'status': status, 'reasons': reasons}
+
+
 def render(batches: list[dict]) -> str:
     if not batches:
         raise ValueError('至少需要一个批次')
     template = Path(__file__).with_name('report_template.html').read_text(encoding='utf-8')
     # script 数据区也会被 HTML 解析；不允许回复中的闭合标签逃逸。
     enriched = [{**batch, 'comparisons': {other['label']: compare_conditions(batch, other)
-                 for other in batches if other['label'] != batch['label']}} for batch in batches]
-    payload = json.dumps(enriched, ensure_ascii=False, allow_nan=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
-    return template.replace('__BATCH_DATA__', payload)
+                 for other in batches if other['label'] != batch['label']},
+                 'comparability': {other['label']: comparability(batch, other)
+                                   for other in batches if other['label'] != batch['label']}}
+                for batch in batches]
+    return template.replace('__BATCH_DATA__', safe_json_for_script(enriched))
 
 
 def main() -> int:

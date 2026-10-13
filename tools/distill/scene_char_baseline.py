@@ -40,7 +40,6 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import scenes as SC  # noqa: E402
 import style_features as S  # noqa: E402
 
 REPORT = REPORT

@@ -215,7 +215,8 @@ def main() -> int:
             for s in scored:
                 byc[s["char"]].append(s["distill"])
             lines.append("\n按角色：" + "｜".join(
-                f"{c} {statistics.fmean(v):.3f}" for c, v in sorted(byc.items(), key=lambda kv: -statistics.fmean(kv[1]))))
+                f"{c} {statistics.fmean(v):.3f}"
+                for c, v in sorted(byc.items(), key=lambda kv: -statistics.fmean(kv[1]))))
 
         (REPORT / f"scene_distill_{label}{suffix}.json").write_text(
             json.dumps(scored, ensure_ascii=False, indent=2), encoding="utf-8")

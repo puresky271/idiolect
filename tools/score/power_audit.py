@@ -103,7 +103,7 @@ def main() -> int:
         diff = abs(m2 - m1)
         se = sd1 * math.sqrt(1 / len(arms[0][1]) + 1 / len(arms[1][1]))
         z = diff / se if se else 0
-        print(f"\n=== 为什么 before/after 无法分辨 ===\n")
+        print("\n=== 为什么 before/after 无法分辨 ===\n")
         print(f"观测差 {diff * 100:.1f}pp，标准误 {se * 100:.1f}pp，z = {z:.2f}")
         print(f"（需要 |z| > 1.96 才算显著；实测 z={z:.2f} → 无法拒绝零假设）")
         print(f"要达到 |z|=1.96 且保持该效应量，需每条臂约 "

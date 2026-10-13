@@ -21,7 +21,6 @@ import hashlib
 import re
 import sys
 from collections import Counter, defaultdict
-from pathlib import Path
 
 def summarize(rows: list[dict], category: str = "") -> dict:
     selected = [r for r in rows if not category or r.get('cat') == category]
@@ -68,9 +67,11 @@ def main() -> int:
         (REPORT / f'repeat_{label}.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
         print(f'\n===== {label} =====')
         for cell in result['cells']:
-            print(f"{cell['char']} {cell['scenario']} n={cell['n']} distinct={cell['distinct']} 最多重复={cell['most_repeated']}")
+            print(f"{cell['char']} {cell['scenario']} n={cell['n']} distinct={cell['distinct']}"
+                  f" 最多重复={cell['most_repeated']}")
         ratio = f"{result['ratio']:.2f}" if result['ratio'] is not None else '无数据'
-        print(f"合计 distinct {result['distinct']}/{result['valid']} = {ratio}；错误 {result['errors']}，空白 {result['empty']}")
+        print(f"合计 distinct {result['distinct']}/{result['valid']} = {ratio}；"
+              f"错误 {result['errors']}，空白 {result['empty']}")
         if not result['valid']:
             rc = 2
     return rc

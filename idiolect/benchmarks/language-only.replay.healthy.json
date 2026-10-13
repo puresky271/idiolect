@@ -1,0 +1,113 @@
+{
+  "schema_version": "response-set/v1",
+  "suite_id": "language-only",
+  "suite_sha256": "6c5a39d609ff8ed507abea58519dd5b9ddfcf6b74f18a787038d73be860da893",
+  "arm": "replay:healthy",
+  "runner": {
+    "kind": "replay",
+    "synthetic": "replay",
+    "note": "手写合成回复：五人风格示意，只验证链路"
+  },
+  "responses": [
+    {
+      "task_id": "lang-anon-plain",
+      "finish_reason": "stop",
+      "raw": "诶？在刷手机啦～"
+    },
+    {
+      "task_id": "lang-anon-schedule",
+      "finish_reason": "stop",
+      "raw": "明天第一节是九点哦！"
+    },
+    {
+      "task_id": "lang-anon-comfort",
+      "finish_reason": "stop",
+      "raw": "诶……先别哭，我在呢。"
+    },
+    {
+      "task_id": "lang-anon-banter",
+      "finish_reason": "stop",
+      "raw": "去吃可丽饼吧！"
+    },
+    {
+      "task_id": "lang-tomori-plain",
+      "finish_reason": "stop",
+      "raw": "……在写歌词。"
+    },
+    {
+      "task_id": "lang-tomori-schedule",
+      "finish_reason": "stop",
+      "raw": "……九点。"
+    },
+    {
+      "task_id": "lang-tomori-comfort",
+      "finish_reason": "stop",
+      "raw": "……嗯。……我在。"
+    },
+    {
+      "task_id": "lang-tomori-banter",
+      "finish_reason": "stop",
+      "raw": "……饭团。"
+    },
+    {
+      "task_id": "lang-taki-plain",
+      "finish_reason": "stop",
+      "raw": "练鼓。"
+    },
+    {
+      "task_id": "lang-taki-schedule",
+      "finish_reason": "stop",
+      "raw": "九点。别迟到。"
+    },
+    {
+      "task_id": "lang-taki-comfort",
+      "finish_reason": "stop",
+      "raw": "……先坐下。慢慢说。"
+    },
+    {
+      "task_id": "lang-taki-banter",
+      "finish_reason": "stop",
+      "raw": "随便。食堂吧。"
+    },
+    {
+      "task_id": "lang-soyo-plain",
+      "finish_reason": "stop",
+      "raw": "在泡红茶呢。"
+    },
+    {
+      "task_id": "lang-soyo-schedule",
+      "finish_reason": "stop",
+      "raw": "明天是九点开始哦。"
+    },
+    {
+      "task_id": "lang-soyo-comfort",
+      "finish_reason": "stop",
+      "raw": "嗯，我在听。慢慢说就好。"
+    },
+    {
+      "task_id": "lang-soyo-banter",
+      "finish_reason": "stop",
+      "raw": "要不要一起去吃意面？"
+    },
+    {
+      "task_id": "lang-rana-plain",
+      "finish_reason": "stop",
+      "raw": "练习。"
+    },
+    {
+      "task_id": "lang-rana-schedule",
+      "finish_reason": "stop",
+      "raw": "不知道。"
+    },
+    {
+      "task_id": "lang-rana-comfort",
+      "finish_reason": "stop",
+      "raw": "……猫。在这。"
+    },
+    {
+      "task_id": "lang-rana-banter",
+      "finish_reason": "stop",
+      "raw": "抹茶芭菲。"
+    }
+  ]
+}

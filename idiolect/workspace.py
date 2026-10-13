@@ -23,6 +23,7 @@ from __future__ import annotations
 import re
 import warnings
 from dataclasses import dataclass
+from typing import Any, Mapping
 
 from .assemble import build_system_prompt
 
@@ -46,9 +47,21 @@ LAYER_ORDER = (
 
 @dataclass(frozen=True)
 class ContextBlock:
+    """工作区里的一个上下文块：层名、正文、是否 pinned。"""
     key: str
     text: str
     pinned: bool = False       # pinned 的块不参与预算裁剪（persona 默认 pinned）
+
+
+# 证据合同（EvidenceEnvelope / TemporalEvidenceContext …）独立在 evidence_contract.py：
+# workspace 只是它的一个消费者。这里 re-export 旧名字，旧的
+# `from idiolect.workspace import EvidenceEnvelope` 写法继续成立。
+from .evidence_contract import (  # noqa: E402
+    EvidenceEnvelope,
+    KnowledgeProjection,
+    TemporalEvidenceContext,
+    coerce_temporal_evidence_context,
+)
 
 
 class ContextWorkspace:
@@ -83,6 +96,24 @@ class ContextWorkspace:
     def texts(self) -> dict[str, str]:
         return {key: block.text for key, block in self._blocks.items()}
 
+    def add_evidence_context(
+        self,
+        context: TemporalEvidenceContext | Mapping[str, Any],
+        *,
+        key: str = "on_demand_evidence",
+        pinned: bool = False,
+        include_provenance: bool = True,
+    ) -> "ContextWorkspace":
+        """把结构化时空证据作为一个普通 workspace 层加入。
+
+        证据层默认不 pinned，允许在总预算不足时整块摘除；调用方若有更严格的
+        合同可显式 ``pinned=True``。旧的 ``add`` / ``assemble`` API 不受影响。
+        """
+        resolved = coerce_temporal_evidence_context(context)
+        if resolved is None:
+            return self
+        return self.add(key, resolved.render(include_provenance=include_provenance), pinned=pinned)
+
     def _ordered_keys(self) -> list[str]:
         known = [key for key in LAYER_ORDER if key in self._blocks]
         custom = [key for key in self._blocks if key not in LAYER_ORDER]
@@ -94,6 +125,7 @@ class ContextWorkspace:
         history: list[dict] | None = None,
         execution_packet: str = "",
         max_chars: int = 0,
+        trace: dict | None = None,
     ) -> list[dict]:
         """装配 messages：system 块按层序 → 对话历史 → 执行包贴**已装配的最后一条 user**。
 
@@ -109,8 +141,13 @@ class ContextWorkspace:
 
         给了 packet 却没有可贴的 user 时**直接报错**：静默丢弃会让「模型没遵守执行
         指令」变成一个查不出来的现象（这条是踩过的坑）。
+
+        `trace` 传一个空 dict 进来，装配完会写入层序、各层字符数、pinned 与被预算
+        摘除的层（长上下文计量与评测要分清「装配丢了证据」和「模型没用证据」）。
+        不传时行为与输出和旧版完全一致。
         """
         keys = self._ordered_keys()
+        candidates = list(keys)
         if max_chars > 0:
             def _total(ks: list[str]) -> int:
                 return sum(len(self._blocks[k].text) for k in ks)
@@ -130,6 +167,15 @@ class ContextWorkspace:
                         f"要么放宽 max_chars，要么别再 pin 这么多层。",
                         RuntimeWarning, stacklevel=2)
 
+        if trace is not None:
+            trace.update({
+                "max_chars": max_chars,
+                "layers": [{"key": k, "chars": len(self._blocks[k].text),
+                            "pinned": self._blocks[k].pinned, "kept": k in keys}
+                           for k in candidates],
+                "trimmed": [k for k in candidates if k not in keys],
+                "system_chars": sum(len(self._blocks[k].text) for k in keys),
+            })
         messages: list[dict] = [
             {"role": "system", "content": self._blocks[key].text} for key in keys
         ]
@@ -171,6 +217,11 @@ def build_workspace_messages(
     include_turn_logic: bool = True,
     max_chars: int = 0,
     now=None,
+    evidence_context: TemporalEvidenceContext | Mapping[str, Any] | None = None,
+    evidence_layer: str = "on_demand_evidence",
+    evidence_pinned: bool = False,
+    include_evidence_provenance: bool = True,
+    trace: dict | None = None,
 ) -> list[dict]:
     """一行入口：idiolect 四层进 persona 位，外部块挂其余层，装配成 messages。
 
@@ -179,25 +230,41 @@ def build_workspace_messages(
     `execution_packet`（本轮执行指令：长度预算、风格提醒）**贴在本轮 user 消息末尾**
     ——那是模型真正要回答的那条，也是离生成端最近的位置。贴完的 messages 形如
     `[system…, user(上一轮), assistant, user(本轮 + 执行包)]`。
+
+    `evidence_context` 只在调用方显式传入时才挂证据层（可选能力，普通角色 prompt
+    不会被塞进时空块）；接受 `TemporalEvidenceContext`、v1 合同字典（严格）或旧的
+    无版本字典（兼容层）。`trace` 见 `ContextWorkspace.assemble`。
     """
     ws = ContextWorkspace()
     persona = build_system_prompt(
         char, user_text, session_id=session_id,
         include_turn_logic=include_turn_logic, now=now)
     ws.add("persona", persona, pinned=True)
+    if evidence_context is not None:
+        ws.add_evidence_context(
+            evidence_context,
+            key=evidence_layer,
+            pinned=evidence_pinned,
+            include_provenance=include_evidence_provenance,
+        )
     for key, text in blocks or []:
         if key == "persona":
             continue  # persona 位只允许 idiolect 四层，外部块请挂其余层
         ws.add(key, text)
 
     # packet 由这里贴到本轮 user 上，所以不给 assemble 传（它只会贴到历史里那条 user）。
-    messages = ws.assemble(history=history, max_chars=max_chars)
+    messages = ws.assemble(history=history, max_chars=max_chars, trace=trace)
 
     current = str(user_text or "").rstrip()
     packet = str(execution_packet or "").strip()
     if packet:
         current = f"{current}\n\n{packet}" if current else packet
     messages.append({"role": "user", "content": current})
+    if trace is not None:
+        trace["history_messages"] = len(messages) - 1 - sum(
+            1 for m in messages if m["role"] == "system")
+        trace["packet_on_current_user"] = bool(packet)
+        trace["evidence_layer"] = evidence_layer if evidence_context is not None else None
     return messages
 
 
@@ -372,7 +439,9 @@ def select_facts(
 
 
 __all__ = [
-    "LAYER_ORDER", "ContextBlock", "ContextWorkspace", "FactRecord",
+    "LAYER_ORDER", "ContextBlock", "ContextWorkspace", "EvidenceEnvelope",
+    "TemporalEvidenceContext", "KnowledgeProjection",
+    "coerce_temporal_evidence_context", "FactRecord",
     "build_workspace_messages", "overlap_score", "recency_score",
     "select_facts", "topic_tokens",
 ]

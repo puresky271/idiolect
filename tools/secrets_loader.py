@@ -23,7 +23,6 @@ from _paths import ROOT  # noqa: E402
 
 import os
 import re
-from pathlib import Path
 
 _KV = re.compile(r"^\s*([A-Za-z_][\w]*)\s*[=:]\s*[\"\']?([^\"\'#\n]*)")
 

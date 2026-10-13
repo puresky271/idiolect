@@ -74,7 +74,23 @@ py -X utf8 tools/gates/dump_prompt.py --all --matrix
 py -X utf8 tools/offline_smoke.py
 ```
 
-它不调模型，跑完会告诉你四层装配、场景覆盖、触发矩阵、内容红线、派生统计、门禁、单测是否通过，并且比对仓库文件指纹确认整轮检查没有写过任何文件（除 `report/`）。
+它不调模型，跑完会告诉你四层装配、场景覆盖、触发矩阵、内容红线、派生统计、评测合同与四种能力模式、同链变异自测、门禁（含注释风格）、单测是否通过，并且比对仓库文件指纹确认整轮检查没有写过任何文件（除 `report/`）。
+
+## 离线评测：grounding 与自测（v0.1.2）
+
+不需要密钥，也不需要克隆仓库——装好包就能跑：
+
+```bash
+py -X utf8 -m idiolect selftest                         # 先看评测链自己能抓到什么、会不会误报
+py -X utf8 -m idiolect bench list                       # 内置 suite 与合成回放
+py -X utf8 -m idiolect bench inspect spatiotemporal-core --messages --task st-history-01
+py -X utf8 -m idiolect eval --suite spatiotemporal-core --responses builtin:spatiotemporal-core.healthy \
+    --capabilities spatiotemporal --html                # PASS；结果登记到 report/experiments/
+py -X utf8 -m idiolect eval --suite spatiotemporal-core --responses builtin:spatiotemporal-core.defects \
+    --capabilities spatiotemporal                       # 负对照：FAIL，逐项列出哪一层判的
+```
+
+内置回放都是合成回复，验证的是评测链路，不是模型。默认工作流只评风格（`--suite language-only`），时空与长上下文是显式启用的能力；四种模式、状态与门禁口径见 [`09-evidence-grounding.md`](09-evidence-grounding.md)。
 
 ## 跑一次真探针
 
@@ -117,7 +133,7 @@ py -X utf8 tools/distill/scene_char_baseline.py
 py -X utf8 tools/distill/export_profiles.py
 ```
 
-这些命令的写入位置不同：`export_targets.py` 默认写 `report/style_targets.json`，`export_scene_targets.py` 写 `idiolect/scene_length_targets.py`，`scene_char_baseline.py` 默认写 `report/scene_char_baseline.json`，`export_profiles.py` 写 `data/style_profiles.json`。从报告发布到 `data/` 前需剥离例句并检查数据形状，见[工具手册](05-tooling.md#8-语料与蒸馏)。语料缺失时探针退回读随仓库发布的画像，启动日志会标明来源。
+这些命令的写入位置不同：`export_targets.py` 默认写 `report/style_targets.json`，`export_scene_targets.py` 写 `idiolect/scene_length_targets.py`，`scene_char_baseline.py` 默认写 `report/scene_char_baseline.json`，`export_profiles.py` 写 `data/style_profiles.json`。从报告发布到 `data/` 前需剥离例句并检查数据形状，见[工具手册](05-tooling.md#9-语料与蒸馏)。语料缺失时探针退回读随仓库发布的画像，启动日志会标明来源。
 
 ## 接进你自己的角色系统
 
@@ -147,7 +163,7 @@ messages = build_messages("乐奈", "你今天又想去哪找猫")
 
 ## 验证过什么
 
-运行 `py -X utf8 tools/offline_smoke.py` 获取当前结果。Skill 可用 `py -X utf8 tools/export_roleplay_skill.py --check --out skills/mygo-five-roleplay` 核对发布资料；浏览页还需打开 HTML 检查筛选、展开与手机布局。测试通过不能替代真实模型的角色质量评估。
+运行 `py -X utf8 tools/offline_smoke.py` 获取当前结果；v0.1.2 起 CI 另有 lint job（`ruff check .` 与 `tools/gates/style_gate.py`），以及在仓库之外的干净 venv 里 `--no-deps` 安装 wheel 后跑离线评测与自测的验收步骤。Skill 可用 `py -X utf8 tools/export_roleplay_skill.py --check --out skills/mygo-five-roleplay` 核对发布资料；浏览页还需打开 HTML 检查筛选、展开与手机布局。测试通过不能替代真实模型的角色质量评估。
 
 以下是早期发布验证记录，用于说明覆盖面，不代表当前测试数量或性能承诺：
 
