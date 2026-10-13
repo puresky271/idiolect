@@ -34,7 +34,7 @@ from typing import Callable
 
 from idiolect.registry import canonicalize_name
 from idiolect.scene_engine import (
-    SceneModule,
+    SceneModule,  # noqa: F401 - 包级 re-export，深模块按此名导入
     append_general_scene_blocks,
     build_scene_blocks,
     env_enabled,

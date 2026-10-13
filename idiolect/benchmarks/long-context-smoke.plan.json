@@ -1,0 +1,218 @@
+{
+  "schema_version": "long-context-plan/v1",
+  "plan_id": "long-context-smoke",
+  "plan_version": "1.0.0",
+  "description": "最小可复现矩阵：长度 × 关键证据位置；历史/当前冲突多轮；预算截断对照。",
+  "seed": 20261014,
+  "preregistration": {
+    "registered_at": "2026-10-14",
+    "unit": "family",
+    "min_families_for_claims": 8,
+    "primary_contrast": "length=long 下 position=middle 对比对照臂（short/head）",
+    "note": "family 数远低于下限：本计划只验证链路与计量，不支持任何模型结论"
+  },
+  "label_source": {
+    "kind": "authored-synthetic",
+    "independent_of_responses": true,
+    "authored_by": "idiolect maintainers",
+    "authored_at": "2026-10-14",
+    "note": "期望与 oracle 先于任何回复写定；合成、脱敏，不含真实用户或生产数据"
+  },
+  "families": [
+    {
+      "family_id": "lcf-lenpos-01",
+      "design": "length_x_position",
+      "scene_id": "scene_lc1",
+      "factors": {
+        "length": {
+          "short": 600,
+          "long": 6000
+        },
+        "position": [
+          "head",
+          "middle",
+          "tail"
+        ]
+      },
+      "control": {
+        "length": "short",
+        "position": "head"
+      },
+      "intervention": [
+        "length",
+        "position"
+      ],
+      "distractor_density": 1.0,
+      "semantic": {
+        "subject": "actor_b",
+        "user": "actor_b 现在在哪里？",
+        "key": {
+          "evidence_id": "evidence_17",
+          "text": "actor_b 现在在 location_k 的北侧入口。"
+        },
+        "expect": {
+          "policy": "answer_current",
+          "required_claims": [
+            {
+              "claim_id": "c1",
+              "any_of": [
+                "北侧入口"
+              ],
+              "evidence_id": "evidence_17",
+              "expected_status": "current"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "family_id": "lcf-lenpos-02",
+      "design": "length_x_position",
+      "scene_id": "scene_lc2",
+      "factors": {
+        "length": {
+          "short": 600,
+          "long": 6000
+        },
+        "position": [
+          "head",
+          "middle",
+          "tail"
+        ]
+      },
+      "control": {
+        "length": "short",
+        "position": "head"
+      },
+      "intervention": [
+        "length",
+        "position"
+      ],
+      "distractor_density": 1.0,
+      "semantic": {
+        "subject": "actor_h",
+        "user": "actor_h 的会合点定在哪？",
+        "key": {
+          "evidence_id": "evidence_27",
+          "text": "actor_h 的会合点定在 location_w 的钟楼下。"
+        },
+        "expect": {
+          "policy": "answer_current",
+          "required_claims": [
+            {
+              "claim_id": "c1",
+              "any_of": [
+                "钟楼下"
+              ],
+              "evidence_id": "evidence_27",
+              "expected_status": "current"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "family_id": "lcf-conflict-01",
+      "design": "multiturn_conflict",
+      "scene_id": "scene_lc3",
+      "factors": {
+        "conflict": [
+          "none",
+          "history_vs_current"
+        ],
+        "turns": {
+          "short": 2,
+          "long": 24
+        }
+      },
+      "control": {
+        "conflict": "none",
+        "turns": "short"
+      },
+      "intervention": [
+        "conflict",
+        "turns"
+      ],
+      "semantic": {
+        "subject": "actor_j",
+        "kind": "conflict_correction",
+        "user": "actor_j 现在在哪？",
+        "old_question": "actor_j 在哪？",
+        "old_answer": "在 location_v 的旧码头。",
+        "key": {
+          "evidence_id": "evidence_37",
+          "text": "actor_j 已经转去 location_v 的新码头。"
+        },
+        "old": {
+          "evidence_id": "evidence_36",
+          "text": "上午 actor_j 在 location_v 的旧码头。",
+          "as_of": "2026-09-12T09:00:00+09:00"
+        },
+        "expect": {
+          "policy": "use_latest",
+          "required_claims": [
+            {
+              "claim_id": "c1",
+              "any_of": [
+                "新码头"
+              ],
+              "evidence_id": "evidence_37",
+              "expected_status": "current"
+            }
+          ],
+          "forbidden_claims": [
+            {
+              "claim_id": "f1",
+              "any_of": [
+                "旧码头"
+              ],
+              "reason": "history_as_current",
+              "evidence_id": "evidence_36",
+              "expected_status": "history",
+              "allow_if_qualified": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "family_id": "lcf-controls-01",
+      "design": "controls",
+      "scene_id": "scene_lc4",
+      "factors": {
+        "budget": {
+          "ample": 0,
+          "trimmed": 120
+        }
+      },
+      "control": {
+        "budget": "ample"
+      },
+      "intervention": [
+        "budget"
+      ],
+      "filler_chars": 1200,
+      "semantic": {
+        "subject": "actor_k",
+        "user": "actor_k 现在在哪？",
+        "key": {
+          "evidence_id": "evidence_47",
+          "text": "actor_k 在 location_z 的东门售货亭。"
+        },
+        "expect": {
+          "policy": "answer_current",
+          "required_claims": [
+            {
+              "claim_id": "c1",
+              "any_of": [
+                "东门售货亭"
+              ],
+              "evidence_id": "evidence_47",
+              "expected_status": "current"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

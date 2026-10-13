@@ -10,6 +10,17 @@
                                 （读环境变量 LLM_API_KEY / LLM_BASE_URL / LLM_MODEL，
                                  需要 `pip install "idiolect[llm]"`）
 
+评测（离线命令零密钥、零网络；见 docs/09-evidence-grounding.md）：
+
+  capabilities                  列出评测能力：style（默认）/ spatiotemporal / long-context-stress
+  contract validate|project     校验合同文件 / 把显式快照投影成证据上下文
+  bench list|inspect            查看内置 suite、任务与模型可见 messages
+  eval                          离线评测：双轴判定 + 门禁 + 实验登记（manifest）
+  run                           生成回复：--dry-run 占位，或 --yes 显式付费调用
+  compare <实验A> <实验B>        先判可比性，再做 family 配对比较
+  report <实验目录…>             导出离线 inspect HTML
+  selftest                      同链变异体 + 健康反控制
+
 角色名支持别名：`乐奈` / `rana` / `要乐奈` 等价（完整别名表见 `idiolect/registry.py`）。
 """
 from __future__ import annotations
@@ -135,6 +146,7 @@ def _cmd_chat(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """解析命令行并分派到对应子命令；返回进程退出码。"""
     parser = argparse.ArgumentParser(
         prog="python -m idiolect",
         description="把角色的说话方式装配成 system prompt（示例角色：MyGO!!!!! 五人）")
@@ -145,7 +157,8 @@ def main(argv: list[str] | None = None) -> int:
     p_prompt = sub.add_parser("prompt", help="打印装配出的完整 system prompt")
     p_prompt.add_argument("char")
     p_prompt.add_argument("text")
-    p_prompt.add_argument("--layers", default=None, help="只打印指定层，逗号分隔（canon,voice,style_target,turn_logic）")
+    p_prompt.add_argument("--layers", default=None,
+                          help="只打印指定层，逗号分隔（canon,voice,style_target,turn_logic）")
     p_prompt.add_argument("--no-turn-logic", action="store_true", help="不注入本轮场景指引")
 
     p_sizes = sub.add_parser("sizes", help="打印四层各自的字符数")
@@ -161,7 +174,12 @@ def main(argv: list[str] | None = None) -> int:
     p_chat.add_argument("--temperature", type=float, default=0.75)
     p_chat.add_argument("--max-tokens", type=int, default=420)
 
+    from .evals.cli import HANDLERS, register
+    register(sub)
+
     args = parser.parse_args(argv)
+    if args.cmd in HANDLERS:
+        return HANDLERS[args.cmd](args)
     if args.cmd == "list":
         return _cmd_list()
     if args.cmd == "prompt":

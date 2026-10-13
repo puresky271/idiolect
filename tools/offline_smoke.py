@@ -67,7 +67,7 @@ FORBIDDEN = {
 }
 
 GATES = ["voice_meta_gate.py", "_gen_scene_check.py", "_tl_deep_check.py", "audit_role_packages.py",
-         "oob_check.py", "evidence_check.py"]
+         "oob_check.py", "evidence_check.py", "style_gate.py"]
 
 
 class Result:
@@ -215,6 +215,58 @@ def check_fixtures(res: Result) -> None:
         res.add("夹具.占位提示", None, "5 份都是占位夹具（system 为空）→ 探针请加 --assemble")
     elif any("system0字" in n for n in note):
         res.add("夹具.占位提示", None, "部分夹具 system 为空 → 探针请加 --assemble")
+
+
+def check_eval_contracts(res: Result) -> None:
+    """评测合同（v0.1.2）：内置数据合法、四种能力模式各自得到预期门禁，负对照必须 FAIL。
+
+    全部在内存里跑（不登记、不写文件），回放都是合成回复——这里验证的是链路，不是模型。
+    """
+    from idiolect.evals.cli import _validate_any
+    from idiolect.evals.pipeline import evaluate_suite
+    from idiolect.evals.suites import BUILTIN_EXAMPLES, BUILTIN_SUITES, load_responses, load_suite, read_json_source
+
+    t0 = time.time()
+    bad = []
+    for name in list(BUILTIN_SUITES) + list(BUILTIN_EXAMPLES):
+        _schema, report = _validate_any(read_json_source(name))
+        if not report.get("ok"):
+            bad.append(name)
+    res.add("评测.内置合同", not bad,
+            f"{len(BUILTIN_SUITES)} suite + {len(BUILTIN_EXAMPLES)} 样例；不合格={bad or '无'}",
+            time.time() - t0)
+
+    # (suite, 回放, 启用能力, 预期门禁)：四种模式 + 三个负对照
+    cases = [
+        ("language-only", "language-only.healthy", "", "PASS"),
+        ("spatiotemporal-core", "spatiotemporal-core.healthy", "spatiotemporal", "PASS"),
+        ("long-context-smoke", "long-context-smoke.healthy", "long-context-stress", "PASS"),
+        ("long-context-smoke", "long-context-smoke.healthy", "long-context-stress,spatiotemporal", "PASS"),
+        ("mygo-five-showcase", "mygo-five-showcase.healthy", "", "PASS"),
+        ("spatiotemporal-core", "spatiotemporal-core.defects", "spatiotemporal", "FAIL"),
+        ("long-context-smoke", "long-context-smoke.lost_middle", "long-context-stress,spatiotemporal", "FAIL"),
+        ("long-context-smoke", "long-context-smoke.failure_controls", "long-context-stress", "FAIL"),
+    ]
+    t0 = time.time()
+    wrong = []
+    for suite_name, replay, caps, want in cases:
+        suite = load_suite(suite_name)
+        got = evaluate_suite(suite, load_responses(f"builtin:{replay}", suite), capabilities=caps)["gate"]["verdict"]
+        if got != want:
+            wrong.append(f"{replay}[{caps or 'style'}]={got}≠{want}")
+    res.add("评测.能力模式", not wrong, f"{len(cases)} 例（仅语言/单独时空/单独长上下文/联合 + 负对照）；"
+            f"不符={wrong or '无'}", time.time() - t0)
+
+
+def check_selftest(res: Result) -> None:
+    """同链变异自测：变异体全部被检出、等价体不被误判、健康反控制零误报。"""
+    from idiolect.evals.mutants import run_selftest
+
+    t0 = time.time()
+    s = run_selftest()["summary"]
+    res.add("评测.同链变异自测", s["ok"],
+            f"检出 {s['killed']}/{s['mutants']}｜存活={s['survivors'] or '无'}｜反控制误报="
+            f"{s['control_false_positives'] or '无'}｜按阶段 {s['detected_by_stage']}", time.time() - t0)
 
 
 def check_data(res: Result) -> None:
@@ -463,7 +515,9 @@ def main() -> int:
     check_cli_safety(res)
     check_readme_tables(res)
     check_doc_test_count_claims(res)
+    check_eval_contracts(res)
     if not args.fast:
+        check_selftest(res)
         check_gates(res)
         check_tests(res)
     if args.with_llm:

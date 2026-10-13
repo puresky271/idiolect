@@ -61,7 +61,7 @@ def main() -> int:
 
     out: dict[str, dict[str, dict]] = {}
     dropped = 0
-    for key, v in src.items():
+    for _key, v in src.items():
         if int(v.get("n") or 0) < MIN_N:
             dropped += 1
             continue

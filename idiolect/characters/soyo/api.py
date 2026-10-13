@@ -6,8 +6,8 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from .canon import CHARACTER_NAME, get_canon_facts, get_canon_profile
-from .voice import get_voice_manifest
+from .canon import CHARACTER_NAME, get_canon_facts, get_canon_profile  # noqa: F401 - registry 经 getattr 取用的公开入口
+from .voice import get_voice_manifest  # noqa: F401 - registry 经 getattr 取用的公开入口
 from ...registry import canonicalize_name
 
 _log = logging.getLogger(__name__)

@@ -1,0 +1,38 @@
+{
+  "schema_version": "response-set/v1",
+  "suite_id": "mygo-five-showcase",
+  "suite_sha256": "4ab7cbb0be05665eb8c81fb49e4a6d3c8933012497b21c9faf707aa94c5d2b47",
+  "arm": "replay:healthy",
+  "runner": {
+    "kind": "replay",
+    "synthetic": "replay",
+    "note": "手写合成回复：同一事实的五种说法，演示不等于实证"
+  },
+  "responses": [
+    {
+      "task_id": "show-anon",
+      "finish_reason": "stop",
+      "raw": "开着哦！告示上写着营业到21:00～"
+    },
+    {
+      "task_id": "show-tomori",
+      "finish_reason": "stop",
+      "raw": "……开着。……到21:00。"
+    },
+    {
+      "task_id": "show-taki",
+      "finish_reason": "stop",
+      "raw": "开着，到21:00。"
+    },
+    {
+      "task_id": "show-soyo",
+      "finish_reason": "stop",
+      "raw": "开着呢，告示上写营业到21:00。"
+    },
+    {
+      "task_id": "show-rana",
+      "finish_reason": "stop",
+      "raw": "开着。21:00。"
+    }
+  ]
+}

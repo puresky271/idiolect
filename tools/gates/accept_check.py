@@ -106,40 +106,9 @@ def anchor_per_char(art: dict) -> dict[str, tuple[int, int]]:
     return out
 
 
-def poisson_decrease_pvalue(hits_b: int, chars_b: int, hits_a: int, chars_a: int) -> float:
-    """单侧精确检验：after 的锚点率是否显著低于 before。
-
-    条件检验（两泊松率比较的标准精确做法）：零假设两臂率相同，
-    给定总命中 N = hits_a + hits_b，after 的命中数 ~ Binomial(N, p0)，
-    p0 = chars_a / (chars_a + chars_b)（按曝光量加权）。math.comb 手算，
-    不需要 scipy。N 到几百时浮点足够稳。
-    """
-    from math import comb
-
-    n = hits_a + hits_b
-    if n == 0 or not chars_a or not chars_b:
-        return 1.0
-    p0 = chars_a / (chars_a + chars_b)
-    return sum(comb(n, k) * p0 ** k * (1 - p0) ** (n - k) for k in range(hits_a + 1))
-
-
-def critical_drop(hits_b: int, chars_b: int, chars_a: int, alpha: float) -> float | None:
-    """当前样本量下能判 FAIL 的最小相对降幅（5% 显著临界）。
-
-    找不到（计数太少，任何降幅都不显著）返回 None——调用方照实打印「无结论」。
-    """
-    rate_b = hits_b / chars_b if chars_b else 0.0
-    if not rate_b:
-        return None
-    best: int | None = None
-    for k in range(hits_b + 1):
-        if poisson_decrease_pvalue(hits_b, chars_b, k, chars_a) < alpha:
-            best = k
-        else:
-            break
-    if best is None:
-        return None
-    return 1.0 - (best / chars_a) / rate_b
+# 精确检验的唯一实现在 idiolect.evals.stats（grounding 的 family 符号检验是它在曝光量相等时的
+# 特例）。这里 re-export 原名字，multiturn_probe 等旧调用方不用改；数值与迁移前逐位一致。
+from idiolect.evals.stats import critical_drop, poisson_decrease_pvalue  # noqa: E402,F401
 
 
 def distill_mean(art: dict) -> float | None:

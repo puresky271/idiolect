@@ -22,7 +22,6 @@ from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
 import argparse
 import json
 import statistics
-import sys
 
 
 def main() -> int:

@@ -22,7 +22,6 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import scenes as SC  # noqa: E402
-import taxonomy as TX  # noqa: E402
 
 REPORT = REPORT
 CHARS = ["爱音", "素世", "灯", "立希", "乐奈"]

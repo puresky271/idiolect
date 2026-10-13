@@ -33,7 +33,6 @@ for _p in (_ROOT, _ROOT / "tools",
 from _paths import CORPUS_DIR, DATA, REPORT, ROOT, require_corpus  # noqa: E402,F401
 
 import json
-from collections import Counter
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -169,8 +168,9 @@ def main() -> int:
         lines.append(f"\n## {cname}（n={len(texts)} 条）\n")
         lines.append("**专有口癖**（专指度 ≥2，即基本是她专用）：")
         exclusive = [p for p in per if p["specificity"] >= 2][:14]
-        lines.append("　" + ("、".join(f"`{p['tic']}`({p['count']}, 专指{p['specificity']}, 句占比{p['line_share']:.0%})"
-                                      for p in exclusive) or "（无）"))
+        lines.append("　" + ("、".join(
+            f"`{p['tic']}`({p['count']}, 专指{p['specificity']}, 句占比{p['line_share']:.0%})"
+            for p in exclusive) or "（无）"))
         lines.append("\n**高频共用语气**：")
         common = sorted([p for p in per if p["specificity"] < 2], key=lambda x: -x["count"])[:10]
         lines.append("　" + "、".join(f"`{p['tic']}`({p['count']})" for p in common))

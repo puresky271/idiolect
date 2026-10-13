@@ -56,9 +56,13 @@ py -X utf8 tools/probe/make_fixtures.py
 py -X utf8 tools/probe/probe_runner.py --label dry --dry-run --assemble --registry --runs 1
 py -X utf8 tools/probe/probe_runner.py --label run1 --assemble --turn-logic --registry --cats 通用场景 --runs 3
 py -X utf8 tools/score/probe_report.py --label run1 --scenes crisis,comfort --cat 通用场景
+
+# 5. （可选）grounding：通用合同与角色无关，自己的角色名可以直接写进任务的 actor
+py -X utf8 -m idiolect selftest
+py -X utf8 -m idiolect eval --suite <你的 suite.json> --responses <回复集> --capabilities spatiotemporal --html
 ```
 
-每一步之间都要过门禁：**门禁不过就别往下走**。`tools/offline_smoke.py` 是总闸，它会在一次运行里把装配、场景覆盖、触发矩阵、内容红线、数据形状、四道门禁、单测和零写校验全跑一遍。
+每一步之间都要过门禁：**门禁不过就别往下走**。`tools/offline_smoke.py` 是总闸，它会在一次运行里把装配、场景覆盖、触发矩阵、内容红线、数据形状、评测合同与能力模式、同链变异自测、门禁（含注释风格）、单测和零写校验全跑一遍。
 
 ## 哪些是自动的，哪些必须人写
 
@@ -88,6 +92,7 @@ git grep -l '"tomori"' -- tools idiolect        # 当前 28 个文件
 - **夹具的可测性**：需要上文指代的场景（「你刚才那句什么意思」）用占位夹具测不出来。
 - **词面通道对单个汉字失明**：见 [`docs/08-context-workspace.md`](../../../docs/08-context-workspace.md) 第 4 节。
 - **语料不入库**：`raw/` 与 `*.jsonl` 已被 `.gitignore` 排除；发布形态只有聚合量。
+- **grounding 只认声明过的写法**：任务的 `any_of` 写不全时会出现 needs_review；宿主上下文只能以显式快照进来（[`docs/09-evidence-grounding.md`](../../../docs/09-evidence-grounding.md)）。
 
 ---
 

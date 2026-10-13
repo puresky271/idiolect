@@ -118,7 +118,8 @@ def main() -> int:
         print("\n--- 明细 ---")
         for it in items:
             flag = " ⚠risk" if it["risk"] else ""
-            print(f"[{it['source']}] {it['id']:<28} {it['char']:<4} scene={it['scene']:<18} {it['user_text'][:34]!r}{flag}")
+            print(f"[{it['source']}] {it['id']:<28} {it['char']:<4} scene={it['scene']:<18}"
+                  f" {it['user_text'][:34]!r}{flag}")
 
     (REPORT / "probe_registry.json").write_text(
         json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")

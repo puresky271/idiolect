@@ -2,7 +2,7 @@
 
 > 讲什么：工具手册——每个脚本干什么、怎么调，含「加一个角色 / 加一个场景」的完整步骤。 ｜ 前置：无；找命令时直接来这篇。
 
-**目录**：[1 路径与环境变量](#1-路径与环境变量) ｜ [2 一条命令的健康检查](#2-一条命令的健康检查) ｜ [3 mock 时钟](#3-mock-时钟) ｜ [4 全量 prompt dump](#4-全量-prompt-dump) ｜ [5 探针](#5-探针) ｜ [6 评分四件套](#6-评分四件套) ｜ [7 机械门禁](#7-机械门禁) ｜ [8 语料与蒸馏](#8-语料与蒸馏) ｜ [9 加一个角色或一个场景](#9-加一个角色或一个场景) ｜ [10 密钥](#10-密钥)
+**目录**：[1 路径与环境变量](#1-路径与环境变量) ｜ [2 一条命令的健康检查](#2-一条命令的健康检查) ｜ [3 mock 时钟](#3-mock-时钟) ｜ [4 全量 prompt dump](#4-全量-prompt-dump) ｜ [5 探针](#5-探针) ｜ [6 评分四件套](#6-评分四件套) ｜ [7 机械门禁](#7-机械门禁) ｜ [8 统一评测 CLI](#8-统一评测-cli) ｜ [9 语料与蒸馏](#9-语料与蒸馏) ｜ [10 加一个角色或一个场景](#10-加一个角色或一个场景) ｜ [11 密钥](#11-密钥)
 
 所有命令在仓库根跑，统一用 `py -X utf8`（Windows 上裸 `python` 可能解析到没装依赖的解释器）。产物默认写进 `report/`，可用 `IDIOLECT_REPORT_DIR` 改。
 
@@ -206,11 +206,54 @@ py -X utf8 tools/gates/dump_turn_logic_gate.py --phase after    # 触发矩阵 +
 py -X utf8 tools/gates/voice_check_diff_check.py   # 后处理清洗的前后差异
 py -X utf8 tools/gates/oob_check.py                # 输出侧越界审计（无参=自检；--label 扫探针批次，--gate 判定）
 py -X utf8 tools/gates/evidence_check.py           # 证据一致性：担当/学校/CRYCHIC/称呼（无参=自检）
+py -X utf8 tools/gates/style_gate.py               # 注释风格：中文 docstring / 注释格式 / 繁体字 / 纯英文注释
+ruff check .                                       # 代码风格：pyflakes + 机械格式（pip install "idiolect[lint]"，版本钉死）
 ```
+
+`style_gate.py` 是标准库实现，跑在 offline_smoke 里；ruff 跑在 CI 的 lint job 里，规则集在
+`pyproject.toml` 的 `[tool.ruff.lint]`（正确性 + 机械格式；`idiolect/characters/**` 的 prompt 正文
+长行豁免，重排有 prompt 漂移风险）。
+
+**workspace 路径的 prompt 证据**：`dump_prompt.py` 只装配四层。四层之外的那段（外部块、历史、
+执行包位置、预算尾裁、证据块）用 `tools/gates/dump_workspace.py` 在改动前后各导出一次：
+
+```powershell
+$env:IDIOLECT_REPORT_DIR = "report/<改动>/before"
+py -X utf8 tools/gates/dump_workspace.py --contract
+# 修改代码后
+$env:IDIOLECT_REPORT_DIR = "report/<改动>/after"
+py -X utf8 tools/gates/dump_workspace.py --contract
+Remove-Item Env:\IDIOLECT_REPORT_DIR
+```
+
+`legacy.*` 用例必须零漂移；`contract.*` 只在新代码上存在，没有 before 产物时要在报告里写明。
 
 `dump_turn_logic_gate.py --phase before` 只产基线，不判期望（回退开关全关时按定义什么都不触发）。
 
-## 8. 语料与蒸馏
+## 8. 统一评测 CLI
+
+v0.1.2 新增。装了包就能用，离线命令零密钥、零网络；方法见 [`09-evidence-grounding.md`](09-evidence-grounding.md)。
+
+| 命令 | 干什么 | 退出码 |
+|---|---|---|
+| `idiolect capabilities` | 列出能力：版本、输入合同、适用任务、scorer、fixture、依赖、覆盖与不覆盖 | 0 |
+| `idiolect contract validate <文件>` | 自动识别合同类型并严格校验（证据 / 快照 / suite / 计划 / 回复集 / manifest） | 0 合格 / 1 不合格 |
+| `idiolect contract project <快照>` | 显式快照 → `evidence-context/v1`，列出被丢弃的记录 | 0 / 1 |
+| `idiolect bench list` | 内置 suite 与合成回放 | 0 |
+| `idiolect bench inspect <suite> [--task ID] [--messages] [--meter]` | 任务与期望、模型可见 messages、上下文计量 | 0 |
+| `idiolect eval --suite S --responses R [--capabilities …] [--labels F] [--intervention …] [--html]` | 双轴判定 + 门禁，登记到 `report/experiments/` | 0 PASS / 1 FAIL / 3 INCONCLUSIVE |
+| `idiolect run --suite S [--dry-run \| --yes --max-calls N]` | 生成回复集：干跑占位，或显式付费调用 | 0 / 2 拒绝 |
+| `idiolect compare <实验A> <实验B> [--html F]` | 先判可比性，再做 family 配对比较 | 0 可比 / 1 阻止或不可比 |
+| `idiolect report <实验目录…> [--selftest] [--out F]` | 离线 inspect HTML | 0 |
+| `idiolect selftest [--json] [--html F]` | 同链变异体 + 健康反控制 | 0 / 1 |
+
+四种模式（仅语言、单独时空、单独长上下文、两者联合）的命令见 README 的「四种模式」一节；
+`offline_smoke.py` 的「评测.能力模式」逐一跑过它们和三个负对照。
+
+探针批次也可以登记干预：`probe_runner.py --intervention prompt`。从 metadata v2 起，
+`tools/score/report_html.py` 会按「预注册干预」判两批的可比性；旧批次只能浏览。
+
+## 9. 语料与蒸馏
 
 需要语料，先设 `IDIOLECT_CORPUS_DIR`。读语料的脚本都有一道前置检查：文件缺失抛 `FileNotFoundError`，文件**存在但为空**直接退出（空语料会算出空产物，宁可当场停）。
 
@@ -245,7 +288,7 @@ py -X utf8 tools/distill/scene_stats.py        --no-exemplars --out data/scene_s
 
 三个写文件的脚本带零结果守卫，防止误调用把已有的好数据覆盖成空：`build_gold.py`（没有源文件时拒绝写，除非 `--force-empty`）、`prep_hf_corpus.py`、`export_scene_targets.py`。
 
-## 9. 加一个角色或一个场景
+## 10. 加一个角色或一个场景
 
 1. 在 `idiolect/characters/<key>/` 建包，至少提供 `get_canon_profile()`、`get_voice_manifest()`、`render_supplemental_blocks()`。
 2. 在 `idiolect/registry.py` 的 `_PACKAGE_NAMES` 与 `_ALIASES` 注册角色名与别名。
@@ -253,7 +296,7 @@ py -X utf8 tools/distill/scene_stats.py        --no-exemplars --out data/scene_s
 4. 跑 `py -X utf8 tools/offline_smoke.py`：装配、触发矩阵、红线、门禁会一起告诉你漏了什么。
 5. 改动用 `dump_prompt.py --phase before/after` 留 diff。
 
-## 10. 密钥
+## 11. 密钥
 
 探针按顺序取 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`：进程环境变量优先，其次仓库根的 `.env`，最后 `.streamlit/secrets.toml`（顺序实现见 `tools/secrets_loader.py`）。三者都不入库。
 

@@ -63,8 +63,8 @@ def main() -> int:
         rows = []
         multi = 0
         for rec in df.itertuples(index=False):
-            name = str(getattr(rec, "windowDisplayName") or "").strip()
-            text = str(getattr(rec, "text") or "").strip()
+            name = str(rec.windowDisplayName or "").strip()
+            text = str(rec.text or "").strip()
             if not text:
                 continue
             if any(sep in name for sep in MULTI_SEP):
@@ -79,8 +79,8 @@ def main() -> int:
                     "character": char,
                     "text": text,
                     "source": "hf_eventstory",
-                    "event_id": int(getattr(rec, "event_id")),
-                    "chapter": int(getattr(rec, "chapter")),
+                    "event_id": int(rec.event_id),
+                    "chapter": int(rec.chapter),
                     "lang": lang,
                 }
             )

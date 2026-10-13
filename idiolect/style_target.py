@@ -50,11 +50,16 @@ STYLE_TARGETS: dict[str, dict] = {
 }
 
 
-def build_style_target_block(char: str, scene: str = "") -> str:
-    """按角色实测基线渲染「可检验」的语气目标 + 写前自查。无该角色基线时返回 ""。"""
+def style_caps(char: str, scene: str = "") -> dict | None:
+    """本轮说话尺度的数字：中位 / p90 / 句数，以及写前硬检查的两条上限。
+
+    `build_style_target_block` 渲染的数字与评测侧（`idiolect.evals.style_axis`）检查的
+    上限都从这里取，保证「prompt 里写的上限」和「评分时卡的上限」是同一个数。
+    无该角色基线时返回 None。
+    """
     t = STYLE_TARGETS.get(char)
     if not t:
-        return ""
+        return None
     scene_cn = ""
     st = None
     if scene:
@@ -73,8 +78,26 @@ def build_style_target_block(char: str, scene: str = "") -> str:
         sent_per_turn = float(t["sent_per_turn"])
     # 硬检查的冗余量是人定的、不是语料数字：p90 之上再放 4 字、句数均值之上再放 0.6 句，
     # 给模型留「正常波动不被误杀」的余量（硬检查管的是异常长，不是贴着分布裁剪）。
-    cap = int(p90_chars) + 4
-    sent_cap = max(1, int(round(sent_per_turn + 0.6)))
+    return {
+        "median_chars": median_chars, "p90_chars": p90_chars, "sent_per_turn": sent_per_turn,
+        "cap_chars": int(p90_chars) + 4,
+        "cap_sentences": max(1, int(round(sent_per_turn + 0.6))),
+        "scene": scene if st else "", "scene_cn": scene_cn, "scene_hit": bool(st),
+    }
+
+
+def build_style_target_block(char: str, scene: str = "") -> str:
+    """按角色实测基线渲染「可检验」的语气目标 + 写前自查。无该角色基线时返回 ""。"""
+    t = STYLE_TARGETS.get(char)
+    caps = style_caps(char, scene)
+    if not t or caps is None:
+        return ""
+    median_chars, p90_chars = caps["median_chars"], caps["p90_chars"]
+    sent_per_turn = caps["sent_per_turn"]
+    scene_cn = caps["scene_cn"]
+    st = caps["scene_hit"]
+    cap = caps["cap_chars"]
+    sent_cap = caps["cap_sentences"]
     interjections = "、".join(str(x) for x in t.get("top_interjections", [])[:5])
     head = f"【说话尺度·{char}】" if not scene_cn else f"【说话尺度·{char}·{scene_cn}】"
     lines = [
@@ -120,4 +143,4 @@ def persona_card_prefix(char: str, user_text: str = "") -> str:
     return build_style_target_block(char, scene)
 
 
-__all__ = ["STYLE_TARGETS", "build_style_target_block", "persona_card_prefix"]
+__all__ = ["STYLE_TARGETS", "build_style_target_block", "persona_card_prefix", "style_caps"]

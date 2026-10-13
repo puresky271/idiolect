@@ -58,7 +58,6 @@ import functools
 import importlib.resources
 import json
 import os
-import re
 from idiolect.scene_engine import SessionStore
 from typing import Optional
 

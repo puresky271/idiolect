@@ -114,7 +114,6 @@ def main() -> int:
     print(f"逐格：{wins} 改善 / {loss} 退化 / {len(shared) - wins - loss} 持平")
 
     # 用「中位字长 / 基线」的比值做符号检验（对中位数摆动更稳）
-    import math
     ratios_a = [A[k]["out_med"] / A[k]["base_med"] for k in shared]
     ratios_b = [B[k]["out_med"] / B[k]["base_med"] for k in shared]
     print(f"\n长度比值（输出中位/基线中位）均值：{statistics.fmean(ratios_a):.2f}× → "

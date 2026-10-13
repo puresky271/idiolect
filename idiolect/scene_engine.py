@@ -30,7 +30,7 @@ from collections import OrderedDict
 from contextlib import contextmanager
 from contextvars import ContextVar
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, Optional
 
 _log = logging.getLogger(__name__)
@@ -38,6 +38,7 @@ _log = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class SceneModule:
+    """一个场景注入模块：触发正则、注入正文与去重/开关元数据。"""
     key: str                       # 场景 key（与 scenes.py 对齐）
     cn: str                        # 中文名
     triggers: tuple[str, ...]      # **正则片段**（不是纯字面量；来自语料实证）

@@ -27,7 +27,6 @@ from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
 
 import argparse
 import json
-import sys
 
 import style_features as S  # noqa: E402
 
@@ -51,7 +50,7 @@ def load_train(lang: str = "cn") -> dict[str, list[str]]:
 def build(lang: str = "cn") -> dict:
     texts = load_train(lang)
     out: dict = {"lang": lang, "note": "派生统计（聚合量），不含任何原作台词；由 tools/distill/export_profiles.py 生成"}
-    for char, key in CHARKEY.items():
+    for _char, key in CHARKEY.items():
         out[key] = S.profile_from_texts(texts[key], lang)
     return out
 

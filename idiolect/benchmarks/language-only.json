@@ -1,0 +1,241 @@
+{
+  "schema_version": "benchmark-suite/v1",
+  "suite_id": "language-only",
+  "suite_version": "1.0.0",
+  "description": "默认语言/风格工作流：五人 × 四句，不涉及任何时空 schema。",
+  "preregistration": {
+    "registered_at": "2026-10-14",
+    "unit": "family（每个角色一个 family）",
+    "min_families_for_claims": 5
+  },
+  "label_source": {
+    "kind": "authored-synthetic",
+    "independent_of_responses": true,
+    "authored_by": "idiolect maintainers",
+    "authored_at": "2026-10-14",
+    "note": "期望与 oracle 先于任何回复写定；合成、脱敏，不含真实用户或生产数据"
+  },
+  "capabilities": [],
+  "tasks": [
+    {
+      "task_id": "lang-anon-plain",
+      "family_id": "lang-anon",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "爱音",
+      "user": "在干嘛",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-anon-schedule",
+      "family_id": "lang-anon",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "爱音",
+      "user": "明天几点上课",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-anon-comfort",
+      "family_id": "lang-anon",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "爱音",
+      "user": "我一直在哭，快撑不住了",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-anon-banter",
+      "family_id": "lang-anon",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "爱音",
+      "user": "今天天气不错，午饭吃什么",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-tomori-plain",
+      "family_id": "lang-tomori",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "灯",
+      "user": "在干嘛",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-tomori-schedule",
+      "family_id": "lang-tomori",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "灯",
+      "user": "明天几点上课",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-tomori-comfort",
+      "family_id": "lang-tomori",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "灯",
+      "user": "我一直在哭，快撑不住了",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-tomori-banter",
+      "family_id": "lang-tomori",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "灯",
+      "user": "今天天气不错，午饭吃什么",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-taki-plain",
+      "family_id": "lang-taki",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "立希",
+      "user": "在干嘛",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-taki-schedule",
+      "family_id": "lang-taki",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "立希",
+      "user": "明天几点上课",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-taki-comfort",
+      "family_id": "lang-taki",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "立希",
+      "user": "我一直在哭，快撑不住了",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-taki-banter",
+      "family_id": "lang-taki",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "立希",
+      "user": "今天天气不错，午饭吃什么",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-soyo-plain",
+      "family_id": "lang-soyo",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "素世",
+      "user": "在干嘛",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-soyo-schedule",
+      "family_id": "lang-soyo",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "素世",
+      "user": "明天几点上课",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-soyo-comfort",
+      "family_id": "lang-soyo",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "素世",
+      "user": "我一直在哭，快撑不住了",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-soyo-banter",
+      "family_id": "lang-soyo",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "素世",
+      "user": "今天天气不错，午饭吃什么",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-rana-plain",
+      "family_id": "lang-rana",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "乐奈",
+      "user": "在干嘛",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-rana-schedule",
+      "family_id": "lang-rana",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "乐奈",
+      "user": "明天几点上课",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-rana-comfort",
+      "family_id": "lang-rana",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "乐奈",
+      "user": "我一直在哭，快撑不住了",
+      "expect": {
+        "policy": "style_only"
+      }
+    },
+    {
+      "task_id": "lang-rana-banter",
+      "family_id": "lang-rana",
+      "kind": "style_only",
+      "capabilities": [],
+      "actor": "乐奈",
+      "user": "今天天气不错，午饭吃什么",
+      "expect": {
+        "policy": "style_only"
+      }
+    }
+  ]
+}

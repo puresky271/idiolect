@@ -5,12 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "idiolect"
 dynamic = ["version"]
-description = "把角色的说话方式蒸馏成可验证的 prompt 约束（示例角色：《BanG Dream! It's MyGO!!!!!》五人）"
+description = "把角色的说话方式蒸馏成可验证的 prompt 约束，并对证据 grounding 与长上下文做可预注册的离线评测（示例角色：《BanG Dream! It's MyGO!!!!!》五人）"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE", "NOTICE.md"]
-keywords = ["prompt-engineering", "character-ai", "roleplay", "llm", "evaluation"]
+keywords = ["prompt-engineering", "character-ai", "roleplay", "llm", "evaluation", "grounding",
+            "long-context", "mutation-testing"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -40,6 +41,8 @@ tools = [
     "pytest>=7.4",
 ]
 corpus = ["sentence-transformers>=2.2", "scikit-learn>=1.3"]
+# 代码风格门禁（CI lint job 用同一个钉死的版本，本地与 CI 结论一致）
+lint = ["ruff==0.14.14"]
 
 [tool.setuptools.dynamic]
 version = { attr = "idiolect.__version__" }
@@ -53,3 +56,27 @@ namespaces = false
 [tool.setuptools.package-data]
 "idiolect.characters.anon.data" = ["*.json"]
 "idiolect.characters.tomori.data" = ["*.json"]
+# 评测合同的内置 suite / 回放 / 长上下文计划 / 快照样例，以及离线 inspect 报告模板（v0.1.2）
+"idiolect.benchmarks" = ["*.json"]
+"idiolect.evals" = ["*.html"]
+
+# 代码风格门禁（CI 的 lint job；本地：pip install "idiolect[lint]" 后 ruff check .）。
+# 选的是「正确性 + 机械格式」规则，不是全量风格重排：E402 是 tools/ 有意的 sys.path 引导，
+# 导入排序与 pyupgrade 改写会在 prompt 模块里制造大面积无关 diff，所以不开。
+# 注释风格（中文 docstring、注释格式、繁体字、纯英文注释）由 tools/gates/style_gate.py 检查。
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["report", "raw", ".workbuddy", "build", "dist"]
+
+[tool.ruff.lint]
+select = [
+    "E9", "E501", "E711", "E712", "E713", "E714", "E721", "E722",
+    "F",
+    "W",
+    "B006", "B007", "B008", "B009", "B010", "B012", "B018", "B023",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# 角色包正文是 prompt 素材：长行几乎都是中文注入正文，重排有 prompt 漂移风险。新模块不豁免。
+"idiolect/characters/**" = ["E501"]

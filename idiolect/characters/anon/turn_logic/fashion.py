@@ -473,7 +473,6 @@ def _render_anon_tokyo_canon(intent: dict, *, dedup: bool = False, is_developer:
 
     spec_line = ""
     if sub:
-        sub_data = _taxonomy().get(cat or "", {}).get("subspecies", {}).get(sub, {})
         spec_line = (
             f"\n（用户提到的具体单品：**{sub}**——可以自然带入「这个我以前在 ANON TOKYO 设计稿"
             f"里参考过」式钩子、但不要每一句都拐到 ANON TOKYO）"

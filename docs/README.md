@@ -1,6 +1,6 @@
 # 文档索引
 
-九篇文档，按「你在做什么」分三条路。每篇都能单独读，但编号就是推荐顺序。
+十二篇文档，按「你在做什么」分几条路。每篇都能单独读，但编号就是推荐顺序。
 
 ## 按目的挑路
 
@@ -13,14 +13,17 @@
 | **要重算语料 / 换一部作品** | [`02-corpus.md`](02-corpus.md) → [`03-features.md`](03-features.md) → [`04-evaluation.md`](04-evaluation.md) |
 | **被某个坑卡住了** | [`06-lessons.md`](06-lessons.md)（按主题分组，症状 → 原因 → 约束） |
 | **想先搞清这套方法凭什么成立** | [`00-methodology.md`](00-methodology.md) |
+| **要检查回答是否受可见证据约束**（时空 grounding） | [`09-evidence-grounding.md`](09-evidence-grounding.md) → [`08-context-workspace.md`](08-context-workspace.md) 第 6 节 |
+| **要做长上下文压力测试** | [`10-long-context-stress.md`](10-long-context-stress.md) |
+| **从 v0.1.0 升级、写插件、看路线图** | [`11-upgrade-guide.md`](11-upgrade-guide.md) |
 
-第一次接触项目时，先运行 `py -X utf8 -m idiolect showcase "我今天有点撑不住了"`，再按上表进入对应路径。展示命令只读、无密钥，作用是把“五人体验入口”和后面的证据链接起来。
+第一次接触项目时，先运行 `py -X utf8 -m idiolect showcase "我今天有点撑不住了"`，再按上表进入对应路径。展示命令只读、无密钥，作用是把“五人体验入口”和后面的证据链接起来。评测侧的第一条命令是 `py -X utf8 -m idiolect selftest`：它先告诉你这条评测链自己能抓到什么、抓不到什么。
 
 ## 每篇讲什么
 
 | 文档 | 一句话 | 读完你能 |
 |---|---|---|
-| [`00-methodology.md`](00-methodology.md) | 为什么通用模型演角色会稳定跑偏，以及「把像不像变成可测量的量」这套闭环 | 说清这套方法的四条不变量和证据分级 |
+| [`00-methodology.md`](00-methodology.md) | 为什么通用模型演角色会稳定跑偏，以及「把像不像变成可测量的量」这套闭环 | 说清这套方法的不变量和证据分级 |
 | [`01-quickstart.md`](01-quickstart.md) | 从零跑通：装包 → 看 prompt → 体检 → 真探针 → 换自己的语料 | 在自己机器上看到四层 prompt 和一批真实回复 |
 | [`02-corpus.md`](02-corpus.md) | 语料从哪来：抓取、清洗、切分、审计、派生统计、发布形态 | 自己抓一份语料并重算出 `data/` 里的全部数字 |
 | [`03-features.md`](03-features.md) | 五类特征（场景分类 / 长度目标 / 句式口癖 / 词表 / 称呼）怎么算、落在哪 | 知道改一个特征要动哪个文件、要跑什么 |
@@ -28,7 +31,10 @@
 | [`05-tooling.md`](05-tooling.md) | 工具手册：每个脚本干什么、怎么调（含加角色/加场景的完整步骤） | 不翻源码就能找到该跑哪条命令 |
 | [`06-lessons.md`](06-lessons.md) | 踩坑清单：每条约束是被什么事故教出来的 | 避开别人已经付过代价的坑 |
 | [`07-turn-logic-and-postprocessing.md`](07-turn-logic-and-postprocessing.md) | 两个动态部件（turn_logic / voice_check）怎么搭、边界在哪 | 加一个场景模块或一个后处理规则 |
-| [`08-context-workspace.md`](08-context-workspace.md) | 四层之外的上下文骨架：12 层工作区 + 事实选择器 | 把四层接进一个真实聊天系统 |
+| [`08-context-workspace.md`](08-context-workspace.md) | 四层之外的上下文骨架：12 层工作区 + 事实选择器 + 证据块 | 把四层接进一个真实聊天系统 |
+| [`09-evidence-grounding.md`](09-evidence-grounding.md) | 证据合同、快照 adapter、grounding 任务、双轴门禁、manifest 与同链变异自测 | 判断回答有没有被可见证据约束住，并知道这项判断自己可不可信 |
+| [`10-long-context-stress.md`](10-long-context-stress.md) | 可选能力：长上下文压力的预注册 family、生成器、计量与配对分析 | 分清装配丢证据、模型没用证据与缺测 |
+| [`11-upgrade-guide.md`](11-upgrade-guide.md) | 兼容性、旧 API 迁移、版本策略、插件规范、评测边界、路线图 | 平滑升级并按规范扩展 |
 
 ## 名词表
 
@@ -50,11 +56,19 @@
 | **元叙述** | 角色说出自己的写作依据（「按台词中位数…」）——正文里禁止 | [03](03-features.md) 第 5 节 |
 | **零样本** | 注入正文里不放可整句照抄的例句，只给形态描述 | [03](03-features.md) 第 5 节 |
 | **工作区** | 四层之外、一轮里还要给模型的上下文（12 层固定层序） | [08](08-context-workspace.md) 第 1 节 |
+| **证据合同** | `evidence-context/v1`：这一轮模型能看到什么（current / history / unknown） | [09](09-evidence-grounding.md) 第 2 节 |
+| **oracle** | 评估侧才有的真值与禁止泄漏的值；永远不进 messages | [09](09-evidence-grounding.md) 第 4 节 |
+| **grounding 轴** | 与风格轴并列的第二条评测轴：回答是否受可见证据约束 | [09](09-evidence-grounding.md) 第 6 节 |
+| **能力** | 显式启用的评测扩展：`spatiotemporal`、`long-context-stress` | [09](09-evidence-grounding.md) 第 7 节 |
+| **family** | 独立分析单位；臂、轮次、重复都是它内部的嵌套观测 | [09](09-evidence-grounding.md) 第 6 节 |
+| **manifest** | 一次评测的全部可变因素与指纹；决定两批能不能比 | [09](09-evidence-grounding.md) 第 8 节 |
+| **变异体 / 反控制** | 注入已知缺陷检验评测链的检出力 / 正常写法检验误报 | [09](09-evidence-grounding.md) 第 9 节 |
 
 ## 全仓库通用约定
 
 - **命令一律 `py -X utf8`**（Windows 上裸 `python` 可能解析到没装依赖的解释器）。文档里出现 `$env:VAR = "..."` 的是 PowerShell 写法，POSIX shell 用 `export VAR=...`。
 - **产物写 `report/`**（gitignored）；`data/` 是随仓库发布的派生统计，别往里写临时产物。
-- **数字都是相对量**：贴合分、fidelity 只在同一批次内做 before/after 比较，换模型、换夹具、换时钟后跨批次不可比。
+- **数字都是相对量**：贴合分、fidelity 只在同一批次内做 before/after 比较，换模型、换夹具、换时钟后跨批次不可比；两批能不能比由 manifest 的可比性规则判定。
+- **代码与注释风格**：`ruff check .` 与 `tools/gates/style_gate.py` 都要过（CI 的 lint job）；注释与 docstring 用简体中文。
 - **改 prompt 必须留证据**：先 dump 基线，改完再 dump，逐场景审 diff（见 [05](05-tooling.md) 第 4 节）。
 - **文档纪律**：新增、移动或删除 `docs/` 下的文件，必须同步改本索引，并在 [AGENTS.md](../AGENTS.md) 的文档清单里登记。

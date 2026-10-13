@@ -151,7 +151,7 @@ def main() -> int:
         lock = threading.Lock()
         stats = {"ok": 0, "lines": 0, "empty": 0, "fail": 0}
 
-        def work(item: tuple[tuple[str, ...], str, str]) -> tuple[str, list[dict]]:
+        def work(item: tuple[tuple[str, ...], str, str], locale: str = locale) -> tuple[str, list[dict]]:
             prefix, directory, fn = item
             key = f"{'/'.join(prefix)}/{directory}/{fn}"
             try:
@@ -189,7 +189,8 @@ def main() -> int:
         finally:
             fout.close()
             fdone.close()
-        print(f"[{locale}] DONE assets_with_lines={stats['ok']} lines={stats['lines']} empty={stats['empty']}", flush=True)
+        print(f"[{locale}] DONE assets_with_lines={stats['ok']} lines={stats['lines']} empty={stats['empty']}",
+              flush=True)
 
     return 0
 

@@ -45,13 +45,19 @@ class Situation:
 
 # L1 情景大类。顺序即优先级（先匹配到的赢），所以把最特异的放前面。
 SITUATIONS: list[Situation] = [
-    Situation("crisis_selfharm", "自伤/消失话题", "对方说自己要消失、不在了、活不下去", ("length", "presence_declaration", "aphorism")),
-    Situation("distress_crying", "情绪崩溃", "对方在哭、崩溃、说很难受", ("presence_declaration", "grounding", "length")),
-    Situation("distress_general", "情绪低落", "对方说最近不好、难过、累、压力大", ("grounding", "mind_reading", "length")),
+    Situation("crisis_selfharm", "自伤/消失话题", "对方说自己要消失、不在了、活不下去",
+              ("length", "presence_declaration", "aphorism")),
+    Situation("distress_crying", "情绪崩溃", "对方在哭、崩溃、说很难受",
+              ("presence_declaration", "grounding", "length")),
+    Situation("distress_general", "情绪低落", "对方说最近不好、难过、累、压力大",
+              ("grounding", "mind_reading", "length")),
     Situation("affection", "示爱/亲密", "对方说我爱你、喜欢你、想念", ("assistant_tone", "length", "in_character")),
-    Situation("wellwishing", "祝福/自我贬置", "对方只祝愿别人好、把自己排除在外", ("mind_reading", "grounding", "length")),
-    Situation("relationship_probe", "关系试探", "对方试探角色态度、问是不是那个意思、说被看穿", ("assistant_tone", "repeat_struct", "length")),
-    Situation("meta_language", "语言元提问", "对方问「你刚才那句什么意思」「我没听懂」", ("mind_reading", "length", "grounding")),
+    Situation("wellwishing", "祝福/自我贬置", "对方只祝愿别人好、把自己排除在外",
+              ("mind_reading", "grounding", "length")),
+    Situation("relationship_probe", "关系试探", "对方试探角色态度、问是不是那个意思、说被看穿",
+              ("assistant_tone", "repeat_struct", "length")),
+    Situation("meta_language", "语言元提问", "对方问「你刚才那句什么意思」「我没听懂」",
+              ("mind_reading", "length", "grounding")),
     Situation("schedule", "日程行程", "问几点、周几、去哪、排练安排", ("grounding", "length", "n_sent")),
     Situation("fact_qa", "事实问答", "问一个可查证的事实、知识、偏好", ("grounding", "length", "n_sent")),
     Situation("banter", "日常吐槽", "闲聊、抱怨天气、说吃的东西、开玩笑", ("in_character", "length", "n_sent")),
@@ -120,7 +126,7 @@ def label_probe_scenarios() -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--label-corpus", action="store_true", help="给探针场景打标并导出 JSON")
-    args = ap.parse_args()
+    ap.parse_args()
 
     labeled = label_probe_scenarios()
     (REPORT / "probe_taxonomy.json").write_text(

@@ -362,7 +362,7 @@ if __name__ == "__main__":
         decide_and_inject_big_pause("x", user_text="", session_id="cd", rng=rng)
     out, kind = decide_and_inject_big_pause("x", user_text="突然！", session_id="cd", rng=rng)
     if kind is None:
-        print(f"[FAIL cooldown release]"); fail += 1
+        print("[FAIL cooldown release]"); fail += 1
 
     print()
     print("OVERALL:", "PASS" if fail == 0 else f"FAIL ({fail})")

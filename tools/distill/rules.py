@@ -181,9 +181,9 @@ def check_text(char: str, text: str, *, sentence_count: int | None = None, lengt
     n = length if length is not None else len(text)
     if lim:
         if n > lim["hard"]:
-            add(f"length_hard", "V", None, f"{CN_NAME[char]} 单泡 {n} 字 > 硬限 {lim['hard']}")
+            add("length_hard", "V", None, f"{CN_NAME[char]} 单泡 {n} 字 > 硬限 {lim['hard']}")
         elif n > lim["soft"]:
-            add(f"length_soft", "W", None, f"{CN_NAME[char]} 单泡 {n} 字 > 软限 {lim['soft']}")
+            add("length_soft", "W", None, f"{CN_NAME[char]} 单泡 {n} 字 > 软限 {lim['soft']}")
 
     sc = sentence_count if sentence_count is not None else len([s for s in re.split(r"[。！？!?]+", text) if s.strip()])
     cap = SENTENCE_LIMIT.get(char)

@@ -539,7 +539,6 @@ def _render_tier2_dedup(intent: dict, is_developer: bool = False) -> str:
 def _render_tier1_dedup(intent: dict, is_developer: bool = False) -> str:
     relation = _relation_hint(is_developer)
     cat = intent["category"]
-    cat_data = STONE_TAXONOMY.get(cat, {})
 
     head = f"（话题：石头 → 类别『{cat}』·**这次聊天里已经涉猎过**）"
     body = (
@@ -811,7 +810,7 @@ if __name__ == "__main__":
 
     other = build_stone_special_block("鹅卵石", session_id="d2")
     assert "这次聊天里已经讲过" not in other, "session isolation failed"
-    print(f"[PASS] session isolation")
+    print("[PASS] session isolation")
 
     # ─── 底色 (石头 + 立希) ────────────
     print()
@@ -833,31 +832,31 @@ if __name__ == "__main__":
 
     # 鹅卵石 (沉积岩) + 立希 → 正面 spec_line confirm
     assert "正是真实的 现场你和立希经过神田川时常捡的那种" in cf3
-    print(f"[PASS] 底色 spec_line confirm for 鹅卵石")
+    print("[PASS] 底色 spec_line confirm for 鹅卵石")
 
     # 立希 + 玄武岩 (不是沉积岩) → 仍 底色 但 spec_line warn
     reset_session_dedup()
     cf4 = build_stone_special_block("立希看到玄武岩", session_id="cm3")
     assert "立希散步 心里的共振" in cf4
     assert "那次不是这种" in cf4 or "可以转回" in cf4
-    print(f"[PASS] 底色 spec_line warn for 玄武岩 (not 沉积岩)")
+    print("[PASS] 底色 spec_line warn for 玄武岩 (not 沉积岩)")
 
     # 仅石头无立希 → 走普通 Tier
     reset_session_dedup()
     no_rikki = build_stone_special_block("聊聊鹅卵石", session_id="cm4")
     assert "立希散步 心里的共振" not in no_rikki
-    print(f"[PASS] only stone: no 底色")
+    print("[PASS] only stone: no 底色")
 
     # 仅立希无石头 → 不进 stone 模块
     no_stone = build_stone_special_block("立希今天好吗", session_id="cm5")
     assert no_stone == "", "should not 起作用 stone module without stone signal"
-    print(f"[PASS] only 立希: stone module not fired")
+    print("[PASS] only 立希: stone module not fired")
 
     # 立希 + 钻石 → NEGATIVE 优先、整模块 abort（底色 不应触发）
     reset_session_dedup()
     no_canon_neg = build_stone_special_block("立希给我看了一颗钻石", session_id="cm6")
     assert no_canon_neg == "", "NEGATIVE should override 底色"
-    print(f"[PASS] NEGATIVE overrides 底色")
+    print("[PASS] NEGATIVE overrides 底色")
 
     print()
     print("OVERALL:", "PASS" if fail == 0 else f"FAIL ({fail})")

@@ -13,10 +13,15 @@
 
 每一层都配一个可跑的门禁（`tools/gates/`），改 prompt 必须留下 before/after 证据。
 
+v0.1.2 起另有一条与风格并列、彼此独立的评测轴（`idiolect.evals`，标准库实现）：
+证据合同（`idiolect.evidence_contract`）约束「这一轮允许模型看到什么」，grounding
+评测检查回答是否受可见证据约束；时空与长上下文压力是显式启用的可选能力
+（`idiolect.capabilities`），不启用时默认的语言/风格工作流完全不受影响。
+
 本包不含任何原作台词。随仓库发布的 `data/` 只有派生统计量。
 """
 from __future__ import annotations
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
 __all__ = ["__version__"]

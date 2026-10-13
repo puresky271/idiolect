@@ -206,7 +206,7 @@ class DeepModuleWiringTests(unittest.TestCase):
         import idiolect.characters.soyo.turn_logic as stl
         from idiolect.scene_engine import run_modules
 
-        for pkg, entry, char, text in (
+        for pkg, _entry, char, text in (
             (rtl, build_rana_special_block, "乐奈", "我外婆家的猫好像很困，你觉得它有趣吗"),
             (stl, build_soyo_special_block, "素世", "听说你以前在吹奏乐社拉低音大提琴，妈妈支持你吗"),
         ):

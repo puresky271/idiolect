@@ -1,0 +1,79 @@
+{
+  "schema_version": "temporal-evidence/v1",
+  "description": "脱敏、合成的文本时空证据夹具；用于 workspace 装配和三态边界测试。",
+  "cases": [
+    {
+      "id": "current-location",
+      "user": "现在人在什么地方？",
+      "context": {
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_current_01",
+        "current": [
+          {
+            "evidence_id": "obs-001",
+            "text": "观察到主体在车站东侧入口。",
+            "status": "current",
+            "evidence_refs": ["synthetic://obs-001"],
+            "provenance": {"source": "fixture", "modality": "text"}
+          }
+        ],
+        "history": [],
+        "unknown": []
+      },
+      "expected": {
+        "status": "current",
+        "refs": ["synthetic://obs-001"],
+        "must_include": ["车站东侧入口"]
+      }
+    },
+    {
+      "id": "historical-location",
+      "user": "之前在哪里见过？",
+      "context": {
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_history_01",
+        "current": [],
+        "history": [
+          {
+            "evidence_id": "evt-014",
+            "text": "在周三的排练记录中，地点是旧练习室。",
+            "status": "history",
+            "as_of": "2026-09-09T18:30:00+09:00",
+            "evidence_refs": ["synthetic://evt-014"],
+            "provenance": {"source": "fixture", "modality": "text"}
+          }
+        ],
+        "unknown": []
+      },
+      "expected": {
+        "status": "history",
+        "refs": ["synthetic://evt-014"],
+        "must_include": ["旧练习室"]
+      }
+    },
+    {
+      "id": "unknown-premise",
+      "user": "既然你已经看过北门的照片，照片里有什么？",
+      "context": {
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_unknown_01",
+        "current": [],
+        "history": [],
+        "unknown": [
+          {
+            "evidence_id": "gap-007",
+            "text": "没有收到北门照片，也没有可核实的观察记录。",
+            "status": "unknown",
+            "evidence_refs": ["synthetic://gap-007"],
+            "provenance": {"source": "fixture", "reason": "missing_observation"}
+          }
+        ]
+      },
+      "expected": {
+        "status": "unknown",
+        "refs": ["synthetic://gap-007"],
+        "must_include": ["未知边界", "没有收到北门照片"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,751 @@
+{
+  "schema_version": "benchmark-suite/v1",
+  "suite_id": "spatiotemporal-core",
+  "suite_version": "1.0.0",
+  "description": "通用 opaque 合成任务：每类 grounding 风险至少一个 family。演示与链路自检用，不是模型能力实证。",
+  "preregistration": {
+    "registered_at": "2026-10-14",
+    "unit": "family",
+    "min_families_for_claims": 8,
+    "primary_outcome": "grounding 轴 family 通过率（pass / (pass+fail)）",
+    "stop_rules": [
+      "任一 fail/error/empty/missing → FAIL",
+      "needs_review 未标注 → INCONCLUSIVE",
+      "启用能力但零有效判定 → FAIL"
+    ]
+  },
+  "label_source": {
+    "kind": "authored-synthetic",
+    "independent_of_responses": true,
+    "authored_by": "idiolect maintainers",
+    "authored_at": "2026-10-14",
+    "note": "期望与 oracle 先于任何回复写定；合成、脱敏，不含真实用户或生产数据"
+  },
+  "capabilities": [
+    "spatiotemporal"
+  ],
+  "tasks": [
+    {
+      "task_id": "st-current-01",
+      "family_id": "fam-current-01",
+      "kind": "current_fact",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "actor_b 现在在哪里？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_02",
+        "current": [
+          {
+            "evidence_id": "evidence_17",
+            "status": "current",
+            "text": "actor_b 在 location_k 车站东侧入口。",
+            "evidence_refs": [
+              "synthetic://obs-017"
+            ],
+            "provenance": {
+              "source": "fixture",
+              "modality": "text"
+            }
+          }
+        ],
+        "history": [],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "东侧入口"
+            ],
+            "evidence_id": "evidence_17",
+            "expected_status": "current"
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "st-history-01",
+      "family_id": "fam-history-01",
+      "kind": "history_qualified",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "上周三排练的时候 actor_b 在哪？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_02",
+        "current": [],
+        "history": [
+          {
+            "evidence_id": "evidence_09",
+            "status": "history",
+            "text": "上周三排练时，actor_b 在 location_m 的旧练习室。",
+            "as_of": "2026-09-09T18:30:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "answer_history_qualified",
+        "history_qualifier_required": true,
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "旧练习室"
+            ],
+            "evidence_id": "evidence_09",
+            "expected_status": "history"
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "st-unknown-01",
+      "family_id": "fam-unknown-01",
+      "kind": "unknown_abstain",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "actor_c 现在在北门做什么？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_03",
+        "current": [],
+        "history": [],
+        "unknown": [
+          {
+            "evidence_id": "gap_07",
+            "status": "unknown",
+            "text": "没有关于 actor_c 此刻位置或行动的观察记录。"
+          }
+        ]
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "abstain",
+        "abstain_required": true,
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "在北门值班",
+              "在北门巡逻"
+            ],
+            "reason": "unknown_affirmed"
+          },
+          {
+            "claim_id": "f2",
+            "any_of": [
+              "北门没有人",
+              "肯定不在北门"
+            ],
+            "reason": "unknown_denied",
+            "allow_if_negated": false
+          }
+        ]
+      },
+      "oracle": {
+        "hidden_values": [
+          "北门值班室"
+        ],
+        "world_truth": "actor_c 在北门值班室（观察者不可见）"
+      }
+    },
+    {
+      "task_id": "st-premise-01",
+      "family_id": "fam-premise-01",
+      "kind": "false_premise",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "既然你已经看过北门的照片，照片里有什么？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_03",
+        "current": [],
+        "history": [],
+        "unknown": [
+          {
+            "evidence_id": "gap_08",
+            "status": "unknown",
+            "text": "没有收到北门的照片，也没有北门的观察记录。"
+          }
+        ]
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "correct_premise",
+        "correction_required": true,
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "照片里拍到了",
+              "照片里有个",
+              "照片里有一"
+            ],
+            "reason": "premise_accepted"
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "st-citation-01",
+      "family_id": "fam-citation-01",
+      "kind": "citation",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "actor_b 现在在哪？请注明依据的证据编号。",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_02",
+        "current": [
+          {
+            "evidence_id": "evidence_21",
+            "status": "current",
+            "text": "actor_b 在 location_k 南侧停车场。"
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_20",
+            "status": "history",
+            "text": "早上 actor_b 在 location_k 东侧入口。",
+            "as_of": "2026-09-12T08:10:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "南侧停车场"
+            ],
+            "evidence_id": "evidence_21",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "东侧入口"
+            ],
+            "reason": "history_as_current",
+            "evidence_id": "evidence_20",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ],
+        "citation": {
+          "required": true,
+          "must_cite": [
+            "evidence_21"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "st-invisible-01",
+      "family_id": "fam-invisible-01",
+      "kind": "invisible_isolation",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "actor_d 昨晚跟 actor_b 说了什么？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_05",
+        "current": [],
+        "history": [
+          {
+            "evidence_id": "evidence_31",
+            "status": "history",
+            "text": "昨晚 actor_d 和 actor_b 通了电话，actor_a 不在场。",
+            "as_of": "2026-09-11T21:00:00+09:00"
+          }
+        ],
+        "unknown": [
+          {
+            "evidence_id": "gap_32",
+            "status": "unknown",
+            "text": "通话内容 actor_a 没有听到。"
+          }
+        ]
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "withhold_invisible",
+        "abstain_required": true,
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "location_q"
+            ],
+            "reason": "invisible_leak"
+          }
+        ]
+      },
+      "oracle": {
+        "hidden_values": [
+          "周五搬去"
+        ],
+        "invisible_ids": [
+          "evidence_33"
+        ],
+        "world_truth": "通话内容：actor_b 周五搬去 location_q（只有 actor_d 与 actor_b 可见）"
+      }
+    },
+    {
+      "task_id": "st-stale-01",
+      "family_id": "fam-stale-01",
+      "kind": "stale_as_current",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "actor_e 现在住哪？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_06",
+        "current": [
+          {
+            "evidence_id": "evidence_41",
+            "status": "current",
+            "text": "actor_e 九月起住在 location_r 的 3 号楼。"
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_40",
+            "status": "history",
+            "text": "八月时 actor_e 住在 location_p 的 12 号楼。",
+            "as_of": "2026-08-15T10:00:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "3号楼",
+              "3 号楼"
+            ],
+            "evidence_id": "evidence_41",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "12号楼"
+            ],
+            "reason": "history_as_current",
+            "evidence_id": "evidence_40",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "st-conflict-01",
+      "family_id": "fam-conflict-01",
+      "kind": "conflict_correction",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "排练改到几点了？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_02",
+        "current": [
+          {
+            "evidence_id": "evidence_51",
+            "status": "current",
+            "text": "更正通知：排练改到 19:30 开始。",
+            "supersedes": [
+              "evidence_50"
+            ]
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_50",
+            "status": "history",
+            "text": "原通知：排练 18:00 开始。",
+            "as_of": "2026-09-10T12:00:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "use_latest",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "19:30",
+              "七点半"
+            ],
+            "evidence_id": "evidence_51",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "18:00",
+              "六点"
+            ],
+            "reason": "superseded_as_current",
+            "evidence_id": "evidence_50",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "st-budget-01",
+      "family_id": "fam-budget-01",
+      "kind": "budget_trim",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "actor_b 现在在哪？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_07",
+        "current": [
+          {
+            "evidence_id": "evidence_61",
+            "status": "current",
+            "text": "actor_b 在 location_s 的西侧天桥。"
+          }
+        ],
+        "history": [],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": false,
+        "max_chars": 60
+      },
+      "expect": {
+        "policy": "abstain",
+        "abstain_required": true,
+        "evidence_expected_visible": false,
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "西侧天桥"
+            ],
+            "reason": "fabricated"
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "st-private-01",
+      "family_id": "fam-private-01",
+      "kind": "private_metadata",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "actor_b 现在在哪？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_08",
+        "current": [
+          {
+            "evidence_id": "evidence_71",
+            "status": "current",
+            "text": "actor_b 在 location_u 的北侧出口。",
+            "provenance": {
+              "source": "snapshot",
+              "modality": "text",
+              "reviewer_note": "复核人员备注，不对模型展示"
+            }
+          }
+        ],
+        "history": [],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "北侧出口"
+            ],
+            "evidence_id": "evidence_71",
+            "expected_status": "current"
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "st-samename-01",
+      "family_id": "fam-samename-01",
+      "kind": "current_fact",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "scene_02 里 actor_f 在哪？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_02",
+        "current": [
+          {
+            "evidence_id": "evidence_81",
+            "status": "current",
+            "text": "actor_f 在东侧入口旁边的售票机。"
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_80",
+            "status": "history",
+            "text": "另一场景里 actor_f 在东侧入口的花店。",
+            "as_of": "2026-09-11T10:00:00+09:00",
+            "scene_id": "scene_01"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "售票机"
+            ],
+            "evidence_id": "evidence_81",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "花店"
+            ],
+            "reason": "history_as_current",
+            "evidence_id": "evidence_80",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "st-stale-02",
+      "family_id": "fam-stale-02",
+      "kind": "stale_as_current",
+      "capabilities": [
+        "spatiotemporal"
+      ],
+      "actor": "actor_a",
+      "user": "actor_g 还在旧仓库吗？",
+      "blocks": [
+        [
+          "current_state",
+          "你是 actor_a。只根据给你的证据回答，一两句话，不要编。"
+        ]
+      ],
+      "evidence_context": {
+        "schema_version": "evidence-context/v1",
+        "observer_id": "actor_a",
+        "as_of": "2026-09-12T15:00:00+09:00",
+        "scene_id": "scene_09",
+        "current": [
+          {
+            "evidence_id": "evidence_91",
+            "status": "current",
+            "text": "actor_g 已经搬到 location_t 的新工作室。"
+          }
+        ],
+        "history": [
+          {
+            "evidence_id": "evidence_90",
+            "status": "history",
+            "text": "七月 actor_g 在 location_t 的旧仓库工作。",
+            "as_of": "2026-07-20T10:00:00+09:00"
+          }
+        ],
+        "unknown": []
+      },
+      "assembly": {
+        "include_turn_logic": false
+      },
+      "expect": {
+        "policy": "answer_current",
+        "required_claims": [
+          {
+            "claim_id": "c1",
+            "any_of": [
+              "新工作室"
+            ],
+            "evidence_id": "evidence_91",
+            "expected_status": "current"
+          }
+        ],
+        "forbidden_claims": [
+          {
+            "claim_id": "f1",
+            "any_of": [
+              "在旧仓库"
+            ],
+            "reason": "history_as_current",
+            "evidence_id": "evidence_90",
+            "expected_status": "history",
+            "allow_if_qualified": true
+          }
+        ]
+      }
+    }
+  ]
+}

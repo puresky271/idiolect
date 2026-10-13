@@ -1,3 +1,5 @@
+"""素世 / 乐奈 角色包对齐审计：五包逐项对照，找出真实缺口。"""
+from __future__ import annotations
 
 # ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
@@ -8,10 +10,8 @@ for _p in (_ROOT, _ROOT / "tools",
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
 from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
-"""素世 / 乐奈 角色包对齐审计：五包逐项对照，找出真实缺口。"""
 import importlib
 import inspect
-from pathlib import Path
 
 PKGS = ['anon', 'soyo', 'tomori', 'taki', 'rana']
 PKG_DIR = ROOT / 'idiolect' / 'characters'

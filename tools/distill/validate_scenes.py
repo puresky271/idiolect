@@ -26,7 +26,6 @@ from _paths import CORPUS_DIR, DATA, REPORT, ROOT, require_corpus  # noqa: E402,
 import argparse
 import json
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -152,7 +151,7 @@ def main() -> int:
         verdict = "冗余，建议合并" if j > args.overlap_warn else ("偏高，观察" if j > 0.4 else "可分")
         lines.append(f"| `{a}` | `{b}` | {j} | {verdict} |")
 
-    lines.append(f"\n## 结论\n")
+    lines.append("\n## 结论\n")
     lines.append(f"- 冗余场景对（>{args.overlap_warn}）：{len(redundant)}")
     for a, b, j in redundant:
         lines.append(f"  - `{a}` ↔ `{b}`（{j}）")

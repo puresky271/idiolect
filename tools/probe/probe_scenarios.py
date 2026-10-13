@@ -49,7 +49,8 @@ SCENARIOS: dict[str, list[dict]] = {
         # 追问会把回复拉长、掩盖「被示好」本身的长度分布。补一条纯示好夹具做对照。
         {"id": "tomori_p7_love", "cat": "情感轮", "text": "灯，我喜欢你",
          "watch": ["length", "n_sent", "first_person_rate"]},
-        {"id": "tomori_p3_repeat", "cat": "重复提问", "text": "如果我现在每天说一百遍我爱你，会有奇迹发生解决我的问题吗",
+        {"id": "tomori_p3_repeat", "cat": "重复提问",
+         "text": "如果我现在每天说一百遍我爱你，会有奇迹发生解决我的问题吗",
          "watch": ["repeat_struct", "aphorism"]},
         {"id": "tomori_p4_mundane", "cat": "中性对照", "text": "今天便利店那个新出的抹茶布丁你吃了吗",
          "watch": ["length", "first_person_rate"]},

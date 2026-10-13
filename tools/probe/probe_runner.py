@@ -208,12 +208,14 @@ def score_arm(char: str, replies: list[str], gold: dict) -> dict:
     out["hard_n"] = tot
     out["hard_any_rate"] = round(anyhit / tot, 4) if tot else 0.0
     out["hard_v_rate"] = round(vhit / tot, 4) if tot else 0.0
-    out["hard_by_rule"] = {k: round(v / tot, 4) for k, v in sorted(by_rule.items(), key=lambda x: -x[1])[:6]} if tot else {}
+    out["hard_by_rule"] = ({k: round(v / tot, 4) for k, v in sorted(by_rule.items(), key=lambda x: -x[1])[:6]}
+                           if tot else {})
 
     # 具体处境锚点率（防「变冷淡刷分」的正向指标）
     import re
 
-    concrete = re.compile(r"(教室|学校|排练|RiNG|吉他|贝斯|鼓|抹茶|布丁|红茶|咖啡|便利店|饭团|雨|窗|桌子|手机|手机|课|车站|电车|猫|笔记本|便当|面包|鞋|伞)")
+    concrete = re.compile(r"(教室|学校|排练|RiNG|吉他|贝斯|鼓|抹茶|布丁|红茶|咖啡|便利店|饭团|雨|窗|桌子"
+                          r"|手机|手机|课|车站|电车|猫|笔记本|便当|面包|鞋|伞)")
     conc = sum(1 for t in replies if concrete.search(t))
     out["concrete_anchor_rate"] = round(conc / len(replies), 4) if replies else 0.0
     return out
@@ -230,7 +232,8 @@ def main() -> int:
     ap.add_argument("--max-tokens", type=int, default=420, help="生产主聊天路径量级（非 idle 的 120）")
     ap.add_argument("--thinking", choices=["on", "off", "default"], default="off",
                     help="探针默认关思考：可复现、免截断伪影；'on' 用于对照生产现状")
-    ap.add_argument("--patch", default="none", help="prompt 补丁名（见 prompt_patch.py：none / targets / targets_cap / targets_cap_anchor）")
+    ap.add_argument("--patch", default="none",
+                    help="prompt 补丁名（见 prompt_patch.py：none / targets / targets_cap / targets_cap_anchor）")
     ap.add_argument("--registry", action="store_true",
                     help="用 probe_registry（v1 手工 + v2 语料反推，覆盖 26 场景）而不是 probe_scenarios")
     ap.add_argument("--drop-risk", action="store_true", help="与 --registry 同用时剔除 canon 敏感夹具")
@@ -240,6 +243,9 @@ def main() -> int:
                     help="system 段用 idiolect.assemble 按当轮 user 现场装配"
                          "（canon + voice + 场景化长度目标 + turn_logic 四层全上）。"
                          "自带占位夹具时需要它；外部真实 dump 不需要。")
+    ap.add_argument("--intervention", default="",
+                    help="预注册的干预变量（逗号分隔，如 prompt / assembly / model），写进 metadata；"
+                         "report_html 只允许这些字段在两批之间不同")
     ap.add_argument("--turn-logic", action="store_true",
                     help="向外部夹具追加本轮场景指引；--assemble 已包含动态层，组合使用不会重复追加。")
     args = ap.parse_args()
@@ -430,8 +436,19 @@ def main() -> int:
 
     # 聚合评分
     summary = {char: score_arm(char, replies, gold[char]) for char, replies in per_char_replies.items()}
+    from idiolect.evals.manifest import INTERVENTION_VARIABLES, code_revision
+
+    intervention = sorted({v.strip() for v in args.intervention.split(",") if v.strip()})
+    bad_iv = [v for v in intervention if v not in INTERVENTION_VARIABLES]
+    if bad_iv:
+        print(f"[probe] 未知干预变量 {bad_iv}；可选 {INTERVENTION_VARIABLES}", flush=True)
+        return 2
     metadata = {
-        "schema_version": 1,
+        # v2（2026-10-14）：加入 code（git revision / dirty / diff 指纹）与 intervention，
+        # 供 report_html 按「预注册干预」判可比性；v1 批次照常可浏览，但永远判 incomparable
+        "schema_version": 2,
+        "code": code_revision(),
+        "intervention": intervention,
         "model": model,
         "temperature": args.temperature,
         "max_tokens": args.max_tokens,
@@ -463,9 +480,11 @@ def main() -> int:
 
     lines = [f"# 探针结果 · {args.label}（臂 = {args.arm_name}）\n"]
     errs = sum(1 for r in records if r["error"])
-    lines.append(f"- 夹具：每角色真实 messages dump，仅替换末条 user；生产同参 temperature={args.temperature} max_tokens={args.max_tokens}")
+    lines.append(f"- 夹具：每角色真实 messages dump，仅替换末条 user；生产同参 temperature={args.temperature}"
+                 f" max_tokens={args.max_tokens}")
     lines.append(f"- 生成：{len(records)} 条（error {errs}）｜ 每场景 {args.runs} 次\n")
-    lines.append(f"| 角色 | 气泡 | composite | fidelity | 锚点(出/参) | 硬规则V | 硬规则任一 | 具体锚点率 | 泄漏率 | 最漂维度 |")
+    lines.append("| 角色 | 气泡 | composite | fidelity | 锚点(出/参) | 硬规则V | 硬规则任一"
+                 " | 具体锚点率 | 泄漏率 | 最漂维度 |")
     lines.append("|---|---|---|---|---|---|---|---|---|---|")
     leak_by_char: dict[str, list[int]] = defaultdict(list)
     for r in records:

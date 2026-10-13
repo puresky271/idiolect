@@ -16,8 +16,8 @@ import os
 from typing import Any
 from datetime import datetime
 
-from .canon import get_canon_facts, get_canon_profile
-from .voice import VOICE_MANIFEST
+from .canon import get_canon_facts, get_canon_profile  # noqa: F401 - registry 经 getattr 取用的公开入口
+from .voice import VOICE_MANIFEST  # noqa: F401 - registry 经 getattr 取用的公开入口
 from ...registry import canonicalize_name
 from ...scene_engine import env_enabled
 

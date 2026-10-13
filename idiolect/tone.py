@@ -36,7 +36,6 @@
 from __future__ import annotations
 
 import re
-from typing import Any
 
 # ── 具体信息（有这些就不算「空的状态宣言」）────────────────────
 CONCRETE = re.compile(
@@ -224,4 +223,5 @@ TONE_RULES = {"presence_declaration", "meta_comment", "mind_reading", "aphorism"
 
 
 def tone_rules(text: str) -> list[str]:
+    """回复命中的语气规则 key（`detect` 结果中属于 TONE_RULES 的部分）。"""
     return [k for k in detect(text) if k in TONE_RULES]

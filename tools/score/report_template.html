@@ -38,7 +38,8 @@ $('repeat-note').textContent=rep?`统计类别：${rep.category||'全部'}。同
 for(const c of rep?.cells||[]){const original=b.rows.find(r=>r.char===c.char&&r.scenario===c.scenario);if(!filters({...c,scene:original?.scene}))continue;const tr=node('tr');[c.char+' / '+c.scenario,c.n,c.distinct,c.most_repeated].forEach(v=>tr.append(node('td',v)));$('repetition').append(tr)}
 $('comparison').replaceChildren();const comparison=b.comparisons[$('reference').value]||[];
 const unknown=comparison.filter(x=>x.status==='unknown').length,different=comparison.filter(x=>x.status==='different').length;
-$('comparison-note').textContent=comparison.length?`不同 ${different} 项，未知 ${unknown} 项。字段一致不代表模型端点、统计功效或质量已经验证；装配与代码差异可能正是实验变量。`:'请选择另一个已导出的批次。单批次无法提供条件对照。';
+const verdict=(b.comparability||{})[$('reference').value];
+$('comparison-note').textContent=comparison.length?`可比性：${verdict?({comparable:'可比（只在预注册干预上不同）',blocked:'阻止比较',incomparable:'不可比较'})[verdict.status]:'未知'}${verdict&&verdict.reasons.length?'（'+verdict.reasons.join('；')+'）':''}。不同 ${different} 项，未知 ${unknown} 项。字段一致不代表模型端点、统计功效或质量已经验证。`:'请选择另一个已导出的批次。单批次无法提供条件对照。';
 for(const row of comparison){const tr=node('tr'),cell=node('td'),detail=node('details');detail.append(node('summary','展开字段值'),node('pre',JSON.stringify({当前:row.left??'未知',参考:row.right??'未知'},null,2)));cell.append(detail);tr.append(node('td',row.title),node('td',({same:'一致',different:'不同',unknown:'未知'})[row.status]),cell);$('comparison').append(tr)}
 $('overview').replaceChildren();for(const [char,s] of Object.entries(b.summary.summary||{})){const tr=node('tr');[char,s.n_replies??'—',number(s.composite),number(s.fidelity),number(s.anchor_score),typeof s.hard_v_rate==='number'?number(s.hard_v_rate*100)+'%':'—'].forEach(v=>tr.append(node('td',v)));$('overview').append(tr)}
 if(!$('overview').children.length){const tr=node('tr'),td=node('td','无汇总评分；请先运行探针评分。');td.colSpan=6;tr.append(td);$('overview').append(tr)}

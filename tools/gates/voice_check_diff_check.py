@@ -1,3 +1,5 @@
+"""voice_check 模块化后的行为自检：全量跑，确认无损、不产空、变换类型正确。"""
+from __future__ import annotations
 
 # ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
@@ -8,20 +10,22 @@ for _p in (_ROOT, _ROOT / "tools",
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
 from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
-"""voice_check 模块化后的行为自检：全量跑，确认无损、不产空、变换类型正确。"""
 import json
 import re
 import sys
 from collections import Counter
-from pathlib import Path
 
 BENCH = ROOT / '_audit_scratch' / 'v41' / 'bench'
 sys.path.insert(0, str(ROOT))
 
-from idiolect.characters.soyo.voice_check import clean_reply as soyo_clean, inspect as soyo_inspect, normalize_peer_nicknames
+from idiolect.characters.soyo.voice_check import clean_reply as soyo_clean, inspect as soyo_inspect
 from idiolect.characters.rana.voice_check import clean_reply as rana_clean, inspect as rana_inspect, TIC_FORBIDDEN
-from idiolect.characters.soyo.voice_check.thresholds import LEN_P90 as S_P90, LEN_HARD as S_HARD, EXCLAIM_MAX_PER_TURN as S_EX
-from idiolect.characters.rana.voice_check.thresholds import LEN_P90 as R_P90, LEN_HARD as R_HARD, EXCLAIM_MAX_PER_TURN as R_EX
+from idiolect.characters.soyo.voice_check.thresholds import (
+    LEN_P90 as S_P90, LEN_HARD as S_HARD, EXCLAIM_MAX_PER_TURN as S_EX,
+)
+from idiolect.characters.rana.voice_check.thresholds import (
+    LEN_P90 as R_P90, LEN_HARD as R_HARD, EXCLAIM_MAX_PER_TURN as R_EX,
+)
 
 print('阈值 re-export:', (S_P90, S_HARD, S_EX), (R_P90, R_HARD, R_EX), TIC_FORBIDDEN)
 

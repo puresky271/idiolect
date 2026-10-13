@@ -34,7 +34,6 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import scenes as SC  # noqa: E402
 import style_features as S  # noqa: E402
 
 REPORT = REPORT
@@ -44,7 +43,8 @@ CHARS = {"tomori": "灯", "anon": "爱音", "rana": "乐奈", "soyo": "素世", 
 # 只统计**已被语料确认**的口癖（来自 tic_profile 核对后的清单，不含零支持候选）
 TICS: dict[str, list[str]] = {
     "tomori": ["……", "诶……", "嗯……", "呃", "啊……", "唔……", "小爽世", "小爱", "小立希", "小乐奈", "不知道", "嗯"],
-    "anon": ["诶？", "诶——", "诶~", "诶诶", "啊——", "啊哈哈", "嘛", "哎呀", "咦", "啊", "诶", "哦", "对吧", "不过", "谢谢"],
+    "anon": ["诶？", "诶——", "诶~", "诶诶", "啊——", "啊哈哈", "嘛", "哎呀", "咦", "啊", "诶", "哦",
+             "对吧", "不过", "谢谢"],
     "rana": ["哼哼", "哼", "ふふん", "呼", "好吃", "有趣", "有趣的女人", "无聊", "抹茶", "芭菲", "吉他", "猫",
              "不够", "还不够", "我要", "我想吃", "嗯。", "我知道了", "Rikki"],
     "soyo": ["哦", "呢", "的哦", "的呢", "了吧", "呵呵", "这样啊", "这样", "如果", "只是", "小灯", "小爱音",
@@ -126,7 +126,8 @@ def main() -> int:
     for key, v in out.items():
         lines.append(f"\n## {key}（k={v['k']}）\n")
         for r in v["tics"][:10]:
-            lines.append(f"- `{r['tic']}` ×{r['count']}　lift {r['lift']}（本场景 {r['per_10k']} / 全局 {r['base_per_10k']} 每万字）")
+            lines.append(f"- `{r['tic']}` ×{r['count']}　lift {r['lift']}"
+                         f"（本场景 {r['per_10k']} / 全局 {r['base_per_10k']} 每万字）")
     (REPORT / "tic_by_scene.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"\n-> report/tic_by_scene.md / .json（{len(out)} 个 cell）")
     return 0

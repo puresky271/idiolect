@@ -156,7 +156,7 @@ def main() -> int:
         json.dumps({"k": k, "silhouette": scores, "n_samples": len(texts), "clusters": out},
                    ensure_ascii=False, indent=2), encoding="utf-8")
 
-    lines = [f"# 语料场景发现（embedding 聚类）\n",
+    lines = ["# 语料场景发现（embedding 聚类）\n",
              f"- 模型 `{MODEL}`｜样本 {len(texts)} 条（每角色 {args.per_char}）｜k={k}",
              f"- silhouette 扫描：{scores}\n"]
     for c in out:

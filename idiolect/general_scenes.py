@@ -1248,6 +1248,7 @@ GENERAL_SCENES: dict[str, list[SceneModule]] = {
 # 本模块原先自带一张手写表，与 registry 的集合不一致（少 `愛音`/`燈`，
 # 多 `らな`/`そよ`），同一个别名在两条路径上会解析成不同结果。
 def canon_character(character: str) -> str:
+    """把角色名或别名规整成 canonical 名（问 registry，不自带名单）。"""
     from .registry import canonicalize_name
 
     return canonicalize_name(character)

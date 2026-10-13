@@ -67,7 +67,8 @@ FILLER_WORDS = [
 LAUGH_MARKS = ["w", "ｗ", "笑", "ふふ", "ふふっ", "はは", "あはは", "うふふ", "えへへ", "哈哈", "嘿嘿", "嘻嘻"]
 
 # jp 句末助词（终助词 / 間投助詞）
-JP_SENTENCE_FINAL = ["よ", "ね", "な", "ぞ", "ぜ", "わ", "か", "の", "さ", "かな", "かよ", "じゃん", "っしょ", "だろ", "ろ"]
+JP_SENTENCE_FINAL = ["よ", "ね", "な", "ぞ", "ぜ", "わ", "か", "の", "さ",
+                     "かな", "かよ", "じゃん", "っしょ", "だろ", "ろ"]
 # jp 有标点感的记号
 JP_LONG_VOWEL = ["ー", "〜", "～", "－"]
 
@@ -86,7 +87,8 @@ def _jp_tokens(text: str) -> list[tuple[str, str, str, str]]:
 
         _sudachi = (dictionary.Dictionary().create(), SplitMode.C)
     tokenizer, mode = _sudachi
-    return [(m.surface(), m.part_of_speech()[0], m.part_of_speech()[1], m.dictionary_form()) for m in tokenizer.tokenize(text, mode)]
+    return [(m.surface(), m.part_of_speech()[0], m.part_of_speech()[1], m.dictionary_form())
+            for m in tokenizer.tokenize(text, mode)]
 
 
 def _cn_tokens(text: str) -> list[tuple[str, str, str]]:
@@ -242,7 +244,7 @@ def turn_features(text: str, lang: str = "jp") -> TurnFeatures:
         for w in JP_LONG_VOWEL:
             f.long_vowel_jp += text.count(w)
         toks = _jp_tokens(text)
-        for surface, pos1, pos2, _base in toks:
+        for _surface, pos1, pos2, _base in toks:
             if pos1 == "助詞" and pos2 == "終助詞":
                 f.sent_final_jp += 1
         if f.sent_final_jp == 0 and toks:
@@ -321,7 +323,8 @@ def profile_from_texts(texts: Iterable[str], lang: str) -> dict:
         "n_clause": Dist.of([f.n_clause for f in feats]).to_dict(),
         "max_sent_len": Dist.of([f.max_sent_len for f in feats]).to_dict(),
         "punct_density": {k: Dist.of(dens(k)).to_dict() for k in ("…", "！", "？", "、", "，", "—", "～", "。")},
-        "punct_rate": {k: round(sum(1 for f in feats if f.punct_any[k]) / n, 4) for k in ("…", "！", "？", "、", "，", "—", "～", "。", "♪", "（")},
+        "punct_rate": {k: round(sum(1 for f in feats if f.punct_any[k]) / n, 4)
+                       for k in ("…", "！", "？", "、", "，", "—", "～", "。", "♪", "（")},
         "first_person_rate": round(sum(1 for f in feats if f.first_person) / n, 4),
         "first_person_per_turn": Dist.of([f.first_person for f in feats]).to_dict(),
         "second_person_rate": round(sum(1 for f in feats if f.second_person) / n, 4),

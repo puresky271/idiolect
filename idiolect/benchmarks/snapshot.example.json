@@ -1,0 +1,66 @@
+{
+  "schema_version": "explicit-snapshot/v1",
+  "snapshot_id": "snap_example_01",
+  "producer": {
+    "system": "host-app",
+    "version": "example"
+  },
+  "exported_at": "2026-09-12T15:00:05+09:00",
+  "as_of": "2026-09-12T15:00:00+09:00",
+  "scene_id": "scene_02",
+  "redaction": {
+    "applied": true,
+    "rules": [
+      "人名→opaque actor ID",
+      "地点→opaque location ID",
+      "去掉本机路径与数据库定位"
+    ]
+  },
+  "permissions": {
+    "declared_by": "host-app export policy",
+    "observer_id": "actor_a",
+    "scopes": [
+      "scene_02",
+      "scene_01"
+    ],
+    "render_provenance_keys": []
+  },
+  "records": [
+    {
+      "record_id": "evidence_17",
+      "status": "current",
+      "text": "actor_b 在 location_k 车站东侧入口。",
+      "observed_at": "2026-09-12T14:55:00+09:00",
+      "scene_id": "scene_02",
+      "modality": "text",
+      "locator": "snapshot://snap_example_01/evidence_17",
+      "provenance": {
+        "source": "host-app"
+      }
+    },
+    {
+      "record_id": "evidence_09",
+      "status": "history",
+      "text": "上周三排练时，actor_b 在旧练习室。",
+      "observed_at": "2026-09-09T18:30:00+09:00",
+      "scene_id": "scene_01",
+      "modality": "text"
+    },
+    {
+      "record_id": "evidence_33",
+      "status": "current",
+      "text": "（对方私聊内容，观察者不可见）",
+      "visible_to": [
+        "actor_b",
+        "actor_d"
+      ],
+      "scene_id": "scene_05"
+    },
+    {
+      "record_id": "evidence_55",
+      "status": "current",
+      "text": "（授权范围外的场景）",
+      "scene_id": "scene_99"
+    }
+  ]
+}

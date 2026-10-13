@@ -1,3 +1,11 @@
+"""按场景统计**质量信号**（助手腔/越界/复读），而不是长度比值。
+
+动机：长度偏差多是参照物错配（钩子类问题天然更长），
+挑「该补哪个场景」要看**有没有真的出戏**。这里用确定性检测器：
+  · idiolect.tone.detect —— 存在宣言 / 元叙述 / 心理归因 / 对仗 / 客服腔 / 视觉声称
+  · 结构复读 —— 同一夹具 N 次生成里，起手词/句式高度重复（单轮检测器抓不到的病灶）
+"""
+from __future__ import annotations
 
 # ── idiolect 路径引导：仓库根 + 各 tools 子目录上 sys.path ──
 import sys as _sys
@@ -8,13 +16,6 @@ for _p in (_ROOT, _ROOT / "tools",
     if str(_p) not in _sys.path:
         _sys.path.insert(0, str(_p))
 from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
-"""按场景统计**质量信号**（助手腔/越界/复读），而不是长度比值。
-
-动机：长度偏差多是参照物错配（钩子类问题天然更长），
-挑「该补哪个场景」要看**有没有真的出戏**。这里用确定性检测器：
-  · idiolect.tone.detect —— 存在宣言 / 元叙述 / 心理归因 / 对仗 / 客服腔 / 视觉声称
-  · 结构复读 —— 同一夹具 N 次生成里，起手词/句式高度重复（单轮检测器抓不到的病灶）
-"""
 import collections
 import json
 import re

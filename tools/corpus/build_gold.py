@@ -25,7 +25,7 @@ from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
 
 import hashlib
 import json
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent

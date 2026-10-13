@@ -33,11 +33,14 @@ def capture_requests():
     with tempfile.TemporaryDirectory(dir=ROOT/'report') as temp:
         with patch.object(runner,'REPORT',Path(temp)), patch.object(runner,'CORPUS_DIR',Path(temp)/'absent'), \
              patch.object(runner,'SCENARIOS',plan), patch.object(runner,'make_client',return_value=client), \
-             patch.object(runner,'load_fixture',return_value=[{'role':'system','content':''},{'role':'user','content':'占位'}]), \
-             patch.object(sys,'argv',['probe_runner','--label','request_gate','--assemble','--turn-logic','--runs','1']), \
+             patch.object(runner,'load_fixture',
+                          return_value=[{'role':'system','content':''},{'role':'user','content':'占位'}]), \
+             patch.object(sys,'argv',
+                          ['probe_runner','--label','request_gate','--assemble','--turn-logic','--runs','1']), \
              contextlib.redirect_stdout(io.StringIO()):
             rc=runner.main()
-        records=[json.loads(line) for line in (Path(temp)/'probe_request_gate.jsonl').read_text(encoding='utf8').splitlines()]
+        records=[json.loads(line)
+                 for line in (Path(temp)/'probe_request_gate.jsonl').read_text(encoding='utf8').splitlines()]
         summary=json.loads((Path(temp)/'probe_request_gate_summary.json').read_text(encoding='utf8'))
     return dict(rc=rc,expected=expected,calls=calls,records=records,summary=summary)
 
@@ -52,7 +55,9 @@ class ProbeRequestTests(unittest.TestCase):
                 self.assertEqual(call[0]['content'],expected)
                 self.assertEqual([m['role'] for m in call],['system','user'])
         metadata=result['summary']['metadata']
-        self.assertEqual(metadata['schema_version'],1)
+        self.assertEqual(metadata['schema_version'],2)
+        self.assertIn('revision',metadata['code'])
+        self.assertEqual(metadata['intervention'],[])
         self.assertEqual(metadata['temperature'],0.75)
         self.assertEqual(metadata['counts']['empty_content'],20)
         self.assertEqual(metadata['counts']['successful'],0)

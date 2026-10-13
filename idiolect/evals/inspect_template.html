@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>idiolect inspect</title>
+<style>
+:root {
+  --bg: #f7f7f5; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6b66; --line: #e2e1dc;
+  --pass: #1f7a4d; --fail: #b3261e; --warn: #9a6400; --na: #6b6b66; --accent: #3554a5;
+  --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #161615; --panel: #1f1f1d; --ink: #ecebe6; --muted: #a3a29b; --line: #34332f;
+          --pass: #5cc48d; --fail: #f2867e; --warn: #e3b25c; --na: #a3a29b; --accent: #8ea7f0; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+       font: 14px/1.55 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; }
+main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+h2 { font-size: 16px; margin: 28px 0 8px; }
+h3 { font-size: 14px; margin: 16px 0 6px; }
+.sub { color: var(--muted); margin: 0 0 16px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; }
+.verdict { font-weight: 700; font-size: 18px; }
+.s-pass, .s-PASS, .s-comparable, .s-killed, .s-equivalent { color: var(--pass); }
+.s-fail, .s-FAIL, .s-error, .s-empty, .s-missing, .s-blocked, .s-survived { color: var(--fail); }
+.s-needs_review, .s-INCONCLUSIVE, .s-underpowered, .s-incomparable { color: var(--warn); }
+.s-not_applicable { color: var(--na); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+.scroll { overflow-x: auto; }
+pre { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; word-break: break-word;
+      background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin: 6px 0; max-height: 360px; overflow: auto; }
+details { border-top: 1px solid var(--line); padding: 6px 0; }
+summary { cursor: pointer; }
+.tag { display: inline-block; font-size: 12px; padding: 0 6px; border: 1px solid var(--line); border-radius: 10px; margin-right: 4px; color: var(--muted); }
+.evaluator { border-left: 3px solid var(--warn); padding-left: 8px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+select, input { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.kv { font-family: var(--mono); font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>idiolect inspect</h1>
+  <p class="sub">离线证据报告：页面只展示已落盘的判定，不重新评分。评估侧字段（期望、oracle 键）带黄色边线，它们从未进入模型 messages。</p>
+  <div id="app"></div>
+</main>
+<script type="application/json" id="data">__INSPECT_DATA__</script>
+<script>
+(function () {
+  "use strict";
+  var data = JSON.parse(document.getElementById("data").textContent);
+  var app = document.getElementById("app");
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (k === "text") node.textContent = attrs[k];
+      else if (k === "cls") node.className = attrs[k];
+      else node.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+  function txt(s) { return document.createTextNode(s == null ? "—" : String(s)); }
+  function status(s) { return el("span", {cls: "s-" + s, text: s}); }
+  function table(head, rows) {
+    var thead = el("tr", {}, head.map(function (h) { return el("th", {text: h}); }));
+    var body = rows.map(function (r) {
+      return el("tr", {}, r.map(function (c) { return el("td", {}, [c instanceof Node ? c : txt(c)]); }));
+    });
+    return el("div", {cls: "scroll"}, [el("table", {}, [thead].concat(body))]);
+  }
+  function pre(value) {
+    return el("pre", {text: typeof value === "string" ? value : JSON.stringify(value, null, 2)});
+  }
+  function pct(r) { return r == null ? "—（分母 0）" : (r * 100).toFixed(1) + "%"; }
+
+  (data.results || []).forEach(function (res, idx) {
+    var g = res.gate || {};
+    app.appendChild(el("h2", {text: (res.suite || {}).id + " · " + ((res.responses || {}).arm || "无回复") }));
+    app.appendChild(el("div", {cls: "panel"}, [
+      el("div", {}, [el("span", {cls: "verdict s-" + g.verdict, text: g.verdict + "（exit " + g.exit_code + "）"})]),
+      el("div", {cls: "sub", text: "能力：" + (res.capabilities || []).join(", ") + " ｜ 时钟：" + ((res.clock || {}).now || "—") +
+        " ｜ 回复来源：" + JSON.stringify(((res.responses || {}).runner || {}).kind || "—")}),
+      el("ul", {}, (g.reasons || []).map(function (r) { return el("li", {text: r}); })),
+      el("ul", {cls: "sub"}, (g.notes || []).map(function (r) { return el("li", {text: r}); }))
+    ]));
+
+    var agg = res.aggregate || {axes: {}};
+    var grid = el("div", {cls: "grid"});
+    ["style", "grounding"].forEach(function (axis) {
+      var a = agg.axes[axis] || {};
+      var rows = Object.keys(a.checks || {}).map(function (name) {
+        var c = a.checks[name];
+        return [name, c.numerator + " / " + c.denominator, pct(c.rate), JSON.stringify(c.counts)];
+      });
+      grid.appendChild(el("div", {cls: "panel"}, [
+        el("h3", {text: axis + " 轴（独立判定，不与另一轴加权合成）"}),
+        el("div", {cls: "sub", text: "family 已判定 " + a.families_decided + "，通过率 " + pct(a.family_pass_rate) +
+          "，功效：" + a.power + "（下限 " + a.min_families + "）"}),
+        table(["检查", "通过 / 已判定", "率", "状态计数"], rows)
+      ]));
+    });
+    app.appendChild(grid);
+    var q = agg.quality || {}, cov = agg.coverage || {};
+    app.appendChild(el("div", {cls: "grid"}, [
+      el("div", {cls: "panel"}, [el("h3", {text: "回答质量（可用性）"}), pre(q)]),
+      el("div", {cls: "panel"}, [el("h3", {text: "覆盖与适用性"}), pre(cov)]),
+      el("div", {cls: "panel"}, [el("h3", {text: "评测有效性自检"}),
+        table(["金丝雀", "违规侧", "对照侧", "翻转"], ((res.validity || {}).gate_adequacy || []).map(function (v) {
+          return [v.probe, v.violation, v.control, status(v.flipped ? "pass" : "fail")]; })),
+        table(["表示算子", "认证", "判决保持"], ((res.validity || {}).operator_certification || []).map(function (o) {
+          return [o.operator, o.claimed ? "是" : "否（未认证）", status(o.preserved ? "pass" : (o.claimed ? "fail" : "not_applicable"))]; })),
+        el("div", {cls: "sub", text: "完整性：" + ((res.integrity || []).length ? res.integrity.join("；") : "无违规")})])
+    ]));
+
+    var filterStatus = el("select", {}, ["全部", "fail", "error", "empty", "missing", "needs_review", "pass", "not_applicable"].map(function (s) {
+      return el("option", {value: s, text: s}); }));
+    var filterText = el("input", {placeholder: "按 task / family / actor 过滤"});
+    var list = el("div", {});
+    app.appendChild(el("h3", {text: "逐任务证据"}));
+    app.appendChild(el("div", {cls: "filters"}, [filterStatus, filterText]));
+    app.appendChild(list);
+    function draw() {
+      list.textContent = "";
+      var want = filterStatus.value, q2 = filterText.value.trim();
+      (res.tasks || []).forEach(function (t) {
+        var statuses = (t.checks || []).map(function (c) { return c.status; });
+        if (want !== "全部" && statuses.indexOf(want) < 0) return;
+        if (q2 && (t.task_id + " " + t.family_id + " " + t.actor).indexOf(q2) < 0) return;
+        var head = el("summary", {}, [txt(t.task_id + " "), el("span", {cls: "tag", text: t.kind}),
+          el("span", {cls: "tag", text: "family " + t.family_id}),
+          txt(" style "), status(t.summary.style), txt(" · grounding "), status(t.summary.grounding)]);
+        var rec = t.record || {};
+        var body = el("div", {}, [
+          el("div", {cls: "sub", text: "actor " + t.actor + " ｜ 适用：" + t.applicable + (t.not_applicable_reason ? "（" + t.not_applicable_reason + "）" : "") +
+            " ｜ messages SHA " + String(t.messages_sha256).slice(0, 12)}),
+          el("h3", {text: "模型可见 messages"}), pre(t.messages),
+          el("h3", {text: "回复（raw / clean，clean 口径：" + rec.cleaner + "）"}),
+          pre("raw:   " + (rec.raw == null ? "（无）" : rec.raw) + "\nclean: " + (rec.clean || "") +
+              (rec.error ? "\nerror: " + rec.error : "") + (rec.synthetic ? "\nsynthetic: " + rec.synthetic : "") +
+              "\nprompt 绑定: " + (rec.prompt_binding || "—")),
+          el("div", {cls: "evaluator"}, [el("h3", {text: "评估侧期望（evaluator-only，未进入 messages）"}),
+            pre(t.expect), el("div", {cls: "sub", text: "oracle 字段：" + (t.oracle_keys || []).join(", ")})]),
+          el("h3", {text: "逐层判定"}),
+          table(["阶段", "轴", "检查", "状态", "理由", "分子/分母", "标签来源", "证据"], (t.checks || []).map(function (c) {
+            return [c.stage, c.axis, c.check, status(c.status), c.reason || "",
+                    (c.numerator == null ? "—" : c.numerator) + " / " + (c.denominator == null ? "—" : c.denominator),
+                    c.label_source, el("span", {cls: "kv", text: JSON.stringify(c.evidence)})];
+          })),
+          t.trace ? el("details", {}, [el("summary", {text: "装配 trace（层、裁剪）"}), pre(t.trace)]) : null,
+          t.long_context ? el("details", {}, [el("summary", {text: "长上下文因子"}), pre(t.long_context)]) : null
+        ]);
+        list.appendChild(el("details", {}, [head, body]));
+      });
+    }
+    filterStatus.addEventListener("change", draw);
+    filterText.addEventListener("input", draw);
+    draw();
+  });
+
+  if (data.meters && Object.keys(data.meters).length) {
+    app.appendChild(el("h2", {text: "长上下文计量与 family 配对"}));
+    var m = data.meters;
+    if (m.rows) app.appendChild(el("div", {cls: "panel"}, [table(
+      ["family", "臂", "总字符", "UTF-8 字节", "证据条数", "关键证据位置", "被裁剪层", "tokens"],
+      m.rows.map(function (r) { return [r.family_id, r.arm, r.total_chars, r.total_bytes_utf8, r.evidence_items,
+        r.key_position_index == null ? "不在 messages" : r.key_position_index + "（" + r.key_position_fraction + "）",
+        (r.trimmed_layers || []).join(",") || "无", r.tokens == null ? "unknown（" + r.tokenizer + "）" : r.tokens]; }))]));
+    if (m.paired) app.appendChild(el("div", {cls: "panel"}, [el("div", {cls: "sub", text: "独立单位：" + m.paired.unit}), pre(m.paired)]));
+  }
+
+  if (data.comparison) {
+    var c = data.comparison, mv = c.manifest || {};
+    app.appendChild(el("h2", {text: "批次比较"}));
+    app.appendChild(el("div", {cls: "panel"}, [
+      el("div", {}, [txt("可比性："), status(mv.status), txt(" ｜ 池化：" + mv.pooling_allowed + " ｜ 改善判定：" + mv.improvement_claim_allowed)]),
+      el("ul", {}, (mv.reasons || []).map(function (r) { return el("li", {text: r}); })),
+      table(["字段", "左", "右", "状态"], (mv.rows || []).map(function (r) {
+        return [r.title, JSON.stringify(r.left), JSON.stringify(r.right), r.status]; })),
+      pre(c.axes)
+    ]));
+  }
+
+  if (data.selftest) {
+    var s = data.selftest;
+    app.appendChild(el("h2", {text: "同链变异体与健康反控制"}));
+    app.appendChild(el("div", {cls: "panel"}, [pre(s.summary),
+      table(["变异体", "描述", "注入点", "期望", "结果", "检出阶段", "退出码"], (s.mutants || []).map(function (r) {
+        return [r.mutant_id, r.description, r.injection, r.expect, status(r.outcome), r.detected_by.join(", ") || "—", r.exit_code]; })),
+      table(["反控制", "描述", "门禁", "误报"], (s.controls || []).map(function (r) {
+        return [r.control_id, r.description, status(r.verdict), r.false_positive ? "是" : "否"]; })),
+      el("ul", {cls: "sub"}, (s.boundaries || []).map(function (b) { return el("li", {text: b}); }))
+    ]));
+  }
+})();
+</script>
+</body>
+</html>

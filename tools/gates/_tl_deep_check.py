@@ -12,7 +12,6 @@ for _p in (_ROOT, _ROOT / "tools",
 from _paths import CORPUS_DIR, DATA, REPORT, ROOT  # noqa: E402,F401
 
 import sys
-from pathlib import Path
 
 sys.path.insert(0, str(ROOT))
 
@@ -39,7 +38,8 @@ POSITIVE = {
     "rana.interesting": ["你觉得我们乐队的人怎么样？", "你怎么看灯", "这个演出有趣吗",
                          "刚才那个挺好玩的", "好无聊啊", "你以前说过有趣的女人吧"],
     "rana.space": ["你外婆的店是个什么样的地方", "外婆来看你演出了吗", "SPACE 还在营业吗",
-                   "你的归宿是哪里", "你外婆弹吉他吗"],    "rana.cat": ["刚才在门口看到一只猫", "你喂过猫吗", "你是不是能听懂猫说话",
+                   "你的归宿是哪里", "你外婆弹吉他吗"],
+    "rana.cat": ["刚才在门口看到一只猫", "你喂过猫吗", "你是不是能听懂猫说话",
                  "那只猫在叫", "这里有猫吗"],
     # 注：「你现在在干嘛」**故意不触发**——nap 是 text-driven（无 睡/困 线索就不猜她困）
     "rana.nap": ["你是不是又睡着了", "你平时在哪睡觉", "好困", "你昨晚睡了没", "要不要睡一会"],

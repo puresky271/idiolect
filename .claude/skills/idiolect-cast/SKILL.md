@@ -14,7 +14,7 @@ description: "Create the role packages for a new cast in idiolect: the per-chara
 | `style_target` | 字数/句数/句末/自称的数字；命中场景换该场景数字 | 从 `data/` 生成 |
 | `turn_logic` | 本轮场景/话题指引，命中才注入 | **你**（触发词要有语料实证） |
 
-前置：派生统计已就绪（[`idiolect-distill`](../idiolect-distill/SKILL.md)）。逐条细节见 [`docs/05-tooling.md`](../../../docs/05-tooling.md) 第 9 节与 [`docs/07-turn-logic-and-postprocessing.md`](../../../docs/07-turn-logic-and-postprocessing.md)。
+前置：派生统计已就绪（[`idiolect-distill`](../idiolect-distill/SKILL.md)）。逐条细节见 [`docs/05-tooling.md`](../../../docs/05-tooling.md) 第 10 节与 [`docs/07-turn-logic-and-postprocessing.md`](../../../docs/07-turn-logic-and-postprocessing.md)。
 
 ## 1. 最小角色包
 

@@ -816,7 +816,6 @@ def _render_tier2_dedup(intent: dict, is_developer: bool = False) -> str:
 def _render_tier1_dedup(intent: dict, is_developer: bool = False) -> str:
     relation = _relation_hint(is_developer)
     cat = intent["category"]
-    cat_data = INSECT_TAXONOMY.get(cat, {})
 
     head = f"（话题：昆虫 → 类别『{cat}』·**这次聊天里已经涉猎过**）"
     body = (
@@ -938,11 +937,11 @@ if __name__ == "__main__":
 
     other = build_insect_special_block("普通西瓜虫", session_id="d2")
     assert "这次聊天里已经讲过" not in other, "session isolation failed"
-    print(f"[PASS] session isolation")
+    print("[PASS] session isolation")
 
     t1_after = build_insect_special_block("西瓜虫", session_id="d1")
     assert "这次聊天里已经涉猎过" in t1_after, "T1 dedup after T2 failed"
-    print(f"[PASS] T1 dedup after T2")
+    print("[PASS] T1 dedup after T2")
 
     # 底色-critical category 类别 标识有 (底色 关键) tag
     reset_session_dedup()
@@ -950,12 +949,12 @@ if __name__ == "__main__":
     assert "底色 关键" in cc_t1, "canon_critical tag missing on 类别"
     cc_t2 = build_insect_special_block("Armadillidium vulgare", session_id="cc2")
     assert "底色 关键" in cc_t2, "canon_critical tag missing on 具体"
-    print(f"[PASS] canon_critical tag on 西瓜虫 类别/2")
+    print("[PASS] canon_critical tag on 西瓜虫 类别/2")
 
     # 普通 category 不标 底色 关键
     nm_t1 = build_insect_special_block("聊聊蜻蜓", session_id="nm1")
     assert "底色 关键" not in nm_t1, "non-底色-critical falsely tagged"
-    print(f"[PASS] non-底色-critical not tagged")
+    print("[PASS] non-底色-critical not tagged")
 
     # ─── 底色 (西瓜虫 + 美绪) tests ──────────────────────────
     print()
@@ -984,25 +983,25 @@ if __name__ == "__main__":
     cf4 = build_insect_special_block("美绪 粗糙鼠妇", session_id="cm3")
     assert "美绪 心里的共振" in cf4, "底色 should still 起作用"
     assert "严格说不是西瓜虫" in cf4, "warn missing for Porcellio"
-    print(f"[PASS] 底色 with 粗糙鼠妇: warn injected")
+    print("[PASS] 底色 with 粗糙鼠妇: warn injected")
 
     # 仅西瓜虫无美绪 → 走普通 类别 (底色 关键 但 不是 美绪 底色)
     reset_session_dedup()
     no_mio = build_insect_special_block("聊聊西瓜虫", session_id="cm4")
     assert "美绪 心里的共振" not in no_mio, "should not 起作用 底色 without 美绪"
     assert "底色 关键" in no_mio, "should still tag 底色-critical"
-    print(f"[PASS] only 西瓜虫: tag 底色-critical, no 美绪 底色")
+    print("[PASS] only 西瓜虫: tag 底色-critical, no 美绪 底色")
 
     # 美绪 + 蝴蝶（不是西瓜虫）→ 不触发 美绪 底色（这是 西瓜虫 专属）
     reset_session_dedup()
     other_cat = build_insect_special_block("美绪喜欢蝴蝶", session_id="cm5")
     assert "美绪 心里的共振" not in other_cat, "美绪 底色 should be 西瓜虫-only"
-    print(f"[PASS] 美绪 + 蝴蝶: no 底色 (西瓜虫-only)")
+    print("[PASS] 美绪 + 蝴蝶: no 底色 (西瓜虫-only)")
 
     # 仅美绪无西瓜虫信号 → 不进 insect 模块
     no_insect = build_insect_special_block("美绪今天来了", session_id="cm6")
     assert no_insect == "", "should not 起作用 insect module without insect signal"
-    print(f"[PASS] only 美绪: insect module not fired")
+    print("[PASS] only 美绪: insect module not fired")
 
     print()
     print("OVERALL:", "PASS" if fail == 0 else f"FAIL ({fail})")
