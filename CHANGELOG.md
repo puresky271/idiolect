@@ -7,6 +7,7 @@
 ### 修复
 
 - 装配入口（`build_messages` / `build_system_prompt` / `layer_sizes`）先经 `registry.canonicalize_name` 归一化角色名：此前别名（如 `rana` / `要楽奈`）能解析到角色包，却会静默丢掉整个 `style_target` 层与场景化说话尺度数字，且没有任何报错。
+- 通用场景层的 per-session 去重键加角色作用域：此前同一 session 里先触发场景的角色会把其他角色的同 key 块（affection / crisis / …）静默吞掉；同角色只注入一次的原语义不变。
 
 ## v0.1.2（2026-10-14）
 

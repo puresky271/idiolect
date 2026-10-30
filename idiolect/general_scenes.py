@@ -1280,5 +1280,9 @@ def build_general_scene_blocks(
     modules = GENERAL_SCENES.get(key)
     if not modules:
         return []
-    blocks = build_scene_blocks(user_text, modules, session_id=session_id, max_blocks=max_blocks)
+    # scope=key（canonical 角色名）：通用场景 key 五角色共用，去重必须带角色
+    # 维度，否则同一 session 里先触发的角色会把后触发角色的同 key 块吞掉
+    # （2026-10-31 评审 P0-2）。
+    blocks = build_scene_blocks(user_text, modules, session_id=session_id,
+                                max_blocks=max_blocks, scope=key)
     return [f"{b.rstrip()}\n{NO_LITERAL_COPY}" for b in blocks]

@@ -852,6 +852,30 @@ class GeneralSceneCompletionTests(unittest.TestCase):
         self.assertIn("重复关键词", body("乐奈", "meta_language"))    # 最短档
         self.assertIn("解释自己", body("素世", "meta_language"))      # 不解释表达意图
 
+    def test_dedup_key_is_scoped_per_character(self):
+        """同 session 下先触发的角色不得吞掉另一角色的同 key 场景（2026-10-31 评审 P0-2）。
+
+        通用场景 key（crisis/affection/…）五角色共用，而去重表原来只按
+        (session, key) 记账：同一会话里灯先触发 affection 后，乐奈的同场景块
+        被静默吞掉。契约：去重键带角色维度——跨角色不互斥；
+        同角色同场景在同一 session 内仍只注入一次（原语义不变）。
+        """
+        from idiolect.general_scenes import build_general_scene_blocks
+
+        text = "我喜欢你"
+        engine.reset_session()
+        sid = "dedup-scope:x"
+        first = build_general_scene_blocks("灯", text, session_id=sid)
+        second = build_general_scene_blocks("乐奈", text, session_id=sid)
+        self.assertTrue(first, "灯 应触发 affection（基线）")
+        self.assertTrue(second, "同 session 内先触发的角色不得吞掉另一角色的同 key 场景块")
+        self.assertIn("【本轮·被示好】", second[0])
+        # 同角色同场景仍要去重：这是 per-session 去重的本意，修复不得把它一起放松
+        engine.reset_session()
+        build_general_scene_blocks("乐奈", text, session_id=sid)
+        self.assertEqual(build_general_scene_blocks("乐奈", text, session_id=sid), [],
+                         "同角色同场景在同一 session 内仍应只注入一次")
+
     def test_cross_layer_priority_is_sane(self):
         """char 专属场景不该被通用层顶掉；通用层一次只注入一块。"""
         import idiolect.registry as rp

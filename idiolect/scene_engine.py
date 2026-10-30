@@ -16,7 +16,9 @@ env flag + block 构建」，6 个场景就要抄 6 遍。这里把这层样板�
 设计约束（对齐既有 turn_logic 约定）：
   · 窄入口：只暴露 `build_scene_block(user_text, scene_key, ...)`
   · 可关闭：env flag `<PREFIX>_TURN_LOGIC_<SCENE>_ENABLED=0`
-  · per-session 去重：同一场景在同一 session 内只注入一次，避免每轮复读
+  · per-session 去重：同一场景在同一 session 内只注入一次，避免每轮复读；
+    去重键可带角色作用域（`build_scene_blocks` 的 `scope`）——通用场景层的
+    key 五角色共用，不带作用域会跨角色互吞（2026-10-31 评审 P0-2）
   · 状态集中：模块级状态只有 `_fired` 去重表（`SessionStore`，有上限、
     `reset_session()` 可清空），此外不读写任何调用方状态
 """
@@ -266,11 +268,18 @@ def build_scene_blocks(
     *,
     session_id: Optional[str] = None,
     max_blocks: int = 2,
+    scope: str = "",
 ) -> list[str]:
     """按命中场景产出 block 文本。
 
     max_blocks：一轮最多注入几个场景，避免多个场景叠加把 prompt 撑爆
       （场景词表有重叠，例如「雨」同时属 rana_cat 与 rana_guitar）。
+    scope：去重键的作用域前缀（2026-10-31 评审 P0-2）。通用场景层的 key
+      （crisis / affection / …）是五角色共用的，只按 (session, key) 记账时，
+      同一 session 里先触发的角色会把后触发角色的同 key 块静默吞掉；传入
+      canonical 角色名后去重键为 `{scope}:{key}`，跨角色不互斥、同角色仍只
+      注入一次。角色包直连本函数的场景 key 自带角色前缀（rana_cat 等），
+      不传 scope、行为不变。
     """
     if not user_text:
         return []
@@ -282,7 +291,8 @@ def build_scene_blocks(
             continue
         if not module.pattern().search(user_text):
             continue
-        if _mark_fired(session_id, module.key):
+        dedup_key = f"{scope}:{module.key}" if scope else module.key
+        if _mark_fired(session_id, dedup_key):
             continue
         blocks.append(module.render())
     return blocks
