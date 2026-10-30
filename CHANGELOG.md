@@ -2,6 +2,12 @@
 
 版本策略见 [`docs/11-upgrade-guide.md`](docs/11-upgrade-guide.md) 第 3 节。
 
+## 未发布
+
+### 修复
+
+- 装配入口（`build_messages` / `build_system_prompt` / `layer_sizes`）先经 `registry.canonicalize_name` 归一化角色名：此前别名（如 `rana` / `要楽奈`）能解析到角色包，却会静默丢掉整个 `style_target` 层与场景化说话尺度数字，且没有任何报错。
+
 ## v0.1.2（2026-10-14）
 
 从「说得像」到「只说看得见的」：在风格轴旁边加入独立的 grounding 轴与评测有效性检查。运行时仍为零第三方依赖；四层装配输出与旧版逐字节一致（`report/upgrade_20261014/` 的前后 dump，本地产物）。

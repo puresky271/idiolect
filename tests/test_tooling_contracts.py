@@ -125,6 +125,40 @@ class AssemblyContractTests(unittest.TestCase):
             "乐奈", "明天几点上课", session_id="t:clock", now_jst=MOCK.mock_now())
         self.assertTrue(block, "schedule 场景在 mock 时间下应当命中")
 
+    def test_alias_input_keeps_all_layers(self):
+        """别名输入不得静默丢层（2026-10-31 评审 P0-1）。
+
+        registry 能把 "rana" 解析到角色包，但 `STYLE_TARGETS` 与场景长度表的键
+        都是 canonical 中文名——装配入口不归一化时，别名调用会静默丢掉
+        style_target 整层（实测 `build_messages("rana", …)` 比 canonical 少
+        1011 字符），用户拿到的是没有任何说话尺度约束的 prompt，且没有任何
+        报错——正是红线「静默失效比报错危险」的形状。
+        契约：任意别名装配结果与 canonical 名**逐字节相同**。
+        """
+        from idiolect.assemble import build_system_prompt, layer_sizes
+        from idiolect.registry import canonicalize_name
+
+        cases = {"乐奈": ("rana", "Rana", "要楽奈", "らな"), "灯": ("tomori", "燈", "高松灯")}
+        text = "你今天又想去哪找猫"
+        for canonical, aliases in cases.items():
+            for alias in aliases:
+                with self.subTest(canonical=canonical, alias=alias):
+                    self.assertEqual(canonicalize_name(alias), canonical)
+                    # 两次调用各用全新 session：turn_logic 的 per-session 去重是
+                    # 正确行为（同 session 第二轮不再注入同块），不能让它污染对比
+                    ref = build_system_prompt(canonical, text,
+                                              session_id=f"alias:ref:{canonical}:{alias}",
+                                              now=MOCK.mock_now())
+                    got = build_system_prompt(alias, text,
+                                              session_id=f"alias:got:{canonical}:{alias}",
+                                              now=MOCK.mock_now())
+                    self.assertTrue(ref)
+                    self.assertEqual(got, ref, f"别名 {alias!r} 装配结果与 canonical 不一致")
+                    sizes = layer_sizes(alias, text, session_id=f"alias:sz:{canonical}:{alias}",
+                                        now=MOCK.mock_now())
+                    self.assertGreater(sizes["style_target"], 0,
+                                       f"别名 {alias!r} 的 style_target 层丢失")
+
 
 class ProbeAssembleRegressionTests(unittest.TestCase):
     """`--assemble` 必须真的进到发给模型的 messages 里（历史上被静默覆盖）。"""

@@ -19,7 +19,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from .registry import get_canon_profile, get_voice_manifest, render_turn_special_block
+from .registry import (
+    canonicalize_name, get_canon_profile, get_voice_manifest, render_turn_special_block,
+)
 from .scene_classifier import classify
 from .style_target import build_style_target_block
 
@@ -44,6 +46,12 @@ def _build_layers(
     改了措辞或条件，尺寸报告就会静默说谎。现在两边都走这里。
     """
     layers: dict[str, str] = {}
+
+    # 名字归一化在装配入口做一次（2026-10-31 评审 P0-1）：registry 能把 "rana"
+    # 解析到角色包，但 `STYLE_TARGETS` / 场景长度表的键是 canonical 中文名，
+    # 别名原样下传会让 style_target 层（连同场景判定）静默消失——静默失效比
+    # 报错危险。未知名字保持原样下传，让各层按「未注册」走既有路径。
+    char = canonicalize_name(char) or char
 
     profile = (get_canon_profile(char) or "").strip()
     if profile:
